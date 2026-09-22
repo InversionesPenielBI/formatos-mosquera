@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formatos de Proceso - Mosquera</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="compartido/estilos.css">
+<script src="https://accounts.google.com/gsi/client"></script>
+<style>
+/* ════════════════════════════════════════════════════════════════════════
+   Estilos propios de "Formatos de Proceso - Mosquera".
+   El resto (neomorfismo, barra lateral, tarjetas, tablas) viene del entorno
+   compartido. Regla del estilo: nada de bordes ni fondos blancos, el volumen
+   sale de --nm-out (saliente) y --nm-in (hundido).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Inicio: tarjetas de formatos ───────────────────────────────────── */
+.inicio-intro { font-size: 13px; color: var(--text2); margin: -6px 0 24px 4px; max-width: 760px; }
+.formatos-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 24px; margin-bottom: 30px;
+}
+.formato-card {
+  display: flex; flex-direction: column; gap: 14px; text-align: left;
+  padding: 22px 24px 20px; border: none; cursor: pointer;
+  border-radius: var(--radius-lg); background: var(--bg); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  box-shadow: var(--nm-out-md);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.formato-card:hover { box-shadow: var(--nm-out); transform: translateY(-2px); }
+.formato-card:active { box-shadow: var(--nm-in-sm); transform: none; }
+.formato-card:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
+.fc-top { display: flex; align-items: center; gap: 14px; }
+.fc-icon {
+  flex: 0 0 48px; height: 48px; border-radius: 15px;
+  display: grid; place-items: center; color: var(--accent-mid);
+  background: var(--bg); box-shadow: var(--nm-out-sm);
+}
+.fc-icon svg { width: 23px; height: 23px; }
+.fc-nombre { font-size: 14.5px; font-weight: 700; line-height: 1.3; color: var(--accent); }
+.fc-codigo { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-top: 3px; }
+.fc-desc { font-size: 12px; color: var(--text2); line-height: 1.5; min-height: 36px; }
+.fc-pie {
+  display: flex; justify-content: space-between; gap: 10px; align-items: center;
+  padding-top: 12px; font-size: 11.5px; color: var(--text3);
+  position: relative;
+}
+.fc-pie::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--nm-dark-soft), var(--nm-light));
+}
+.fc-pie b { color: var(--text2); font-weight: 700; }
+.fc-llenar { color: var(--accent-mid); font-weight: 700; }
+
+/* ── Ficha del formato (encabezado como el del papel) ───────────────── */
+.barra-form {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 22px; flex-wrap: wrap;
+}
+.aviso-edicion {
+  font-size: 12.5px; color: var(--warn); font-weight: 600;
+  padding: 9px 16px; border-radius: var(--pill); background: var(--bg); box-shadow: var(--nm-in-xs);
+}
+.ficha-body { display: grid; grid-template-columns: auto 1fr auto; gap: 26px; align-items: center; }
+.ficha-logo {
+  width: 74px; height: 74px; border-radius: 20px; display: grid; place-items: center;
+  background: linear-gradient(145deg, #24425c, #16293a); box-shadow: var(--nm-out-sm);
+}
+.ficha-logo img { width: 56px; height: 56px; object-fit: contain; }
+.ficha-sis { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; color: var(--text3); text-transform: uppercase; }
+.ficha-nombre { font-size: 20px; font-weight: 700; color: var(--accent); line-height: 1.25; margin: 4px 0 6px; }
+.ficha-planta { font-size: 12px; color: var(--text2); }
+.ficha-meta { display: grid; grid-template-columns: auto auto; gap: 6px 14px; font-size: 11.5px; }
+.ficha-meta span:nth-child(odd) { color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: 10px; align-self: center; }
+.ficha-meta span:nth-child(even) { font-family: 'DM Mono', monospace; color: var(--text); }
+@media (max-width: 820px) { .ficha-body { grid-template-columns: 1fr; } .ficha-logo { display: none; } }
+
+/* ── Controles dentro de tablas ─────────────────────────────────────── */
+.c-in {
+  width: 100%; min-width: 64px;
+  padding: 8px 10px; border: none; border-radius: var(--radius-campo);
+  background: var(--bg); color: var(--text);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 500;
+  box-shadow: var(--nm-in-xs); transition: box-shadow .2s ease;
+}
+.c-in:focus { outline: none; box-shadow: var(--nm-in-xs), 0 0 0 2px var(--accent-soft); }
+.c-in[type=number], .c-in.c-hora { font-family: 'DM Mono', monospace; text-align: right; }
+.c-in.c-hora { text-align: center; max-width: 82px; }
+.c-in[type=date] { min-width: 132px; }
+.c-in::placeholder { color: var(--text3); font-weight: 400; }
+.c-in.c-malo { box-shadow: var(--nm-in-xs), 0 0 0 2px var(--danger); }
+.c-in[type=number] { appearance: textfield; -moz-appearance: textfield; }
+.c-in[type=number]::-webkit-inner-spin-button,
+.c-in[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Casilla que se marca con X (tipo de queso, origen) */
+.c-x {
+  width: 32px; height: 30px; border: none; border-radius: 9px; cursor: pointer;
+  background: var(--bg); box-shadow: var(--nm-out-xs);
+  font-weight: 800; font-size: 13px; color: var(--accent);
+  transition: box-shadow .15s ease;
+}
+.c-x:hover { box-shadow: var(--nm-out-sm); }
+.c-x.on { box-shadow: var(--nm-in-xs); }
+/* Tipo de queso marcado: cada uno con su color */
+.c-x.on.x-azul     { background: #d4e3f5; color: #1d4f8c; }
+.c-x.on.x-verde    { background: #d3ebdc; color: #1e5c3d; }
+.c-x.on.x-amarillo { background: #f5ebc2; color: #7a5a00; }
+.c-x.on.x-rojo     { background: #f5d7db; color: #8f1f30; }
+
+/* Celdas apagadas: columna de verificación sin hora escrita */
+.tabla-captura [disabled] { opacity: .35; cursor: not-allowed; box-shadow: var(--nm-in-xs); }
+
+/* Listas desplegables dentro de celdas */
+.c-in.c-sel { cursor: pointer; appearance: none; padding-right: 26px; min-width: 124px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text3) 50%), linear-gradient(135deg, var(--text3) 50%, transparent 50%);
+  background-position: calc(100% - 13px) 55%, calc(100% - 8px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.c-in.c-num { text-align: right; font-family: 'DM Mono', monospace; }
+/* Fechas calculadas (lote / vencimiento): solo lectura */
+.c-calc, .field input.c-calc { color: #2f6b52 !important; font-weight: 600; cursor: default; }
+
+/* Obligatorio sin llenar */
+.field.falta label { color: var(--danger); }
+.field.falta input, .field.falta select, .field.falta textarea { box-shadow: var(--nm-in-xs), 0 0 0 2px var(--danger) !important; }
+.field.falta .chips { border-radius: var(--pill); box-shadow: 0 0 0 2px var(--danger); }
+.barra-opcional { display: flex; gap: 10px; margin: 0 0 14px 2px; }
+
+/* Marca de verificación: vacío → ✔ → ✗ → NA → vacío */
+.c-marca {
+  width: 44px; height: 30px; border: none; border-radius: 9px; cursor: pointer;
+  background: var(--bg); box-shadow: var(--nm-out-xs);
+  font-weight: 800; font-size: 12.5px; color: var(--text3);
+  transition: box-shadow .15s ease;
+}
+.c-marca:hover { box-shadow: var(--nm-out-sm); }
+.c-marca.m-C  { color: var(--ok);     box-shadow: var(--nm-in-xs); }
+.c-marca.m-NC { color: var(--danger); box-shadow: var(--nm-in-xs); }
+.c-marca.m-NA { color: var(--text2);  box-shadow: var(--nm-in-xs); font-size: 11px; }
+
+/* Opciones excluyentes (R/B, C/NC, A/M/Bj…) */
+.seg {
+  display: inline-flex; gap: 3px; padding: 3px; border-radius: 11px;
+  background: var(--bg); box-shadow: var(--nm-in-xs); white-space: nowrap;
+}
+.seg button {
+  border: none; background: transparent; cursor: pointer;
+  padding: 5px 9px; border-radius: 8px; min-width: 30px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; color: var(--text3);
+}
+.seg button:hover { color: var(--text2); }
+.seg button.on { background: var(--bg); color: var(--accent); box-shadow: var(--nm-out-xs); }
+.seg button.on.v-bien { background: #d3ebdc; color: #1e5c3d; box-shadow: none; }   /* C / B */
+.seg button.on.v-mal  { background: #f5d7db; color: #8f1f30; box-shadow: none; }   /* NC / R */
+
+/* Selección múltiple con fichas (presentación) */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button {
+  border: none; cursor: pointer; padding: 6px 11px; border-radius: var(--pill);
+  background: var(--bg); box-shadow: var(--nm-out-xs);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; color: var(--text3);
+}
+.chips button.on { background: #d3ebdc; color: #1e5c3d; box-shadow: var(--nm-in-xs); }
+.field .chips { padding: 6px 2px; }
+
+/* ── Tablas de captura ──────────────────────────────────────────────── */
+.table-wrap:has(> .tabla-captura) { padding-inline: 0; }
+.tabla-captura td { padding: 7px 8px; vertical-align: middle; }
+.tabla-captura th { padding: 11px 8px; white-space: normal; line-height: 1.3; vertical-align: bottom; }
+.tabla-captura th.centro, .tabla-captura td.centro { text-align: center; }
+.tabla-captura tr.grupos th { text-align: center; color: var(--accent-mid); border-bottom: none; padding-bottom: 2px; font-size: 10px; }
+.tabla-captura thead tr + tr th { top: 0; }
+.tabla-captura .col-fila {
+  position: sticky; left: 0; z-index: 1; background: var(--bg);
+  font-weight: 600; font-size: 12px; color: var(--text); min-width: 220px; max-width: 320px;
+  box-shadow: inset -2px 0 0 var(--nm-dark-soft);
+}
+.tabla-captura th.col-fila { z-index: 3; }
+.tabla-captura .col-fila.angosta { min-width: 52px; width: 52px; text-align: center; }
+.tabla-captura .col-num { color: var(--text3); font-family: 'DM Mono', monospace; font-size: 11.5px; text-align: center; width: 44px; }
+.tabla-captura td.info { font-size: 11.5px; color: var(--text2); min-width: 190px; max-width: 260px; line-height: 1.4; }
+.tabla-captura td.info.corta { min-width: 150px; }
+.tabla-captura td .c-in[type=text]:not(.c-hora):not(.cual) { min-width: 120px; }
+.tabla-captura .sep { box-shadow: inset 2px 0 0 var(--nm-dark-soft); }
+.tabla-captura tr.fila-grupo td {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--accent-mid); background: rgba(182,193,210,.18); padding: 9px 12px;
+}
+.tabla-captura tr.fila-grupo td.col-fila { background: #dde3eb; }
+.tabla-captura tr.fila-info td { font-size: 12px; color: var(--text2); font-style: italic; }
+.tabla-captura .th-hora { min-width: 96px; }
+.tabla-captura .th-hora .c-in { margin-top: 6px; }
+.tabla-captura td.celda-mat { min-width: 118px; }
+.tabla-captura td .cual { margin-top: 6px; }
+.tabla-captura tbody tr:hover td { background: rgba(255,255,255,.35); }
+.tabla-captura tbody tr:hover td.col-fila { background: #eaeef4; }
+
+/* Muestras de peso: cinco bloques de 40, como en el papel */
+.tabla-muestras td { padding: 4px 6px; }
+.tabla-muestras .c-in { max-width: 96px; min-width: 70px; }
+.tabla-muestras td.col-num { border-left: 2px solid var(--nm-dark-soft); }
+.tabla-muestras td.col-num:first-child { border-left: none; }
+.tabla-muestras .bajo .c-in { box-shadow: var(--nm-in-xs), 0 0 0 2px var(--danger); color: var(--danger); }
+
+/* Resumen en vivo del control de peso */
+.resumen-peso { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+.resumen-peso .metric-card { padding: 13px 16px; }
+.resumen-peso .metric-value { font-size: 22px; }
+@media (max-width: 1100px) { .resumen-peso { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* Referencia y notas del formato */
+.nota-formato {
+  font-size: 12px; color: var(--text2); line-height: 1.6;
+  padding: 16px 20px; border-radius: var(--radius); background: var(--bg); box-shadow: var(--nm-in-xs);
+  margin-top: 18px;
+}
+.nota-formato b { color: var(--accent); }
+.leyenda { font-size: 11.5px; color: var(--text2); margin: 0 0 14px 4px; }
+.leyenda b { color: var(--accent); }
+.tabla-ref { max-width: 720px; }
+.tabla-ref td, .tabla-ref th { font-size: 12px; padding: 9px 12px; }
+
+/* Acciones del formulario: se quedan a la vista al bajar */
+.acciones-form {
+  position: sticky; bottom: -48px; z-index: 20;
+  display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap;
+  padding: 16px 20px; margin: 10px -8px 0; border-radius: var(--radius-lg);
+  background: var(--bg); box-shadow: 0 -10px 18px -14px rgba(27,53,74,.45);
+}
+.acciones-form .izq { margin-right: auto; display: flex; gap: 10px; }
+
+/* ── Barra de desplazamiento superior (igual que Mosquera / Honda) ─── */
+.view { --pad-vista: 34px; }
+.scroll-espejo {
+  position: sticky; top: 0; z-index: 30;
+  background: var(--bg); padding: 4px 4px 0; margin: 0 0 6px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.scroll-espejo.pegada { box-shadow: 0 12px 16px -12px rgba(27,53,74,.5); }
+.scroll-espejo.pegada::before {
+  content: ''; position: absolute; inset-inline: 0; bottom: 100%;
+  block-size: var(--pad-vista, 34px); background: var(--bg);
+}
+.espejo-barra {
+  overflow-x: auto; overflow-y: hidden; border-radius: var(--radius);
+  background: var(--bg); box-shadow: var(--nm-in-xs); scroll-behavior: auto;
+}
+.espejo-barra > div { block-size: 1px; }
+.espejo-head {
+  position: absolute; top: 100%; inset-inline: 4px; overflow: hidden; display: none;
+  background: var(--bg); border-radius: 0 0 var(--radius) var(--radius);
+}
+.scroll-espejo.con-encabezado .espejo-head { display: block; }
+.espejo-head table { inline-size: auto; table-layout: fixed; }
+.espejo-head th { position: static !important; }
+.espejo-head th.col-fila { position: sticky !important; left: 0; z-index: 2; background: var(--bg); }
+.espejo-head .hora-copia { display: block; margin-top: 6px; font-family: 'DM Mono', monospace; color: var(--text); }
+.espejo-barra::-webkit-scrollbar, .table-wrap::-webkit-scrollbar { height: 16px; width: 16px; }
+.espejo-barra::-webkit-scrollbar-thumb, .table-wrap::-webkit-scrollbar-thumb {
+  background: var(--accent-mid); border: 4px solid var(--bg); border-radius: var(--pill); box-shadow: none;
+}
+.espejo-barra::-webkit-scrollbar-thumb:hover, .table-wrap::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+.espejo-barra, .table-wrap { scrollbar-width: auto; scrollbar-color: var(--accent-mid) var(--bg); }
+
+/* ── Barra lateral: al expandirse, el texto no se reacomoda letra a letra ─
+   Los textos no parten línea y aparecen con un fundido cuando la barra ya
+   tiene casi todo su ancho. */
+.sidebar-logo-title, .sidebar-logo-sub, .sidebar-section-label,
+.user-name, .user-role, .nav-label { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.sidebar-logo { flex-wrap: nowrap; }
+.app.sidebar-collapsed .sidebar-logo { flex-wrap: wrap; }
+@keyframes aparecer-lateral { from { opacity: 0; } to { opacity: 1; } }
+.app:not(.sidebar-collapsed) .brand-text,
+.app:not(.sidebar-collapsed) .nav-label,
+.app:not(.sidebar-collapsed) .sidebar-section-label,
+.app:not(.sidebar-collapsed) .user-chip > div:not(.user-avatar) {
+  animation: aparecer-lateral .2s ease .22s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .app:not(.sidebar-collapsed) .brand-text, .app:not(.sidebar-collapsed) .nav-label,
+  .app:not(.sidebar-collapsed) .sidebar-section-label,
+  .app:not(.sidebar-collapsed) .user-chip > div:not(.user-avatar) { animation: none; }
+}
+
+/* ── Historial ──────────────────────────────────────────────────────── */
+.metrics-grid.cuatro { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .metrics-grid.cuatro { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+#h-buscar { flex: 1 1 260px; max-inline-size: 360px; }
+.badge-formato { font-size: 10.5px; padding: 4px 11px; }
+.acciones-fila { display: flex; gap: 6px; justify-content: flex-end; }
+/* overflow: clip recorta igual que hidden pero no rompe la barra pegada arriba */
+#view-historial .card-body, #view-formato .card-body { overflow: clip; }
+.col-formato { min-width: 260px; }
+.col-formato .nombre { font-weight: 600; font-size: 12.5px; }
+#tabla-historial td.nowrap { white-space: nowrap; }
+.conteo-filtro { font-size: 12px; color: var(--text3); margin-left: auto; }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-text">Cargando...</div>
+</div>
+
+<!-- Auth -->
+<div class="auth-screen" id="auth-screen" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo" aria-label="Inversiones Peniel" id="auth-logo-box">
+      <img src="logo.png" alt="Inversiones Peniel" onerror="mostrarLogoFallback()">
+    </div>
+    <div class="auth-title">Formatos de Proceso</div>
+    <div class="auth-sub">Inversiones Peniel - Planta Mosquera<br>Inicia sesión con tu cuenta de Google para continuar.</div>
+    <button class="btn btn-primary" id="btn-login" onclick="iniciarLogin()" style="width:100%;justify-content:center;padding:12px;font-size:14px;margin-top:8px">
+      Iniciar sesión con Google
+    </button>
+    <div id="auth-error" style="margin-top:12px;font-size:12px;color:var(--danger);display:none"></div>
+  </div>
+</div>
+
+<!-- App -->
+<div class="app" id="app-root" style="display:none">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <span class="brand-mark"><img id="brand-img" alt="Inversiones Peniel"></span>
+      <div class="brand-text">
+        <div class="sidebar-logo-title">Formatos de Proceso</div>
+        <div class="sidebar-logo-sub">Planta Mosquera - Calidad</div>
+      </div>
+      <button class="sidebar-toggle" id="btn-sidebar" onclick="toggleSidebar()"
+              aria-expanded="true" aria-controls="sidebar-nav" title="Contraer el menú">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 6l-6 6 6 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Calidad</div>
+      <button class="nav-item active" onclick="irA('inicio')" id="nav-inicio">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg></span>
+        <span class="nav-label">Formatos</span>
+      </button>
+      <button class="nav-item" onclick="irA('historial')" id="nav-historial">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="12" cy="15.5" r="2.8"/><path d="M12 14.2v1.5l1 .7"/></svg></span>
+        <span class="nav-label">Historial</span>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Sesión</div>
+      <button class="nav-item" onclick="salir()" id="nav-logout">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/></svg></span>
+        <span class="nav-label">Cerrar sesión</span>
+      </button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div>
+          <div class="user-name" id="user-name">...</div>
+          <div class="user-role" id="user-role"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title" id="topbar-title">Formatos de Proceso - Mosquera</div>
+        <div class="topbar-date" id="topbar-date"></div>
+      </div>
+      <div class="topbar-right">
+        <div id="sync-status" class="text-muted" style="font-size:11px"></div>
+        <button class="btn btn-sm" onclick="cargarDatos()">Actualizar</button>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW: INICIO - selector de formato ═══ -->
+    <div class="view active" id="view-inicio">
+      <div class="inicio-intro">Selecciona el formato de calidad que vas a diligenciar. Cada formato se guarda por separado y queda en el historial.</div>
+      <div class="formatos-grid" id="formatos-grid"></div>
+    </div>
+
+    <!-- ═══ VIEW: FORMATO - el formulario elegido ═══ -->
+    <div class="view" id="view-formato">
+      <div class="barra-form">
+        <button class="btn btn-sm" onclick="volverDeFormato()">← Formatos</button>
+        <div class="aviso-edicion" id="aviso-edicion" style="display:none"></div>
+      </div>
+      <div id="form-cuerpo"></div>
+      <div class="acciones-form">
+        <div class="izq">
+          <button class="btn btn-sm btn-danger" id="btn-eliminar-form" onclick="eliminarActual()" style="display:none">Eliminar</button>
+        </div>
+        <button class="btn btn-sm" onclick="limpiarFormulario()">Limpiar</button>
+        <button class="btn btn-sm" onclick="volverDeFormato()">Cancelar</button>
+        <button class="btn btn-primary" id="btn-guardar" onclick="guardarFormato()">Guardar formato</button>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW: HISTORIAL ═══ -->
+    <div class="view" id="view-historial">
+      <div class="metrics-grid cuatro">
+        <div class="metric-card"><div class="metric-label">Registros</div><div class="metric-value" id="m-registros">0</div><div class="metric-sub">en el filtro actual</div></div>
+        <div class="metric-card"><div class="metric-label">Formatos</div><div class="metric-value" id="m-formatos">0</div><div class="metric-sub">distintos diligenciados</div></div>
+        <div class="metric-card"><div class="metric-label">Responsables</div><div class="metric-value" id="m-responsables">0</div><div class="metric-sub">que realizaron</div></div>
+        <div class="metric-card"><div class="metric-label">Días con registro</div><div class="metric-value" id="m-dias">0</div><div class="metric-sub" id="m-rango">-</div></div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-row">
+          <input id="h-buscar" type="text" placeholder="Buscar código, turno, responsable, observación…" oninput="renderHistorial()">
+          <span id="h-ms-formato"></span>
+          <span id="h-ms-responsable"></span>
+        </div>
+        <div class="filter-row">
+          <span id="h-ms-anio"></span>
+          <span id="h-ms-mes"></span>
+          <span id="h-ms-quincena"></span>
+          <span id="h-ms-semana"></span>
+          <span id="h-ms-dia"></span>
+          <button class="btn btn-sm" onclick="limpiarFiltros()">Limpiar filtros</button>
+          <span class="conteo-filtro" id="h-conteo"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="table-wrap">
+            <table class="data-table" id="tabla-historial">
+              <thead>
+                <tr>
+                  <th data-orden="fecha">Fecha</th>
+                  <th data-orden="formato">Formato</th>
+                  <th data-orden="turno">Turno</th>
+                  <th data-orden="codigo">Código</th>
+                  <th data-orden="responsable">Realizado por</th>
+                  <th data-orden="usuario">Registrado por</th>
+                  <th data-orden="fecha_registro">Fecha registro</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-historial"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="historial-vacio" style="display:none">
+            <div class="empty-state-text">No hay formatos diligenciados en el filtro seleccionado.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// Configuración de esta página. Tiene que ir ANTES de compartido/entorno.js
+// ════════════════════════════════════════════════════════════════════════
+window.APP = {
+  // Hoja de cálculo "MOSQUERA - FORMATOS DE PROCESO". Pegar aquí su ID
+  // (el trozo largo de la URL entre /d/ y /edit). Vacío = no guarda.
+  SHEET_ID: '1Zzja4qLGEyRdS5OlOOIQYooAhFz1kRXntOZecX1eU5g',
+  CLIENT_ID: '472930002147-of08gfnkeuu57gsbpgl48g5b20bvk3sp.apps.googleusercontent.com',
+  SCOPES: 'https://www.googleapis.com/auth/spreadsheets ' +
+          'https://www.googleapis.com/auth/userinfo.profile ' +
+          'https://www.googleapis.com/auth/userinfo.email',
+  SESSION_KEY: 'peniel_formatos_mosquera_v1',
+  TITULOS: {
+    inicio: 'Formatos de Proceso - Mosquera',
+    formato: 'Diligenciar formato',
+    historial: 'Historial de formatos'
+  },
+  CAMPOS_FECHA_HOY: [],
+  alIniciar() { renderInicio(); cargarDatos(); },
+  alCambiarUsuario() { if (document.getElementById('view-historial').classList.contains('active')) renderHistorial(); },
+  alCambiarVista(v) {
+    if (v === 'inicio')    renderInicio();
+    if (v === 'historial') renderHistorial();
+    // Las tablas ocultas no tienen ancho: la barra superior se recalcula al mostrarlas
+    espejarScrollTodos('#view-' + v + ' .table-wrap');
+  }
+};
+</script>
+<script src="compartido/entorno.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// FORMATOS DE PROCESO - MOSQUERA (corte y empaque)
+// Cada formato del Excel "FORMATOS PAGINA WEB.xlsx" es una entrada de
+// FORMATOS. La pantalla se dibuja a partir de esta configuración: para
+// cambiar un formato se cambia aquí, no el HTML.
+//
+// Tipos de campo y de columna:
+//   txt    texto libre (se guarda en mayúsculas)
+//   num    número decimal (acepta 40,4 y 40.4); min: 0 para no negativos
+//   ent    número entero, mínimo 0
+//   sel    lista desplegable (ops)
+//   calc   fecha calculada: desde + dias (lote / fecha de vencimiento)
+//   fecha  fecha AAAA-MM-DD
+//   hora   hh:mm (se acepta 830, 8:30, 0830…)
+//   x      casilla que se marca con X
+//   marca  verificación: ✔ Cumple (C) - ✗ No cumple (NC) - NA No aplica
+//   op     una opción de una lista corta (botones)
+//   chips  varias opciones de una lista (fichas)
+//   lista  texto libre con sugerencias
+// Las listas (cargos, tipo de queso, presentación, gramajes) están abajo,
+// en "Listas": se cambian ahí y se actualizan en todos los formatos.
+// ════════════════════════════════════════════════════════════════════════
+
+// Usuarios SOLO de esta página (se suman a los del entorno compartido y
+// sobreviven a su regeneración). ADMIN puede eliminar registros.
+const USUARIOS_FORMATOS = {
+  // 'correo@inversionespeniel.com': 'USUARIO',
+};
+Object.assign(USUARIOS_AUTORIZADOS, USUARIOS_FORMATOS);
+
+const PLANTA = 'MOSQUERA - CORTE Y EMPAQUE';
+
+// ── Listas ───────────────────────────────────────────────────────────────
+const CARGOS = ['LIDER DE INOCUIDAD', 'COORDINADOR DE CALIDAD', 'SUPERVISOR DE CALIDAD',
+                'AUXILIAR OPERATIVO', 'APRENDIZ SENA'];
+// Tipo de queso: nombre completo en los campos, abreviatura en las celdas
+const TIPOS_QUESO = [
+  { ab: 'DC', nombre: 'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIBLANDO DOBLE CREMA' },
+  { ab: 'CP', nombre: 'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIBLANDO CAMPESINO' },
+  { ab: 'MZ', nombre: 'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIDURO MOZARELLA' },
+  { ab: 'PR', nombre: 'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIDURO PERA' },
+];
+const OP_QUESO_LARGO = { ops: TIPOS_QUESO.map(q => q.nombre) };
+const OP_QUESO_CORTO = { ops: TIPOS_QUESO.map(q => q.ab), txt: Object.fromEntries(TIPOS_QUESO.map(q => [q.ab, q.nombre])) };
+const PRESENTACIONES = ['TAJADO', 'PORCION', 'BLOQUE'];
+const GRAMAJES = ['10', '20', '25', '30', '35', '40', '45', '50', '60', '80', '90', '125', '250', '300', '350', '500', '2500'];
+const GRAMAJES_BLOQUE = ['10', '20', '30', '45', '300', '350', '1800', '2000', '2100', '2200', '2400', '2500'];
+const DIAS_VENCIMIENTO = 29;   // lote / fecha de vencimiento = fecha de fabricación + 29 días
+
+// ── Piezas repetidas ─────────────────────────────────────────────────────
+// Todos los campos de "Información general" son obligatorios
+const F_FECHA  = { k: 'fecha',  l: 'Fecha', t: 'fecha' };
+const F_TURNO  = { k: 'turno',  l: 'Turno', t: 'sel', ops: ['1', '2'] };
+const F_CODIGO = { k: 'codigo', l: 'Código', t: 'txt' };
+
+// Cierre común (observaciones y firmas). "Realizado por" y su cargo son
+// obligatorios. Ningún formato lleva "Revisado por" en la página.
+const CIERRE = [
+  { k: 'observaciones', l: 'Observaciones', t: 'area' },
+  { k: 'realizado_por', l: 'Realizado por', t: 'txt', req: true },
+  { k: 'cargo_realiza', l: 'Cargo', t: 'sel', ops: CARGOS, req: true },
+];
+
+const OP_CNC   = { ops: ['C', 'NC'],        txt: { C: 'Cumple', NC: 'No cumple' } };
+const OP_CNCNA = { ops: ['C', 'NC', 'NA'],  txt: { C: 'Cumple', NC: 'No cumple', NA: 'No aplica' } };
+const OP_RB    = { ops: ['R', 'B'],         txt: { R: 'Regular', B: 'Bueno' } };
+const MALOS = ['NC', 'NO CUMPLE', 'R'];      // se pintan en rojo al elegirlos
+const BUENOS = ['C', 'CUMPLE', 'B'];
+
+// Verificación por horas de las rutinas de saneamiento
+const colsHora = (n, bloqueHoras) => Array.from({ length: n }, (_, i) =>
+  ({ k: 'v' + (i + 1), l: 'Hora ' + (i + 1), t: 'marca', hora: [bloqueHoras, i] }));
+
+const INFO_SANEAMIENTO = [
+  { k: 'f',   l: 'Frecuencia', info: true, corta: true },
+  { k: 'lav', l: 'Lavado - producto / concentración', info: true },
+  { k: 'des', l: 'Desinfección - producto / concentración', info: true },
+  { k: 'met', l: 'Método (limpiar / desinfectar)', info: true, corta: true },
+];
+const INFO_BODEGA = [
+  { k: 'f',   l: 'Frecuencia', info: true, corta: true },
+  { k: 'lav', l: 'Lavado - producto / concentración', info: true },
+  { k: 'met', l: 'Método para limpiar y/o desinfectar', info: true, corta: true },
+];
+
+// Atajos para escribir las filas de las rutinas sin repetir textos
+const fila = (l, f, lav, des, met) => ({ l, f, lav, des, met });
+const AV21    = 'AV - 21 - 30 ml/Lt de agua';
+const PERA150 = 'PERACET - 1,5 ml/Lt de agua (150 ppm)';
+const DET3    = 'DETERCLOR - 3 ml/Lt de agua';
+const DET20   = 'DETERCLOR - 20 ml/Lt de agua';
+const HIPO    = 'HIPOCLORITO DE SODIO AL 15% - 1 ml/Lt de agua (150 ppm)';
+const ANF_PER = 'ANFOCUAT O PERACET - 3 ml/Lt / 2,5 ml/Lt de agua';
+const F2      = '2 VECES AL DÍA Y/O CADA VEZ QUE SE REQUIERA';
+const FCVR    = 'CADA VEZ QUE SE REQUIERA';
+const FSEM    = 'SEMANAL Y/O CADA VEZ QUE SE REQUIERA';
+const NEBU    = 'LUN - MIÉ: ANFOCUAT (2 ml/Lt de agua) 200 ppm - JUE - DOM: PERACET (2,5 ml/Lt de agua) 250 ppm';
+const LA = 'LAVADO / ASPERSIÓN', PA = 'PAÑO ABSORBENTE / ASPERSIÓN', LN = 'LAVADO / NEBULIZACIÓN';
+
+const LEYENDA_MARCA = '<b>✔</b> Cumple - <b>✗</b> No cumple - <b>NA</b> No aplica - cada clic en la casilla cambia la marca. Las columnas se habilitan al escribir su hora.';
+
+// ── Iconos de las tarjetas ───────────────────────────────────────────────
+const ICONO = {
+  balanza: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 21h10"/><path d="M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/></svg>',
+  termometro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9v7"/></svg>',
+  lupa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/><path d="M11 8v3.5"/><path d="M11 14h.01"/></svg>',
+  gota: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.4 6 10.5a6 6 0 0 1-12 0C6 9.4 12 3 12 3z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5"/></svg>',
+  bodega: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg>',
+  ojo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  tajado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l9-12 9 12z"/><path d="M3 17v2h18v-2"/><circle cx="10" cy="13" r="1"/><circle cx="14" cy="11" r=".8"/></svg>',
+};
+
+// ════════════════════════════════════════════════════════════════════════
+// LOS SIETE FORMATOS
+// ════════════════════════════════════════════════════════════════════════
+const FORMATOS = [
+// ── 1. CONTROL PESO ──────────────────────────────────────────────────────
+{
+  id: 'CPUC', hoja: 'CONTROL PESO',
+  nombre: 'CONTROL PESO UNIDADES CORTADAS',
+  codigo: 'M-GISI-CPUC-1', version: '1', actualizado: '30/04/2026',
+  icono: ICONO.balanza,
+  desc: 'Peso individual de hasta 200 muestras por lote, con el cumplimiento de la tolerancia.',
+  general: [F_FECHA, F_TURNO, F_CODIGO],
+  bloques: [
+    { tipo: 'campos', k: 'producto', titulo: 'Producto', columnas: 3, req: true, campos: [
+      { k: 'tipo_queso',     l: 'Tipo de queso', t: 'sel', ...OP_QUESO_LARGO },
+      { k: 'presentacion',   l: 'Presentación', t: 'sel', ops: PRESENTACIONES },
+      { k: 'gramaje',        l: 'Gramaje (g)', t: 'num', min: 0 },
+      { k: 'fecha_fab',      l: 'Fecha de fabricación (F.F.)', t: 'fecha' },
+      { k: 'lote_vto',       l: 'Lote / fecha vencimiento (L/F. Vto.)', t: 'calc', desde: 'fecha_fab', dias: DIAS_VENCIMIENTO },
+      { k: 'total_unidades', l: 'Total unidades cortadas', t: 'ent' },
+    ]},
+    { tipo: 'muestras', k: 'muestras', titulo: 'Peso unidad (g) - 200 muestras', n: 200, bloquesDe: 40 },
+  ],
+  criterios: '<b>Criterios:</b> deben ser tomadas 200 muestras de las cuales no pueden exceder 10 unidades por debajo del peso tomando los siguientes márgenes: para 10g (9,1g); 15g (13,7g); 20g (18,2g); 22.3g (20.3g); 25g (22,8g); 30g (27,3g); 35g (31,8g); 40g (36,4g); 45g (40,9g); 50g (45,5g); 60g (55,5g); 70g (65,5g); 80g (75,5g); 90g (85,5g); 125g (119,3g); 250g (241g); 300g (291g); 350g (339,5g); 400g (388g); 500g (485g); 1560g (1536,6g); 2000g (1970g); 2400g (2364g); 2500g (2462,5g); 3000g (2955g). Para cualquier otro gramaje menor a 50g se tiene una tolerancia del 91% sobre el peso neto de la unidad.',
+  nota: '<b>Nota:</b> registrar turno, código del producto, fecha y los datos del producto. Lotes de hasta 500 unidades: verificar 50 unidades. Lotes de 501 a 999 unidades: verificar 100 unidades. Tamaño de lote de 1000 unidades tomar 200 muestras, anotando el peso individual en gramos. Verificar el cumplimiento de los criterios de tolerancia; en caso de desviaciones, registrar en observaciones y reportar. Completar con nombre, firma y cargo de responsables. Resolución 32209 de 2020.',
+},
+
+// ── 2. T SELLADO ─────────────────────────────────────────────────────────
+{
+  id: 'CTS', hoja: 'T SELLADO',
+  nombre: 'CONTROL TEMPERATURA DE SELLADO EMPACADORAS',
+  codigo: 'M-GISI-CTS-1', version: '1', actualizado: '01/05/2026',
+  icono: ICONO.termometro,
+  desc: 'Temperatura de sellado longitudinal y horizontal cada 2 horas, por máquina.',
+  general: [F_FECHA, F_TURNO, F_CODIGO],
+  bloques: [
+    { tipo: 'campos', k: 'producto', titulo: 'Producto y máquina', columnas: 3, campos: [
+      { k: 'tipo_queso',   l: 'Tipo de queso', t: 'sel', ...OP_QUESO_LARGO },
+      { k: 'presentacion', l: 'Presentación', t: 'sel', ops: PRESENTACIONES },
+      { k: 'gramaje',      l: 'Gramaje', t: 'txt' },
+      { k: 'lote_vto',     l: 'Lote / fecha vencimiento (L/F. Vto.)', t: 'fecha' },
+      { k: 'maquina',      l: '# Máquina', t: 'sel', ops: ['1', '2', '3'] },
+    ]},
+    { tipo: 'tabla', k: 'sellado', titulo: 'Temperaturas de sellado', filas: 20, columnas: [
+      { k: 'hora',  l: 'Hora', t: 'hora' },
+      { k: 'long',  l: 'Sellado longitudinal (°C)', t: 'num', min: 0 },
+      { k: 'horiz', l: 'Sellado horizontal (°C)', t: 'num', min: 0 },
+      { k: 'cumple', l: 'Cumple / No cumple', t: 'op', ...OP_CNC },
+      { k: 'responsable', l: 'Responsable', t: 'txt' },
+      { k: 'verificado',  l: 'Verificado por', t: 'txt' },
+    ]},
+    { tipo: 'referencia', titulo: 'Rangos de sellado por máquina',
+      encabezado: ['No. máquina', 'Producto', 'Sellado longitudinal', 'Sellado horizontal'],
+      filas: [
+        ['1', 'Queso doble crema (Porción)', '150-170 °C', '130-145 °C'],
+        ['1', 'Queso con bocadillo', 'No aplica', 'No aplica'],
+        ['2', 'Queso doble crema (Porción) - Queso con bocadillo', '170-180 °C', '130-150 °C'],
+        ['3', 'Queso doble crema (Porción) - Queso con bocadillo', '180-190 °C', '135-150 °C'],
+      ]},
+  ],
+  nota: '<b>Nota:</b> registrar turno, código, fecha, información del producto y número de máquina. Tomar y consignar la temperatura de sellado (longitudinal y horizontal) cada 2 horas, incluyendo inicio y final. Verificar cumplimiento según rangos establecidos y marcar Cumple/No cumple. La Máquina #1 no aplica para rangos de sellado en el ensamble de queso con bocadillo, ya que en este equipo no se realiza el proceso de sellado de dicho producto. En caso de desviaciones, registrar en observaciones y notificar para acción correctiva. Completar con nombre, firma y verificación correspondiente.',
+},
+
+// ── 3. CONTAMINACIÓN FÍSICA ─────────────────────────────────────────────
+{
+  id: 'FICF', hoja: 'CONTAMINACION FISICA',
+  nombre: 'FORMATO INSPECCIÓN CONTAMINACIÓN FÍSICA',
+  codigo: 'M-GISI-FICF-1', version: '1', actualizado: '21/04/2026',
+  icono: ICONO.lupa,
+  desc: 'Tipo de contaminación física encontrada, producto afectado, origen y acción correctiva.',
+  general: [F_FECHA, F_TURNO, F_CODIGO],
+  bloques: [
+    { tipo: 'tabla', k: 'inspeccion', titulo: 'Inspección por tipo de contaminación', etiqueta: 'Tipo contaminación',
+      opcional: { p2: 'producto afectado 2' },
+      filas: ['PELO', 'RESIDUOS DE CANASTILLA', 'PUNTOS NEGROS', 'PEGA', 'RESIDUOS DE PLÁSTICO',
+              'INSECTOS', 'FIBRA DE NAYLON',
+              { l: 'OTROS', cual: true }, { l: 'OTROS', cual: true },
+              { l: 'OTROS', cual: true }, { l: 'OTROS', cual: true }],
+      columnas: [
+        { k: 'total1', l: 'Total', t: 'ent', g: 'Producto afectado' },
+        { k: 'mz1', l: 'Mozarella', t: 'x', g: 'Producto afectado', color: 'azul' },
+        { k: 'dc1', l: 'Doble crema', t: 'x', g: 'Producto afectado', color: 'rojo' },
+        { k: 'cp1', l: 'Campesino', t: 'x', g: 'Producto afectado', color: 'verde' },
+        { k: 'pe1', l: 'Pera', t: 'x', g: 'Producto afectado', color: 'amarillo' },
+        { k: 'lote1', l: 'Lote', t: 'fecha', g: 'Producto afectado' },
+        { k: 'gram1', l: 'Gramaje bloque', t: 'txt', g: 'Producto afectado' },
+        { k: 'pres1', l: 'Presentación final', t: 'txt', g: 'Producto afectado' },
+        // Segundo producto: solo aparece si se pulsa "+ Agregar producto afectado 2"
+        { k: 'total2', l: 'Total', t: 'ent', g: 'Producto afectado 2', opc: 'p2' },
+        { k: 'mz2', l: 'Mozarella', t: 'x', g: 'Producto afectado 2', color: 'azul', opc: 'p2' },
+        { k: 'dc2', l: 'Doble crema', t: 'x', g: 'Producto afectado 2', color: 'rojo', opc: 'p2' },
+        { k: 'cp2', l: 'Campesino', t: 'x', g: 'Producto afectado 2', color: 'verde', opc: 'p2' },
+        { k: 'pe2', l: 'Pera', t: 'x', g: 'Producto afectado 2', color: 'amarillo', opc: 'p2' },
+        { k: 'lote2', l: 'Lote', t: 'fecha', g: 'Producto afectado 2', opc: 'p2' },
+        { k: 'gram2', l: 'Gramaje bloque', t: 'txt', g: 'Producto afectado 2', opc: 'p2' },
+        { k: 'pres2', l: 'Presentación final', t: 'txt', g: 'Producto afectado 2', opc: 'p2' },
+        { k: 'correccion', l: 'Corrección', t: 'txt' },
+        { k: 'honda', l: 'Honda', t: 'x', g: 'Origen' },
+        { k: 'guaduas', l: 'Guaduas', t: 'x', g: 'Origen' },
+        { k: 'mosquera', l: 'Mosquera', t: 'x', g: 'Origen' },
+        { k: 'accion', l: 'Acción correctiva', t: 'txt' },
+      ]},
+  ],
+  nota: '<b>Nota:</b> diligenciar el formato en cada turno registrando la información completa (fecha, turno y código). Identificar el tipo de contaminación física encontrado y registrar la cantidad total, tipo de queso, lote, gramaje y presentación final afectada. Marcar el origen correspondiente y describir la corrección y acción correctiva aplicada. En caso de no presentarse contaminación, dejar registro en cero (0). Cualquier novedad adicional debe consignarse en observaciones. El formato debe ser firmado por quien realiza y quien revisa.',
+},
+
+// ── 4. RUTINA DE SANEAMIENTO ────────────────────────────────────────────
+{
+  id: 'RRS', hoja: 'RUTINA DE SANEAMIENTO',
+  nombre: 'REGISTRO RUTINA DE SANEAMIENTO',
+  codigo: 'M-GISI-RRS-1', version: '1', actualizado: '21/04/2026',
+  icono: ICONO.gota,
+  desc: 'Limpieza y desinfección de la planta de corte y empaque, con verificación por horas.',
+  general: [F_FECHA, F_TURNO],
+  bloques: [
+    { tipo: 'horas', k: 'horas', titulo: 'Horas de verificación', n: 5 },
+    { tipo: 'tabla', k: 'jornada', titulo: 'Durante la jornada laboral', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_SANEAMIENTO, ...colsHora(5, 'horas')],
+      filas: [
+        fila('MESAS SEPARADOR', 'CADA DOS HORAS', AV21, PERA150, LA),
+        fila('MESAS AUXILIARES TAJADORAS', F2, AV21, PERA150, LA),
+        fila('MESAS DE CONTEO Y ACOMODACIÓN', F2, AV21, PERA150, LA),
+        fila('MÁQUINA EMPACADORA N° 1', F2, AV21, PERA150, LA),
+        fila('MÁQUINA EMPACADORA N° 2', F2, AV21, PERA150, LA),
+        fila('MÁQUINA EMPACADORA N° 3', F2, AV21, PERA150, ''),
+        fila('MÁQUINA EMPACADORA AL VACÍO', F2, AV21, PERA150, LA),
+        fila('MÁQUINA TERMOFORMADORA', F2, AV21, PERA150, LA),
+        fila('MÁQUINA SELLADORA DE PEDAL', F2, AV21, PERA150, ''),
+        fila('TAJADORA QUESO PORCIÓN N° 1', F2, AV21, PERA150, LA),
+        fila('TAJADORA QUESO PORCIÓN N° 2', F2, AV21, PERA150, LA),
+        fila('TAJADORA QUESO PORCIÓN N° 3', F2, AV21, PERA150, LA),
+        fila('TAJADORA QUESO PORCIÓN N° 4', F2, AV21, PERA150, LA),
+        fila('TAJADORA QUESO PORCIÓN N° 5', F2, AV21, PERA150, LA),
+        fila('GUILLOTINA', F2, AV21, PERA150, LA),
+        fila('MÁQUINA CODIFICADORA', FCVR, AV21, PERA150, PA),
+        fila('BALANZA', FCVR, AV21, PERA150, PA),
+        fila('DISPENSADORES JABÓN Y GEL', FCVR, AV21, PERA150, PA),
+        fila('UTENSILIOS (TABLAS, ESPÁTULAS, BASTONES Y FRASCOS DE AGUA)', FCVR, AV21, PERA150, LA),
+        fila('TERMÓMETROS DE PUNZÓN', 'CADA HORA', AV21, PERA150, LA),
+        fila('TAPETE DE LA ENTRADA', '2 VECES AL DÍA', DET3, 'NO APLICA', 'LAVADO / NA'),
+      ]},
+    { tipo: 'tabla', k: 'finalizar', titulo: 'Al finalizar la jornada laboral', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_SANEAMIENTO, ...colsHora(5, 'horas')],
+      filas: [
+        fila('PISOS', '', DET20, HIPO, 'LAVADO / CONTACTO DIRECTO'),
+        fila('PUERTAS', '', DET20, ANF_PER, LN),
+        fila('PUERTAS CUARTOS FRÍOS', '', DET20, ANF_PER, LN),
+        fila('LAVAMANOS', '', DET20, ANF_PER, LN),
+        fila('ÁREA LAVADO CANASTILLAS', '', DET20, ANF_PER, LN),
+        fila('PATINES', '', DET3, HIPO, LN),
+        fila('CANASTILLAS', '', DET3, HIPO, 'LAVADO / INMERSIÓN'),
+        fila('CANASTILLAS BASE', '', DET3, HIPO, 'LAVADO / INMERSIÓN'),
+        fila('CANECAS DE BASURA', '', DET3, 'NO APLICA', 'LAVADO'),
+        fila('TAPETE DE LA ENTRADA', '', DET3, 'NO APLICA', 'LAVADO'),
+        fila('TANQUES LAVADO CANASTILLAS', '', DET3, 'NO APLICA', 'LAVADO'),
+        fila('ÁREA LAVADO CANASTILLAS', '', DET3, 'NO APLICA', 'LAVADO'),
+        fila('CONTENEDOR DE BASURA INTERNO', '2 VECES A LA SEMANA', DET3, 'NO APLICA', ''),
+        fila('POCETA LAVABOTAS', '', 'DETERCLOR - PURO', 'NA', 'LAVADO'),
+        fila('SILLAS', '', 'AV - 21 - 30 ml/Lt de agua', PERA150, PA),
+      ]},
+    { tipo: 'tabla', k: 'nebulizacion', titulo: 'Nebulización en todas las áreas de la planta de corte y empaque', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_SANEAMIENTO, ...colsHora(5, 'horas')],
+      filas: [ fila('NEBULIZACIÓN EN TODAS LAS ÁREAS', 'DIARIA', '', NEBU, 'NEBULIZACIÓN') ]},
+    { tipo: 'tabla', k: 'semanal', titulo: 'Semanalmente', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_SANEAMIENTO, ...colsHora(5, 'horas')],
+      filas: [
+        fila('CONTENEDORES DE BASURA', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'LAVADO / CONTACTO DIRECTO'),
+        fila('CUARTO QUÍMICOS', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'LAVADO / NO APLICA'),
+        fila('BOMBA HIDROFLO', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'PAÑO ABSORBENTE / NO APLICA'),
+        fila('TAPAS TANQUE DE AGUA', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'LAVADO / NO APLICA'),
+        fila('CAJÓN DE INSUMOS', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'LAVADO / NO APLICA'),
+        fila('DELANTALES', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'LAVADO / NO APLICA'),
+        fila('CORTINAS', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'LAVADO / NO APLICA'),
+        fila('CUARTO DE RECICLAJE Y RESIDUOS PELIGROSOS', FSEM, DET20, 'CLORO AL 15% - 1 ml/Lt de agua (150 ppm)', 'LAVADO / NO APLICA'),
+        fila('ASEO PROFUNDO TODAS LAS ÁREAS', 'SEMANAL', 'PEROXICUAT - 40 ml/Lt de agua - ELINCRU - 20 ml/Lt de agua',
+             'ANFOCUAT (2 ml/Lt de agua) 200 ppm - PERACET (2,5 ml/Lt de agua) 250 ppm', LN),
+      ]},
+    { tipo: 'tabla', k: 'mensual', titulo: 'Mensualmente', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_SANEAMIENTO, ...colsHora(5, 'horas')],
+      filas: [
+        fila('PAREDES', 'MENSUAL', DET20, 'ANFOCUAT A 800 ppm - 8 ml/Lt de agua', LN),
+        fila('TECHOS', 'MENSUAL', DET20, 'ANFOCUAT A 800 ppm - 8 ml/Lt de agua', LN),
+        fila('EXTRACTORES', 'MENSUAL', DET20, 'ANFOCUAT A 800 ppm - 8 ml/Lt de agua', LN),
+      ]},
+    { tipo: 'tabla', k: 'verif_proceso', titulo: 'Verificación de proceso y soluciones de limpieza y desinfección', etiqueta: 'Aspecto a verificar',
+      columnas: [
+        { k: 'metodo', l: 'Método de verificación', info: true, corta: true },
+        { k: 'esperado', l: 'Resultado esperado', info: true, corta: true },
+        { k: 'dias', l: 'Días de verificación', info: true, corta: true },
+        { k: 'resultado', l: 'Resultado', t: 'txt' },
+      ],
+      filas: [
+        { l: 'LIMPIEZA Y DESINFECCIÓN DE SUPERFICIES', dias: 'LUNES Y SÁBADO', metodo: 'Tiras Vericleen', esperado: 'Negativo' },
+        { l: 'LIMPIEZA Y DESINFECCIÓN DE TAJADORAS', dias: 'MIÉRCOLES Y VIERNES', metodo: 'Tiras Vericleen', esperado: 'Negativo' },
+        { l: 'CONCENTRACIÓN DE PERACET X 1 LT EMPLEADO EN ÁREA DE CORTE Y EMPAQUE', dias: 'LUNES, MIÉRCOLES Y VIERNES', metodo: 'Test ácido peracético', esperado: '130-260 ppm' },
+        { l: 'CONCENTRACIÓN DE PERACET X 5 LT EMPLEADO EN NEBULIZACIÓN DE PLANTA', dias: 'JUEVES, VIERNES Y SÁBADO', metodo: 'Test ácido peracético', esperado: '130-260 ppm' },
+        { l: 'CONCENTRACIÓN DE ANFOCUAT X 5 LT EMPLEADO EN NEBULIZACIÓN DE PLANTA', dias: 'LUNES, MARTES Y MIÉRCOLES', metodo: 'Test de amonio cuaternario', esperado: '200 ppm' },
+        { l: 'CONCENTRACIÓN DE CLORO EN TANQUE DE DESINFECCIÓN DE CANASTILLAS', dias: 'MIÉRCOLES Y VIERNES', metodo: 'Test de cloro', esperado: '150 ppm' },
+        { l: 'CONCENTRACIÓN DE CLORO EN TAPETE DE INGRESO A ÁREA DE CORTE Y EMPAQUE', dias: 'LUNES, MIÉRCOLES Y VIERNES', metodo: 'Test de cloro', esperado: '300-500 ppm' },
+        { l: 'LIMPIEZA Y DESINFECCIÓN DE EQUIPOS', dias: 'LUNES A SÁBADO', metodo: 'Bactiscan', esperado: 'Negativo' },
+      ]},
+  ],
+  nota: '<b>Nota:</b> diligenciar el formato en cada turno registrando todas las actividades de limpieza y desinfección según la frecuencia establecida. Marcar con (✔) Cumple, (X) No cumple o (NA) No aplica según corresponda. Registrar productos, concentraciones, métodos y hora de verificación. Cualquier desviación debe anotarse en observaciones. El formato debe quedar firmado por quien realiza y quien revisa.',
+},
+
+// ── 5. RUTINA DE SANEAMIENTO BODEGA ─────────────────────────────────────
+{
+  id: 'RRSADCFBEI', hoja: 'RUTINA DE SANEAMIENTO BODEGA',
+  nombre: 'REGISTRO RUTINA DE SANEAMIENTO ÁREA DE DESPACHO, CUARTOS FRÍOS Y BODEGA DE EMPAQUES E INSUMOS',
+  corto: 'RUTINA DE SANEAMIENTO - DESPACHO, CUARTOS FRÍOS Y BODEGA',
+  codigo: 'M-GISI-RRSADCFBEI-1', version: '1', actualizado: '21/04/2026',
+  icono: ICONO.bodega,
+  desc: 'Limpieza de despacho, cuartos fríos y bodega de empaques, diaria a mensual.',
+  general: [F_FECHA, F_TURNO],
+  bloques: [
+    { tipo: 'horas', k: 'horas', titulo: 'Horas de verificación', n: 4 },
+    { tipo: 'tabla', k: 'diario', titulo: 'Diariamente', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_BODEGA, ...colsHora(4, 'horas')],
+      filas: [
+        { l: 'PISOS DE DESPACHO', f: 'DIARIO', lav: 'NA', met: 'BARRIDO' },
+        { l: 'PISOS DE CUARTOS FRÍOS', f: 'DIARIO', lav: 'NA', met: 'BARRIDO / TRAPEADO' },
+        { l: 'REJILLA DESAGÜE ÁREA DE DESPACHO', f: 'DIARIO', lav: 'NA', met: 'BARRIDO' },
+        { l: 'PUERTAS DE CUARTOS FRÍOS', f: 'DIARIO', lav: 'NA', met: 'LAVADO' },
+      ]},
+    { tipo: 'tabla', k: 'desinfeccion', titulo: 'Desinfección diaria', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_BODEGA, ...colsHora(4, 'horas')],
+      filas: [ { l: 'NEBULIZACIÓN EN TODAS LAS ÁREAS DE BODEGA Y CUARTOS FRÍOS', f: 'DIARIA', lav: NEBU, met: 'NEBULIZACIÓN' } ]},
+    { tipo: 'tabla', k: 'semanal', titulo: 'Semanalmente', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_BODEGA, ...colsHora(4, 'horas')],
+      filas: [
+        { l: 'PAREDES DESPACHO', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'PUERTA DESPACHO', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'PISOS DESPACHO', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'MESAS AUXILIARES', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'PUERTAS Y PAREDES PANELES CUARTOS', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'DISPENSADOR DE GEL', f: FSEM, lav: DET20, met: 'PAÑO ABSORBENTE' },
+        { l: 'DISPENSADOR DE TOALLAS', f: FSEM, lav: DET20, met: 'PAÑO ABSORBENTE' },
+        { l: 'ESTIBADOR HIDRÁULICO', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'PATINES', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'CORTINAS CUARTOS FRÍOS', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'PISO ÁREA EXTERNA', f: FSEM, lav: DET20, met: 'LAVADO' },
+        { l: 'CORTINAS DE AIRE CUARTOS FRÍOS 1, 2 Y 3', f: FSEM, lav: DET20, met: 'PAÑO ABSORBENTE' },
+        { l: 'PAREDES Y PISOS CUARTOS FRÍOS 1, 2 Y 4', f: FSEM, lav: DET20, met: 'PAÑO ABSORBENTE' },
+        { l: 'ABRIGO DEL MUELLE', f: FSEM, lav: DET20, met: 'LAVADO / PAÑO ABSORBENTE' },
+        { l: 'EPPS (CASCOS, GAFAS)', f: FSEM, lav: 'AV - 21 - 30 ml/Lt de agua', met: 'PAÑO ABSORBENTE' },
+        { l: 'MEZANINE', f: FSEM, lav: 'NA', met: 'BARRIDO / TRAPEADO' },
+      ]},
+    { tipo: 'tabla', k: 'quincenal', titulo: 'Quincenalmente', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_BODEGA, ...colsHora(4, 'horas')],
+      filas: [
+        { l: 'BODEGA DE EMPAQUES', f: 'QUINCENAL', lav: 'NA', met: 'BARRIDO / TRAPEADO / PAÑO ABSORBENTE' },
+        { l: 'ESTIBAS DE ÁREA SECA', f: 'QUINCENAL', lav: DET20, met: 'PAÑO ABSORBENTE' },
+      ]},
+    { tipo: 'tabla', k: 'mensual', titulo: 'Mensualmente', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
+      columnas: [...INFO_BODEGA, ...colsHora(4, 'horas')],
+      filas: [
+        { l: 'ESTIBAS', f: 'MENSUAL', lav: DET20, met: 'LAVADO' },
+        { l: 'PISOS CUARTOS FRÍOS', f: 'MENSUAL', lav: DET20, met: 'LAVADO' },
+        { l: 'PUERTAS CUARTOS FRÍOS', f: 'MENSUAL', lav: DET20, met: 'LAVADO' },
+        { l: 'CORTINAS CUARTOS FRÍOS', f: 'MENSUAL', lav: DET20, met: 'LAVADO' },
+        { l: 'PAREDES CUARTOS FRÍOS', f: 'MENSUAL', lav: DET20, met: 'LAVADO' },
+        { l: 'TECHOS CUARTOS FRÍOS', f: 'MENSUAL', lav: DET20, met: 'LAVADO' },
+        { l: 'TECHO EXTERIOR CUARTOS Y PRODUCCIÓN', f: 'MENSUAL', lav: DET20, met: 'TRAPEADO' },
+        { l: 'DIFUSOR CUARTOS FRÍOS', f: 'MENSUAL', lav: 'AV - 21 - 30 ml/Lt de agua', met: 'LAVADO' },
+      ]},
+    { tipo: 'tabla', k: 'verif_proceso', titulo: 'Verificación de proceso y soluciones de limpieza y desinfección', etiqueta: 'Aspecto a verificar',
+      columnas: [
+        { k: 'metodo', l: 'Método de verificación', info: true, corta: true },
+        { k: 'esperado', l: 'Resultado esperado', info: true, corta: true },
+        { k: 'dias', l: 'Días de verificación', info: true, corta: true },
+        { k: 'resultado', l: 'Resultado', t: 'txt' },
+      ],
+      filas: [
+        { l: 'CONCENTRACIÓN DE PERACET 3 LT EMPLEADO EN NEBULIZACIÓN DE CUARTOS FRÍOS', dias: 'JUEVES', metodo: 'Test ácido peracético', esperado: '130-260 ppm' },
+        { l: 'CONCENTRACIÓN DE ANFOCUAT X 5 LT EMPLEADO EN NEBULIZACIÓN DE CUARTOS FRÍOS', dias: 'MARTES', metodo: 'Test de amonio cuaternario', esperado: '200 ppm' },
+        { l: 'CONCENTRACIÓN DE PERACET X 1 LT EMPLEADO EN ÁREA DESPACHO', dias: 'MIÉRCOLES', metodo: 'Test ácido peracético', esperado: '130-260 ppm' },
+      ]},
+  ],
+  nota: '<b>Nota:</b> diligenciar el formato en cada turno registrando todas las actividades de limpieza y desinfección según la frecuencia establecida. Marcar con (✔) Cumple, (X) No cumple o (NA) No aplica según corresponda. Registrar productos, concentraciones, métodos y hora de verificación. Cualquier desviación debe anotarse en observaciones. El formato debe quedar firmado por quien realiza y quien revisa.',
+},
+
+// ── 6. ORGANOLÉPTICO ────────────────────────────────────────────────────
+{
+  id: 'EOPP', hoja: 'ORGANOLEPTICO',
+  nombre: 'EVALUACIÓN ORGANOLÉPTICA PRODUCTO EN PROCESO',
+  codigo: 'M-EOPP-1', version: '1', actualizado: '21/04/2026',
+  icono: ICONO.ojo,
+  desc: 'Evaluación sensorial de hasta 10 productos: fase táctil, visual, olfativa y bucal.',
+  general: [F_FECHA, F_TURNO, F_CODIGO],
+  bloques: [
+    // Se ven 5 productos; con "+ Agregar producto" se abren más, hasta 10
+    { tipo: 'matriz', k: 'evaluacion', titulo: 'Evaluación por producto', n: 10, inicial: 5, enc: 'Producto',
+      leyenda: '<b>R</b> Regular - <b>B</b> Bueno - <b>A</b> Alto - <b>M</b> Medio - <b>Bj</b> Bajo - <b>TAJ</b> Tajado - <b>POR</b> Porción - <b>CP</b> Campesino - <b>PR</b> Pera - <b>Dd</b> Deditos - <b>Bq</b> Bloque - <b>Q.Bo</b> Queso con bocadillo',
+      filas: [
+        { k: 'tipo_queso',   l: 'Tipo de queso', t: 'sel', ...OP_QUESO_CORTO },
+        { k: 'gramaje',      l: 'Gramaje', t: 'sel', ops: GRAMAJES },
+        { k: 'fecha_fab',    l: 'Fecha fabricación', t: 'fecha' },
+        { k: 'lote_vto',     l: 'Lote / F. Vto', t: 'calc', desde: 'fecha_fab', dias: DIAS_VENCIMIENTO },
+        { k: 'gramaje_bloque', l: 'Gramaje bloque', t: 'sel', ops: GRAMAJES_BLOQUE },
+        { k: 'presentacion', l: 'Presentación obtenida', t: 'chips', ops: ['TAJ', 'POR', 'CP', 'PR', 'Dd', 'Bq', 'Q.Bo'] },
+        { grupo: 'Fase táctil y visual - 1. Apariencia externa de la horma' },
+        { k: 'forma',   l: 'Forma', t: 'op', ...OP_RB },
+        { k: 'corteza', l: 'Corteza', t: 'op', ...OP_RB },
+        { k: 'obs1',    l: 'Observaciones', t: 'txt' },
+        { grupo: 'Fase táctil y visual - 2. Textura' },
+        { k: 'tv_elasticidad', l: 'Elasticidad', t: 'op', ...OP_RB },
+        { k: 'tv_firmeza',     l: 'Firmeza', t: 'op', ...OP_RB },
+        { k: 'obs2',           l: 'Observaciones', t: 'txt' },
+        { grupo: 'Fase táctil y visual - 3. Rigurosidad' },
+        { k: 'arenosa', l: 'Arenosa', t: 'op', ...OP_RB },
+        { k: 'graso',   l: 'Graso', t: 'op', ...OP_RB },
+        { k: 'obs3',    l: 'Observaciones', t: 'txt' },
+        { grupo: 'Fase táctil y visual - 4. Humedad superficie (características táctiles en superficie)' },
+        { k: 'contacto_seco', l: 'Contacto seco', t: 'op', ...OP_RB },
+        { k: 'humedo',        l: 'Húmedo', t: 'op', ...OP_RB },
+        { k: 'obs4',          l: 'Observaciones', t: 'txt' },
+        { grupo: 'Fase táctil y visual - 5. Apariencia interna' },
+        { k: 'color',     l: 'Color', t: 'op', ...OP_RB },
+        { k: 'aberturas', l: 'Aberturas', t: 'op', ...OP_RB },
+        { k: 'cristales', l: 'Cristales', t: 'op', ...OP_RB },
+        { k: 'obs5',      l: 'Observaciones', t: 'txt' },
+        { grupo: 'Fase olfativa y bucal - 6. Gusto' },
+        { k: 'intensidad_olor', l: 'Intensidad de olor', t: 'op', ...OP_RB },
+        { k: 'gusto_caract',    l: 'Gusto característico', t: 'op', ...OP_RB },
+        { k: 'salado',          l: 'Salado (Alto, Medio o Bajo)', t: 'op', ops: ['A', 'M', 'Bj'], txt: { A: 'Alto', M: 'Medio', Bj: 'Bajo' } },
+        { k: 'acido',           l: 'Ácido', t: 'op', ...OP_RB },
+        { k: 'obs6',            l: 'Observaciones', t: 'txt' },
+        { grupo: 'Fase olfativa y bucal - 7. Textura' },
+        { k: 'ob_elasticidad', l: 'Elasticidad', t: 'op', ...OP_RB },
+        { k: 'ob_firmeza',     l: 'Firmeza', t: 'op', ...OP_RB },
+        { k: 'granuloso',      l: 'Granuloso', t: 'op', ...OP_RB },
+        { k: 'adherencia',     l: 'Adherencia', t: 'op', ...OP_RB },
+        { k: 'solubilidad',    l: 'Solubilidad', t: 'op', ...OP_RB },
+        { k: 'obs7',           l: 'Observaciones', t: 'txt' },
+      ]},
+  ],
+  nota: '<b>Nota:</b> diligenciar mediante evaluación sensorial del producto en proceso, registrando las características observadas en las fases táctil, visual, olfativa y bucal. Marcar los atributos según corresponda y consignar observaciones en caso de desviaciones. Completar la información del producto, lote, presentación y responsables de la evaluación.',
+},
+
+// ── 7. PORCIÓN Y TAJADO ─────────────────────────────────────────────────
+{
+  id: 'RPCPCEQPT', hoja: 'PORCIÓN Y TAJADO',
+  nombre: 'REGISTRO PARÁMETROS DE CONTROL PROCESO DE CORTE Y EMPAQUE QUESO PORCIÓN Y TAJADO',
+  corto: 'PARÁMETROS DE CONTROL - QUESO PORCIÓN Y TAJADO',
+  codigo: 'M-GISI-RPCPCEQPT-1', version: '2', actualizado: '18/05/2026',
+  icono: ICONO.tajado,
+  desc: 'Parámetros de bloque, queso cortado, retal e insumos, evaluados por hora.',
+  general: [F_FECHA, F_TURNO,
+    { k: 'presentacion', l: 'Presentación', t: 'chips', ops: ['PORCIÓN', 'DEDITOS', 'TAJADO'] },
+    { k: 'linea', l: 'No. línea de corte', t: 'txt' },
+    { k: 'responsable', l: 'Responsable', t: 'txt' }],
+  bloques: [
+    { tipo: 'matriz', k: 'parametros', titulo: 'Parámetros evaluados por hora', n: 9, enc: 'hora',
+      leyenda: '<b>DC</b> Doble crema - <b>MZ</b> Mozarella - <b>C</b> Cumple - <b>NC</b> No cumple - <b>NA</b> No aplica - <b>BC</b> Blanco crema - <b>LA</b> Ligeramente amarillento - <b>S</b> Seco - <b>MH</b> Moderadamente húmedo - <b>H</b> Húmedo. Escribe la hora de cada evaluación en el encabezado de la columna: la columna se habilita al escribirla.',
+      filas: [
+        { grupo: 'Área' },
+        { k: 'temp_area', l: 'Temperatura del área (°C)', t: 'num' },
+        { grupo: 'Bloque' },
+        { k: 'tipo_queso', l: 'Tipo de queso', t: 'sel', ...OP_QUESO_CORTO },
+        { k: 'gramaje_bloque', l: 'Gramaje del bloque', t: 'txt' },
+        { k: 'fecha_prod_bloque', l: 'Codificado: fecha de producción', t: 'fecha' },
+        { k: 'lote_vto_bloque', l: 'Codificado: lote / fecha vencimiento', t: 'calc', desde: 'fecha_prod_bloque', dias: DIAS_VENCIMIENTO },
+        { k: 'temp_salida', l: 'Temperatura de salida del bloque del cuarto frío (°C)', t: 'num' },
+        { k: 'estado_empaque', l: 'Estado del empaque, sellado y rotulado', t: 'op', ...OP_CNCNA },
+        { grupo: 'Queso cortado' },
+        { k: 'gramaje_obtenido', l: 'Gramaje o referencia obtenida', t: 'txt' },
+        { k: 'codificado_cortado', l: 'Codificado: lote / fecha vencimiento', t: 'fecha' },
+        { k: 'codigo_trazabilidad', l: 'Código de trazabilidad', t: 'txt' },
+        { grupo: 'Queso cortado - Inspección organoléptica' },
+        { k: 'color', l: 'Color: blanco crema (BC) / ligeramente amarillento (LA)', t: 'op', ops: ['BC', 'LA'], txt: { BC: 'Blanco crema', LA: 'Ligeramente amarillento' } },
+        { k: 'olor', l: 'Olor: láctico, poco perceptible y ligeramente ácido - conforme (C) / no conforme (NC)', t: 'op', ...OP_CNC },
+        { k: 'sabor', l: 'Sabor: bueno (B) / ácido (AC) / moderadamente ácido (MA) / amargo (AM) / otro (cuál)', t: 'lista', sugerencias: ['B', 'AC', 'MA', 'AM'] },
+        { k: 'humedad', l: 'Humedad: seco (S) / moderadamente húmedo (MH) / húmedo (H)', t: 'op', ops: ['S', 'MH', 'H'], txt: { S: 'Seco', MH: 'Moderadamente húmedo', H: 'Húmedo' } },
+        { k: 'sellado_corte', l: 'Inspección de sellado y corte - conforme (C) / no conforme (NC)', t: 'op', ...OP_CNC },
+        { grupo: 'Queso cortado - Peso, sellado y temperatura' },
+        { l: 'Control de peso neto', info: 'Ver formato diario CONTROL PESO UNIDADES CORTADAS.' },
+        { k: 'integridad', l: 'Sellado (prueba de integridad) - revisar 3 unidades aleatoriamente / hora', t: 'op', ...OP_CNCNA },
+        { k: 'temp_entrada', l: 'Temperatura de entrada del producto al cuarto frío (°C)', t: 'txt' },   // texto: a veces va N/A
+        { grupo: 'Retal' },
+        { k: 'temp_retal', l: 'Temperatura de ingreso del retal al cuarto frío (°C)', t: 'txt' },   // texto: a veces va N/A
+        { grupo: 'Insumos' },
+        { k: 'lote_insumos_1', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 1', t: 'txt' },
+        { k: 'lote_insumos_2', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 2', t: 'txt' },
+      ]},
+  ],
+  nota: '<b>Nota:</b> registrar los parámetros de control en los horarios establecidos mediante medición y verificación visual, consignando valores reales de temperatura, gramaje y demás variables. Evaluar los criterios de calidad marcando: (C) Cumple, (NC) No Cumple o (N.A.) No Aplica. En caso de desviaciones, registrar la novedad y la acción correctiva en observaciones. Completar la información de presentación y diligenciar las abreviaturas correspondientes en la inspección organoléptica.',
+},
+];
+
+// Tolerancias del control de peso (gramaje → peso mínimo aceptable)
+const PESO_MINIMO = { 10: 9.1, 15: 13.7, 20: 18.2, 22.3: 20.3, 25: 22.8, 30: 27.3, 35: 31.8,
+  40: 36.4, 45: 40.9, 50: 45.5, 60: 55.5, 70: 65.5, 80: 75.5, 90: 85.5, 125: 119.3, 250: 241,
+  300: 291, 350: 339.5, 400: 388, 500: 485, 1560: 1536.6, 2000: 1970, 2400: 2364, 2500: 2462.5, 3000: 2955 };
+const MAX_BAJO_PESO = 10;   // sobre 200 muestras
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// MOTOR DE LA PÁGINA - dibuja los formatos, guarda en Sheets e historial
+// ════════════════════════════════════════════════════════════════════════
+const $ = id => document.getElementById(id);
+
+// ── Hoja de cálculo ──────────────────────────────────────────────────────
+// REGISTROS: una fila por formato diligenciado (cabecera + datos en JSON).
+// VALORES:   una fila por dato escrito, en formato largo, para Power BI y el
+//            futuro dashboard. La página no la lee: solo escribe en ella.
+const HOJA_REG = 'REGISTROS';
+const HOJA_VAL = 'VALORES';
+const COLS_REG = ['id_registro', 'formato', 'nombre_formato', 'codigo_formato', 'fecha', 'turno',
+  'codigo', 'responsable', 'cargo_responsable', 'observaciones',
+  'usuario', 'fecha_registro', 'fecha_modificacion', 'datos'];
+const COLS_VAL = ['id_registro', 'formato', 'fecha', 'seccion', 'item', 'columna', 'valor'];
+
+// Interruptor único: sin SHEET_ID o en la demo, no se toca Google.
+// Es función (no constante) porque el bloque de la demo se inyecta al final.
+const hayHoja = () => !!SHEET_ID && !window.DATOS_DEMO;
+
+let registros = [];     // filas de REGISTROS (sin el JSON, que se pide al abrir)
+let actual = null;      // { fmt, id, datos, reg } - el formato en pantalla
+let sucio = false;      // hay cambios sin guardar
+
+const fmtPorId = id => FORMATOS.find(f => f.id === id);
+const nombreCorto = f => f.corto || f.nombre;
+const MARCA_TXT = { C: '✔', NC: '✗', NA: 'NA' };
+const MARCA_SIG = { '': 'C', C: 'NC', NC: 'NA', NA: '' };
+const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto',
+               'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const pad2 = n => String(n).padStart(2, '0');
+const hoyISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+const ahoraLocal = () => { const d = new Date();
+  return `${hoyISO()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`; };
+
+function slug(s) {
+  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+}
+
+// Las filas de cada tabla reciben una clave estable (sale del texto de la
+// fila). Así, agregar una fila nueva al formato no desordena lo ya guardado.
+(function prepararFormatos() {
+  FORMATOS.forEach(f => f.bloques.forEach(b => {
+    if (b.tipo !== 'tabla') return;
+    const usados = {};
+    const lista = typeof b.filas === 'number'
+      ? Array.from({ length: b.filas }, (_, i) => ({ l: String(i + 1), num: true }))
+      : b.filas.map(x => typeof x === 'string' ? { l: x } : x);
+    b._filas = lista.map((x, i) => {
+      let k = x.num ? String(i + 1) : slug(x.l);
+      if (usados[k]) { usados[k]++; k += '_' + usados[k]; } else usados[k] = 1;
+      return { ...x, key: k };
+    });
+  }));
+})();
+
+// ════════════════════════════════════════════════════════════════════════
+// DATOS DEL FORMATO EN PANTALLA
+// Todo vive en actual.datos:  f = campos sueltos { clave: valor }
+//                             [bloque][fila][columna] = valor de celda
+// ════════════════════════════════════════════════════════════════════════
+const esVacio = v => v === '' || v == null || (Array.isArray(v) && !v.length);
+
+function leer(b, r, c) {
+  const d = actual.datos;
+  return b === 'f' ? d.f?.[c] : d[b]?.[r]?.[c];
+}
+function poner(b, r, c, v) {
+  const d = actual.datos;
+  if (b === 'f') {
+    d.f ??= {};
+    if (esVacio(v)) delete d.f[c]; else d.f[c] = v;
+  } else {
+    d[b] ??= {}; d[b][r] ??= {};
+    if (esVacio(v)) delete d[b][r][c]; else d[b][r][c] = v;
+    if (!Object.keys(d[b][r]).length) delete d[b][r];
+    if (!Object.keys(d[b]).length) delete d[b];
+  }
+  sucio = true;
+}
+
+// Copia sin espacios sobrantes ni textos vacíos
+function limpiarDatos(o) {
+  if (Array.isArray(o)) return o.map(limpiarDatos);
+  if (o && typeof o === 'object') {
+    const r = {};
+    Object.entries(o).forEach(([k, v]) => {
+      const x = limpiarDatos(v);
+      if (esVacio(x)) return;
+      if (x && typeof x === 'object' && !Array.isArray(x) && !Object.keys(x).length) return;
+      r[k] = x;
+    });
+    return r;
+  }
+  return typeof o === 'string' ? o.trim() : o;
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// DIBUJO DEL FORMULARIO
+// ════════════════════════════════════════════════════════════════════════
+let _listas = new Set();   // datalists ya dibujados en este render
+
+const attrs = (b, r, c) => `data-b="${esc(b)}" data-r="${esc(r)}" data-c="${esc(c)}"`;
+
+// Números decimales: se acepta 40.4 y 40,4 (se guarda como número 40.4 y
+// se muestra con coma). Devuelve null si el texto no es un número.
+function leerDecimal(t) {
+  t = String(t ?? '').trim().replace(/\s/g, '');
+  if (t === '') return '';
+  if (!/^-?\d+([.,]\d+)?$/.test(t)) return null;
+  return Number(t.replace(',', '.'));
+}
+const mostrarDecimal = v => (v === '' || v == null) ? '' : String(v).replace('.', ',');
+
+// Suma días a una fecha AAAA-MM-DD (para lote / fecha de vencimiento)
+function sumarDias(iso, dias) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) return '';
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + dias);
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+// Un control según su tipo. modo 'campo' = dentro de un .field (estilo del
+// entorno); si no, control compacto de celda. `apagado` = columna sin hora.
+function ctrl(def, b, r, c, modo, apagado) {
+  const v = leer(b, r, c);
+  const a = attrs(b, r, c) + (apagado ? ' disabled' : '');
+  const cls = modo === 'campo' ? '' : 'c-in';
+  const val = esc(v ?? '');
+  switch (def.t) {
+    case 'num':
+      return `<input type="text" inputmode="decimal" class="${cls} c-num" data-t="num"${def.min !== undefined ? ` data-min="${def.min}"` : ''} ${a} value="${esc(mostrarDecimal(v))}">`;
+    case 'ent':
+      return `<input type="number" min="0" step="1" inputmode="numeric" class="${cls}" data-t="ent" ${a} value="${val}">`;
+    case 'fecha':
+      return `<input type="date" min="2025-01-01" max="2027-12-31" class="${cls}" ${a} value="${val}" title="${esc(def.l || 'Fecha')}">`;
+    case 'calc':
+      return `<input type="text" readonly tabindex="-1" class="${cls} c-calc" data-calc="1" ${a} value="${esc(v ? fmtFecha(v) : '')}">`;
+    case 'hora':
+      return `<input type="text" class="${cls} c-hora" placeholder="hh:mm" maxlength="5" inputmode="numeric" data-t="hora" ${a} value="${val}">`;
+    case 'area':
+      return `<textarea rows="3" ${a}>${val}</textarea>`;
+    case 'sel':
+      return `<select class="${cls}${cls ? ' c-sel' : ''}" data-t="sel" ${a}><option value="">Seleccionar...</option>${def.ops.map(o =>
+        `<option value="${esc(o)}"${v === o ? ' selected' : ''} title="${esc(def.txt?.[o] || o)}">${esc(o)}</option>`).join('')}</select>`;
+    case 'x':
+      return `<button type="button" class="c-x ${def.color ? 'x-' + def.color : ''} ${v ? 'on' : ''}" data-t="x" ${a} aria-pressed="${!!v}" title="${esc(def.l)}">${v ? 'X' : ''}</button>`;
+    case 'marca':
+      return `<button type="button" class="c-marca ${v ? 'm-' + v : ''}" data-t="marca" ${a}>${MARCA_TXT[v] || ''}</button>`;
+    case 'op':
+      return `<div class="seg" role="group">${def.ops.map(o =>
+        `<button type="button" data-t="op" data-v="${esc(o)}" ${a} class="${v === o ? 'on' : ''} ${MALOS.includes(o) ? 'v-mal' : ''} ${BUENOS.includes(o) ? 'v-bien' : ''}" title="${esc(def.txt?.[o] || o)}">${esc(o)}</button>`
+      ).join('')}</div>`;
+    case 'chips': {
+      const arr = Array.isArray(v) ? v : [];
+      return `<div class="chips">${def.ops.map(o =>
+        `<button type="button" data-t="chips" data-v="${esc(o)}" ${a} class="${arr.includes(o) ? 'on' : ''}">${esc(o)}</button>`
+      ).join('')}</div>`;
+    }
+    case 'lista': {
+      const id = 'dl-' + slug(b + '-' + (def.k || c));
+      let dl = '';
+      if (!_listas.has(id)) {
+        _listas.add(id);
+        dl = `<datalist id="${id}">${(def.sugerencias || []).map(s => `<option value="${esc(s)}">`).join('')}</datalist>`;
+      }
+      return `<input type="text" class="${cls}" list="${id}" ${a} value="${val}">${dl}`;
+    }
+    default:
+      return `<input type="text" class="${cls}" ${a} value="${val}">`;
+  }
+}
+
+function tarjeta(titulo, cuerpo, sub) {
+  return `<div class="card">
+    <div class="card-header collapsible" onclick="toggleSection(this)">
+      <div><div class="card-title">${esc(titulo)}</div>${sub ? `<div class="card-sub">${sub}</div>` : ''}</div>
+      <span class="card-chevron">▼</span>
+    </div>
+    <div class="card-body">${cuerpo}</div>
+  </div>`;
+}
+
+// req = todos obligatorios (Información general y bloques marcados)
+function rejilla(campos, columnas, req) {
+  const n = columnas || (campos.length <= 4 ? campos.length : 3);
+  const estilo = `grid-template-columns:repeat(${n},minmax(0,1fr))${n === 1 ? ';max-width:340px' : ''}`;
+  return `<div class="form-grid" style="${estilo}">${campos.map(c =>
+    `<div class="field" data-campo="${esc(c.k)}"${c.t === 'area' ? ' style="grid-column:1/-1"' : ''}><label>${esc(c.l)}${(req || c.req) ? ' *' : ''}</label>${ctrl(c, 'f', '', c.k, 'campo')}</div>`
+  ).join('')}</div>`;
+}
+
+// Campos del cierre del formato (observaciones, realizado por y cargo)
+const cierreDe = f => CIERRE;
+
+// Todos los campos obligatorios del formato: Información general completa,
+// los bloques con req: true, y "Realizado por" + cargo
+function obligatorios(f) {
+  const lista = [...f.general];
+  f.bloques.forEach(b => { if (b.tipo === 'campos' && b.req) lista.push(...b.campos.filter(c => c.t !== 'calc')); });
+  lista.push(...cierreDe(f).filter(c => c.req));
+  return lista;
+}
+
+function fichaHTML(f) {
+  return `<div class="card"><div class="card-body ficha-body">
+    <div class="ficha-logo"><img src="logo.png" alt="" onerror="this.style.display='none'"></div>
+    <div>
+      <div class="ficha-sis">Gestión inocuidad y sistemas integrados</div>
+      <div class="ficha-nombre">${esc(f.nombre)}</div>
+      <div class="ficha-planta">Planta: ${esc(PLANTA)}</div>
+    </div>
+    <div class="ficha-meta">
+      <span>Código</span><span>${esc(f.codigo)}</span>
+      <span>Versión</span><span>${esc(f.version)}</span>
+      <span>Actualización</span><span>${esc(f.actualizado)}</span>
+    </div>
+  </div></div>`;
+}
+
+// Encabezado de una columna de verificación: la hora escrita, si la hay
+function etiquetaCol(c) {
+  if (c.hora) return leer(c.hora[0], '_', String(c.hora[1])) || c.l;
+  return c.l;
+}
+
+// ¿La columna ligada a una hora tiene su hora escrita?
+const horaDe = c => c.hora ? leer(c.hora[0], '_', String(c.hora[1])) : null;
+const columnaApagada = c => !!c.hora && !horaDe(c);
+const horaMatriz = (b, i) => leer(b.k, '_enc', String(i));
+const matrizApagada = (b, i) => b.enc === 'hora' && !horaMatriz(b, i);
+
+// Columnas visibles: las opcionales (producto afectado 2) solo si se agregaron
+const colsVisibles = b => b.columnas.filter(c => !c.opc || actual.ui[b.k + ':' + c.opc]);
+
+function tablaHTML(b) {
+  const cols = colsVisibles(b);
+  const numerada = typeof b.filas === 'number';
+  let grupos = '';
+  if (cols.some(c => c.g)) {
+    grupos = '<tr class="grupos"><th class="col-fila' + (numerada ? ' angosta' : '') + '"></th>';
+    for (let i = 0; i < cols.length;) {
+      let j = i; while (j < cols.length && cols[j].g === cols[i].g) j++;
+      grupos += `<th colspan="${j - i}" class="${cols[i].g ? 'sep' : ''}">${esc(cols[i].g || '')}</th>`;
+      i = j;
+    }
+    grupos += '</tr>';
+  }
+  // Ranura vertical donde empieza un grupo de columnas (producto, origen…)
+  const sep = i => i > 0 && (cols[i].g || cols[i - 1].g) && cols[i].g !== cols[i - 1].g ? ' sep' : '';
+  const cab = `<tr><th class="col-fila${numerada ? ' angosta' : ''}">${esc(b.etiqueta || (numerada ? 'N°' : ''))}</th>` +
+    cols.map((c, i) => `<th class="${c.info ? '' : 'centro'}${c.hora ? ' th-hora' : ''}${sep(i)}"${c.hora ? ` data-hora="${c.hora[0]}|${c.hora[1]}" data-base="${esc(c.l)}"` : ''}>${esc(etiquetaCol(c))}</th>`).join('') + '</tr>';
+  const cuerpo = b._filas.map(fl => {
+    const cual = fl.cual
+      ? `<input type="text" class="c-in cual" placeholder="¿Cuál?" ${attrs(b.k, fl.key, '_cual')} value="${esc(leer(b.k, fl.key, '_cual') ?? '')}">`
+      : '';
+    return `<tr><td class="col-fila${numerada ? ' angosta col-num' : ''}">${esc(fl.l)}${cual}</td>` +
+      cols.map((c, i) => c.info
+        ? `<td class="info${c.corta ? ' corta' : ''}${sep(i)}">${esc(fl[c.k] || '')}</td>`
+        : `<td class="centro${sep(i)}">${ctrl(c, b.k, fl.key, c.k, null, columnaApagada(c))}</td>`).join('') + '</tr>';
+  }).join('');
+  // Botones para agregar / quitar los grupos opcionales
+  const opcionales = Object.entries(b.opcional || {}).map(([k, nombre]) => {
+    const on = actual.ui[b.k + ':' + k];
+    return `<button type="button" class="btn btn-sm${on ? ' btn-danger' : ''}" onclick="alternarOpcional('${b.k}','${k}')">${on ? '− Quitar ' : '+ Agregar '}${esc(nombre)}</button>`;
+  }).join('');
+  return `${b.leyenda ? `<div class="leyenda">${b.leyenda}</div>` : ''}
+    ${opcionales ? `<div class="barra-opcional">${opcionales}</div>` : ''}
+    <div class="table-wrap"><table class="data-table tabla-captura"><thead>${grupos}${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
+}
+
+function alternarOpcional(bk, k) {
+  const b = actual.fmt.bloques.find(x => x.k === bk);
+  const clave = bk + ':' + k;
+  if (actual.ui[clave]) {
+    const cols = b.columnas.filter(c => c.opc === k);
+    const hayDatos = Object.values(actual.datos[bk] || {}).some(fila => cols.some(c => !esVacio(fila[c.k])));
+    if (hayDatos && !confirm(`Se borrará lo escrito en ${b.opcional[k]}. ¿Continuar?`)) return;
+    Object.keys(actual.datos[bk] || {}).forEach(r => cols.forEach(c => poner(bk, r, c.k, '')));
+    actual.ui[clave] = false;
+  } else actual.ui[clave] = true;
+  renderFormulario(true);
+}
+
+// Columnas visibles de una matriz (Organoléptico empieza con 5 y crece hasta 10)
+const columnasMatriz = b => b.inicial ? Math.min(b.n, actual.ui[b.k + ':n'] || b.inicial) : b.n;
+
+function alternarColumnas(bk, delta) {
+  const b = actual.fmt.bloques.find(x => x.k === bk);
+  const n = columnasMatriz(b);
+  if (delta > 0) {
+    if (n >= b.n) return;
+    actual.ui[bk + ':n'] = n + 1;
+  } else {
+    if (n <= b.inicial) return;
+    const i = String(n - 1);
+    const hayDatos = Object.entries(actual.datos[bk] || {}).some(([r, fila]) => r !== '_enc' && !esVacio(fila[i]));
+    if (hayDatos && !confirm(`Se borrará lo escrito en ${b.enc} ${n}. ¿Continuar?`)) return;
+    Object.keys(actual.datos[bk] || {}).forEach(r => poner(bk, r, i, ''));
+    actual.ui[bk + ':n'] = n - 1;
+  }
+  renderFormulario(true);
+}
+
+function matrizHTML(b) {
+  const n = columnasMatriz(b);
+  const cab = '<tr><th class="col-fila">Parámetro</th>' + Array.from({ length: n }, (_, i) =>
+    b.enc === 'hora'
+      ? `<th class="centro th-hora">Hora ${i + 1}<br>${ctrl({ t: 'hora' }, b.k, '_enc', String(i))}</th>`
+      : `<th class="centro">${esc(b.enc)} ${i + 1}</th>`).join('') + '</tr>';
+  const cuerpo = b.filas.map(fl => {
+    if (fl.grupo) return `<tr class="fila-grupo"><td class="col-fila">${esc(fl.grupo)}</td><td colspan="${n}"></td></tr>`;
+    if (fl.info)  return `<tr class="fila-info"><td class="col-fila">${esc(fl.l || '')}</td><td colspan="${n}">${esc(fl.info)}</td></tr>`;
+    return `<tr><td class="col-fila">${esc(fl.l)}</td>` + Array.from({ length: n }, (_, i) =>
+      `<td class="centro celda-mat">${ctrl(fl, b.k, fl.k, String(i), null, matrizApagada(b, i))}</td>`).join('') + '</tr>';
+  }).join('');
+  const botones = b.inicial ? `<div class="barra-opcional">
+      <button type="button" class="btn btn-sm" onclick="alternarColumnas('${b.k}', 1)"${n >= b.n ? ' disabled' : ''}>+ Agregar ${esc(b.enc.toLowerCase())} (${n} de ${b.n})</button>
+      ${n > b.inicial ? `<button type="button" class="btn btn-sm btn-danger" onclick="alternarColumnas('${b.k}', -1)">− Quitar ${esc(b.enc.toLowerCase())} ${n}</button>` : ''}
+    </div>` : '';
+  return `${b.leyenda ? `<div class="leyenda">${b.leyenda}</div>` : ''}${botones}
+    <div class="table-wrap"><table class="data-table tabla-captura"><thead>${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
+}
+
+// Habilita o apaga las celdas según haya hora escrita en su columna
+function aplicarHoras() {
+  if (!actual) return;
+  actual.fmt.bloques.forEach(b => {
+    if (b.tipo === 'tabla') b.columnas.filter(c => c.hora).forEach(c => {
+      const apagada = columnaApagada(c);
+      document.querySelectorAll(`#form-cuerpo [data-b="${b.k}"][data-c="${c.k}"]`).forEach(el => { el.disabled = apagada; });
+    });
+    if (b.tipo === 'matriz' && b.enc === 'hora') for (let i = 0; i < b.n; i++) {
+      const apagada = matrizApagada(b, i);
+      document.querySelectorAll(`#form-cuerpo [data-b="${b.k}"][data-c="${i}"]:not([data-r="_enc"])`).forEach(el => { el.disabled = apagada; });
+    }
+  });
+}
+
+function muestrasHTML(b) {
+  const filas = b.bloquesDe, grupos = Math.ceil(b.n / filas);
+  const cab = '<tr>' + Array.from({ length: grupos }, () => '<th class="centro">N° muestra</th><th>Peso unidad</th>').join('') + '</tr>';
+  let cuerpo = '';
+  for (let i = 0; i < filas; i++) {
+    cuerpo += '<tr>';
+    for (let g = 0; g < grupos; g++) {
+      const n = g * filas + i;
+      cuerpo += n < b.n
+        ? `<td class="col-num">${n + 1}</td><td data-m="${n}">${ctrl({ t: 'num', min: 0 }, b.k, 'm', String(n))}</td>`
+        : '<td></td><td></td>';
+    }
+    cuerpo += '</tr>';
+  }
+  const tarjetaRes = (id, l) => `<div class="metric-card"><div class="metric-label">${l}</div><div class="metric-value" id="${id}">-</div></div>`;
+  return `<div class="resumen-peso">
+      ${tarjetaRes('rp-n', 'Muestras')}${tarjetaRes('rp-prom', 'Promedio (g)')}
+      ${tarjetaRes('rp-min', 'Mínimo (g)')}${tarjetaRes('rp-max', 'Máximo (g)')}
+      ${tarjetaRes('rp-lim', 'Peso mínimo aceptable')}${tarjetaRes('rp-bajo', 'Por debajo del peso')}
+    </div>
+    <div class="table-wrap"><table class="data-table tabla-captura tabla-muestras"><thead>${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
+}
+
+function horasHTML(b) {
+  const campos = Array.from({ length: b.n }, (_, i) => ({ k: String(i), l: 'Hora ' + (i + 1), t: 'hora' }));
+  return `<div class="form-grid" style="grid-template-columns:repeat(${b.n},minmax(0,1fr));max-width:${b.n * 150}px">${campos.map(c =>
+      `<div class="field"><label>${c.l}</label>${ctrl(c, b.k, '_', c.k, 'campo')}</div>`).join('')}</div>`;
+}
+
+function referenciaHTML(b) {
+  return `<div class="table-wrap tabla-ref"><table class="data-table"><thead><tr>${b.encabezado.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${b.filas.map(fl => `<tr>${fl.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+
+function bloqueHTML(b) {
+  switch (b.tipo) {
+    case 'campos':     return tarjeta(b.titulo, rejilla(b.campos, b.columnas, b.req));
+    case 'muestras':   return tarjeta(b.titulo, muestrasHTML(b), 'Las celdas en rojo están por debajo del peso mínimo aceptable');
+    case 'tabla':      return tarjeta(b.titulo, tablaHTML(b));
+    case 'matriz':     return tarjeta(b.titulo, matrizHTML(b));
+    case 'horas':      return tarjeta(b.titulo, horasHTML(b));
+    case 'referencia': return tarjeta(b.titulo, referenciaHTML(b), 'Solo consulta');
+  }
+  return '';
+}
+
+// conservarScroll: al redibujar por un botón (agregar producto 2) no saltar arriba
+function renderFormulario(conservarScroll) {
+  const f = actual.fmt;
+  const vista = $('view-formato'), y = vista.scrollTop;
+  _listas = new Set();
+  let h = fichaHTML(f);
+  h += tarjeta('Información general', rejilla(f.general, null, true));
+  f.bloques.forEach(b => { h += bloqueHTML(b); });
+  const cierre = cierreDe(f);
+  h += tarjeta('Observaciones y firmas', rejilla(cierre, cierre.length - 1));
+  h += `<div class="nota-formato">${f.criterios ? f.criterios + '<br><br>' : ''}${f.nota}</div>`;
+  $('form-cuerpo').innerHTML = h;
+  if (conservarScroll) vista.scrollTop = y;
+  espejarScrollTodos('#view-formato .table-wrap');
+
+  const aviso = $('aviso-edicion');
+  if (actual.id) {
+    const r = actual.reg;
+    aviso.textContent = `Editando el registro del ${fmtFecha(r.fecha)} - guardado por ${r.usuario || '-'} el ${r.fecha_registro || '-'}`;
+    aviso.style.display = '';
+  } else aviso.style.display = 'none';
+  $('btn-guardar').textContent = actual.id ? 'Guardar cambios' : 'Guardar formato';
+  $('btn-eliminar-form').style.display = actual.id && isAdmin() ? '' : 'none';
+  recalcular();
+}
+
+// ── Cálculos en vivo (por ahora solo el control de peso) ─────────────────
+function limitePeso(g) {
+  g = parseFloat(g);
+  if (!g) return null;
+  if (PESO_MINIMO[g] !== undefined) return PESO_MINIMO[g];
+  if (g < 50) return Math.round(g * 0.91 * 10) / 10;
+  return null;
+}
+
+function recalcular() {
+  if (!actual || actual.fmt.id !== 'CPUC') return;
+  const m = actual.datos.muestras?.m || {};
+  const valores = Object.values(m).map(Number).filter(v => isFinite(v) && v > 0);
+  const lim = limitePeso(actual.datos.f?.gramaje);
+  const fmt1 = v => v.toLocaleString('es-CO', { maximumFractionDigits: 1 });
+  $('rp-n').textContent = valores.length;
+  $('rp-prom').textContent = valores.length ? fmt1(valores.reduce((a, b) => a + b, 0) / valores.length) : '-';
+  $('rp-min').textContent = valores.length ? fmt1(Math.min(...valores)) : '-';
+  $('rp-max').textContent = valores.length ? fmt1(Math.max(...valores)) : '-';
+  $('rp-lim').textContent = lim !== null ? fmt1(lim) + ' g' : (actual.datos.f?.gramaje ? 'Sin criterio' : 'Falta gramaje');
+  let bajo = 0;
+  document.querySelectorAll('.tabla-muestras td[data-m]').forEach(td => {
+    const v = parseFloat(m[td.dataset.m]);
+    const es = lim !== null && isFinite(v) && v > 0 && v < lim;
+    td.classList.toggle('bajo', es);
+    if (es) bajo++;
+  });
+  const el = $('rp-bajo');
+  el.textContent = lim !== null ? `${bajo} / ${MAX_BAJO_PESO}` : '-';
+  el.style.color = lim !== null ? (bajo > MAX_BAJO_PESO ? 'var(--danger)' : 'var(--ok)') : '';
+}
+
+function actualizarEncabezadosHora() {
+  document.querySelectorAll('#form-cuerpo th[data-hora]').forEach(th => {
+    const [bk, i] = th.dataset.hora.split('|');
+    th.textContent = leer(bk, '_', i) || th.dataset.base;
+  });
+}
+
+// Acepta 830, 0830, 8:30, 8.30, 8h30 → 08:30
+function normHora(s) {
+  s = String(s || '').trim();
+  if (!s) return { v: '', ok: true };
+  let h, m;
+  const sep = /^(\d{1,2})[:.hH](\d{1,2})$/.exec(s);
+  const d = s.replace(/\D/g, '');
+  if (sep) { h = sep[1]; m = sep[2]; }
+  else if (/^\d+$/.test(s) && d.length <= 2) { h = d; m = '0'; }
+  else if (/^\d+$/.test(s) && d.length === 3) { h = d[0]; m = d.slice(1); }
+  else if (/^\d+$/.test(s) && d.length === 4) { h = d.slice(0, 2); m = d.slice(2); }
+  else return { v: s, ok: false };
+  h = +h; m = +m;
+  if (h > 23 || m > 59) return { v: s, ok: false };
+  return { v: pad2(h) + ':' + pad2(m), ok: true };
+}
+
+// ── Eventos del formulario (delegados, se instalan una sola vez) ─────────
+// Lote / fecha de vencimiento = fecha de fabricación + 29 días (campos 'calc')
+function recalcularFechas() {
+  if (!actual) return;
+  const f = actual.fmt;
+  const pintar = (sel, v) => { const el = document.querySelector('#form-cuerpo ' + sel); if (el) el.value = v ? fmtFecha(v) : ''; };
+  const campos = [...f.general, ...f.bloques.filter(b => b.tipo === 'campos').flatMap(b => b.campos)];
+  campos.filter(c => c.t === 'calc').forEach(c => {
+    const v = sumarDias(actual.datos.f?.[c.desde], c.dias);
+    if ((actual.datos.f?.[c.k] || '') !== v) poner('f', '', c.k, v);
+    pintar(`[data-b="f"][data-c="${c.k}"]`, v);
+  });
+  f.bloques.filter(b => b.tipo === 'matriz').forEach(b => b.filas.filter(fl => fl.t === 'calc').forEach(fl => {
+    for (let i = 0; i < b.n; i++) {
+      const v = sumarDias(leer(b.k, fl.desde, String(i)), fl.dias);
+      if ((leer(b.k, fl.k, String(i)) || '') !== v) poner(b.k, fl.k, String(i), v);
+      pintar(`[data-b="${b.k}"][data-r="${fl.k}"][data-c="${i}"]`, v);
+    }
+  }));
+}
+
+// ── Eventos del formulario (delegados, se instalan una sola vez) ─────────
+document.addEventListener('DOMContentLoaded', () => {
+  const cont = $('form-cuerpo');
+  cont.addEventListener('input', e => {
+    const el = e.target;
+    if (!el.dataset || el.dataset.b === undefined || !actual) return;
+    let v = el.value;
+    const t = el.dataset.t;
+    if (t === 'num') {
+      const n = leerDecimal(v);
+      const malo = n === null || (el.dataset.min !== undefined && n !== '' && n < +el.dataset.min);
+      el.classList.toggle('c-malo', malo);
+      v = malo ? v : n;                  // si está mal se guarda el texto y no deja guardar
+    } else if (t === 'ent') {
+      const malo = v !== '' && !/^\d+$/.test(v) || el.validity.badInput;
+      el.classList.toggle('c-malo', !!malo);
+      v = v === '' ? '' : (malo ? v : Number(v));
+    } else if (el.type === 'text') v = v.toUpperCase();
+    poner(el.dataset.b, el.dataset.r, el.dataset.c, v);
+    el.closest('.field')?.classList.remove('falta');
+    if (t === 'hora') el.classList.remove('c-malo');
+    recalcularFechas();
+    if (el.dataset.b === 'f' && el.dataset.c === 'gramaje') recalcular();
+    if (el.dataset.b === 'muestras') recalcular();
+  });
+  cont.addEventListener('change', e => {
+    const el = e.target;
+    if (!actual || !el.dataset) return;
+    if (el.dataset.t === 'num' && !el.classList.contains('c-malo')) el.value = mostrarDecimal(leerDecimal(el.value));
+    if (el.dataset.t !== 'hora') return;
+    const n = normHora(el.value);
+    el.value = n.v;
+    el.classList.toggle('c-malo', !n.ok);
+    poner(el.dataset.b, el.dataset.r, el.dataset.c, n.ok ? n.v : el.value);
+    actualizarEncabezadosHora();
+    aplicarHoras();
+  });
+  // En las 200 muestras, Tab y Enter bajan (1 → 2 → 3…) en vez de saltar a la 41
+  cont.addEventListener('keydown', e => {
+    const el = e.target;
+    if (el.dataset?.b !== 'muestras' || !(e.key === 'Tab' || e.key === 'Enter')) return;
+    const i = +el.dataset.c + (e.shiftKey ? -1 : 1);
+    const sig = cont.querySelector(`[data-b="muestras"][data-c="${i}"]`);
+    if (!sig) return;
+    e.preventDefault();
+    sig.focus(); sig.select();
+  });
+  cont.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-b]');
+    if (!btn || btn.disabled || !actual) return;
+    const { b, r, c, t, v } = btn.dataset;
+    const act = leer(b, r, c);
+    if (t === 'x') {
+      const nv = act ? '' : 'X';
+      poner(b, r, c, nv);
+      btn.classList.toggle('on', !!nv); btn.textContent = nv; btn.setAttribute('aria-pressed', String(!!nv));
+    } else if (t === 'marca') {
+      const nv = MARCA_SIG[act || ''];
+      poner(b, r, c, nv);
+      btn.className = 'c-marca' + (nv ? ' m-' + nv : ''); btn.textContent = MARCA_TXT[nv] || '';
+    } else if (t === 'op') {
+      const nv = act === v ? '' : v;
+      poner(b, r, c, nv);
+      btn.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === nv));
+    } else if (t === 'chips') {
+      const def = btn.parentElement;
+      const orden = [...def.querySelectorAll('button')].map(x => x.dataset.v);
+      let arr = Array.isArray(act) ? [...act] : [];
+      arr = arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v];
+      arr.sort((a, z) => orden.indexOf(a) - orden.indexOf(z));
+      poner(b, r, c, arr);
+      btn.classList.toggle('on', arr.includes(v));
+    }
+    btn.closest('.field')?.classList.remove('falta');
+  });
+});
+
+// El listener de mayúsculas del entorno también recibe el 'input' de las
+// casillas de los filtros múltiples y falla con setSelectionRange. Se corta
+// aquí, en captura, antes de que llegue (el filtro usa 'change', no 'input').
+document.addEventListener('input', e => {
+  if (e.target?.type === 'checkbox') e.stopImmediatePropagation();
+}, true);
+
+window.addEventListener('beforeunload', e => {
+  if (sucio && $('view-formato')?.classList.contains('active')) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// ════════════════════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════════════════════════════════════════
+function hayCambiosPendientes() {
+  return sucio && $('view-formato').classList.contains('active');
+}
+function confirmarSalida() {
+  if (!hayCambiosPendientes()) return true;
+  if (!confirm('Hay datos sin guardar en este formato. ¿Salir y perderlos?')) return false;
+  sucio = false;
+  return true;
+}
+function irA(v) {
+  if (!confirmarSalida()) return;
+  showView(v);
+}
+function volverDeFormato() { irA(actual?.id ? 'historial' : 'inicio'); }
+function salir() { if (confirmarSalida()) cerrarSesion(); }
+
+function mostrarFormato() {
+  showView('formato');
+  document.getElementById('nav-inicio').classList.add('active');
+  $('topbar-title').textContent = nombreCorto(actual.fmt);
+  renderFormulario();
+  $('view-formato').scrollTop = 0;
+}
+
+function abrirFormato(idFmt) {
+  actual = { fmt: fmtPorId(idFmt), id: null, reg: null, ui: {}, datos: { f: { fecha: hoyISO() } } };
+  sucio = false;
+  mostrarFormato();
+}
+
+async function abrirRegistro(id) {
+  if (!confirmarSalida()) return;
+  const reg = registros.find(r => r.id_registro === id);
+  if (!reg) return toast('No se encontró el registro. Pulsa Actualizar.', 'error');
+  const fmt = fmtPorId(reg.formato);
+  if (!fmt) return toast('Formato desconocido: ' + reg.formato, 'error');
+  const st = $('sync-status'), antes = st.textContent;
+  st.textContent = 'Abriendo...';
+  try {
+    const datos = await obtenerDatos(reg);
+    datos.f ??= {};
+    delete datos._v;
+    actual = { fmt, id, reg, datos, ui: {} };
+    // Si el registro trae datos del producto afectado 2, se muestra ese grupo
+    fmt.bloques.filter(b => b.inicial).forEach(b => {
+      let ultima = -1;
+      Object.entries(datos[b.k] || {}).forEach(([r, fila]) => {
+        if (r !== '_enc') Object.keys(fila).forEach(i => { if (!esVacio(fila[i])) ultima = Math.max(ultima, +i); });
+      });
+      actual.ui[b.k + ':n'] = Math.max(b.inicial, ultima + 1);
+    });
+    fmt.bloques.forEach(b => Object.keys(b.opcional || {}).forEach(k => {
+      const cols = b.columnas.filter(c => c.opc === k);
+      actual.ui[b.k + ':' + k] = Object.values(datos[b.k] || {}).some(fila => cols.some(c => !esVacio(fila[c.k])));
+    }));
+    sucio = false;
+    mostrarFormato();
+  } catch (e) {
+    console.error(e);
+    toast('No se pudo abrir el registro: ' + e.message, 'error');
+  } finally { st.textContent = antes; }
+}
+
+function limpiarFormulario() {
+  if (!actual) return;
+  if (!confirm('¿Borrar todo lo escrito en este formato? (se conserva la fecha)')) return;
+  const fecha = actual.datos.f?.fecha || hoyISO();
+  actual.datos = { f: { fecha } };
+  sucio = !!actual.id;
+  renderFormulario();
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// ARMAR EL REGISTRO Y LOS VALORES PARA GUARDAR
+// ════════════════════════════════════════════════════════════════════════
+const ETIQUETA_CIERRE = { observaciones: 'OBSERVACIONES', realizado_por: 'REALIZADO POR',
+  cargo_realiza: 'CARGO REALIZA', revisado_por: 'REVISADO POR', cargo_revisa: 'CARGO REVISA' };
+
+// Formato largo: una fila por dato escrito (sección, ítem, columna, valor)
+function aplanar(f, d) {
+  const out = [];
+  const may = s => String(s).toUpperCase();
+  const push = (sec, item, col, v) => {
+    if (esVacio(v)) return;
+    if (Array.isArray(v)) v = v.join(' / ');
+    out.push({ seccion: may(sec), item: may(item), columna: may(col || ''), valor: v });
+  };
+  f.general.forEach(c => push('Información general', c.l, '', d.f?.[c.k]));
+  f.bloques.forEach(b => {
+    const tit = b.titulo;
+    if (b.tipo === 'campos') b.campos.forEach(c => push(tit, c.l, '', d.f?.[c.k]));
+    if (b.tipo === 'horas') for (let i = 0; i < b.n; i++) push(tit, 'Hora ' + (i + 1), '', d[b.k]?._?.[i]);
+    if (b.tipo === 'muestras') for (let i = 0; i < b.n; i++) push('Muestras de peso', 'Muestra ' + (i + 1), 'Peso unidad (g)', d[b.k]?.m?.[i]);
+    if (b.tipo === 'tabla') {
+      b._filas.forEach(fl => {
+        const filaD = d[b.k]?.[fl.key] || {};
+        const item = fl.cual ? 'OTROS' + (filaD._cual ? ': ' + filaD._cual : '') : (fl.num ? 'Fila ' + fl.l : fl.l);
+        b.columnas.filter(c => !c.info).forEach(c => {
+          let col = c.g ? c.g + ' - ' + c.l : c.l;
+          if (c.hora) {                     // columna de verificación sin hora: no se envía
+            const h = d[c.hora[0]]?._?.[c.hora[1]];
+            if (!h) return;
+            col += ' (' + h + ')';
+          }
+          push(tit, item, col, filaD[c.k]);
+        });
+      });
+      (b.extra || []).forEach(c => push(tit, c.l, '', d.f?.[c.k]));
+    }
+    if (b.tipo === 'matriz') {
+      const enc = d[b.k]?._enc || {};
+      b.filas.filter(fl => fl.k).forEach(fl => {
+        const filaD = d[b.k]?.[fl.k] || {};
+        for (let i = 0; i < b.n; i++) {
+          if (b.enc === 'hora' && !enc[i]) continue;   // sin hora escrita no se envía
+          const col = b.enc === 'hora' ? 'Hora ' + (i + 1) + (enc[i] ? ' (' + enc[i] + ')' : '') : b.enc + ' ' + (i + 1);
+          push(tit, fl.l, col, filaD[i]);
+        }
+      });
+    }
+  });
+  cierreDe(f).forEach(c => push('Observaciones y firmas', ETIQUETA_CIERRE[c.k] || c.l, '', d.f?.[c.k]));
+  return out;
+}
+
+function nuevoId(f) {
+  const d = new Date();
+  const t = `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
+  return `${f.id}-${t}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`;
+}
+
+// Devuelve { reg, vals } listos para escribir. `previo` = registro que se edita.
+// Quita lo que no debe guardarse: marcas de columnas sin hora y campos del
+// cierre que el formato no lleva
+function podar(f, d) {
+  f.bloques.forEach(b => {
+    if (b.tipo === 'tabla') b.columnas.filter(c => c.hora).forEach(c => {
+      if (d[c.hora[0]]?._?.[c.hora[1]]) return;
+      Object.values(d[b.k] || {}).forEach(fila => { delete fila[c.k]; });
+    });
+    if (b.tipo === 'matriz' && b.enc === 'hora') for (let i = 0; i < b.n; i++) {
+      if (d[b.k]?._enc?.[i]) continue;
+      Object.entries(d[b.k] || {}).forEach(([r, fila]) => { if (r !== '_enc') delete fila[i]; });
+    }
+  });
+  if (d.f) { delete d.f.revisado_por; delete d.f.cargo_revisa; }
+  return limpiarDatos(d);
+}
+
+function armarRegistro(f, datos, previo, usuario) {
+  const d = podar(f, limpiarDatos(datos));
+  const ahora = ahoraLocal();
+  const id = previo?.id_registro || nuevoId(f);
+  const reg = {
+    id_registro: id, formato: f.id, nombre_formato: f.nombre, codigo_formato: f.codigo,
+    fecha: d.f?.fecha || '', turno: d.f?.turno || '', codigo: d.f?.codigo || '',
+    responsable: d.f?.realizado_por || d.f?.responsable || '',
+    cargo_responsable: d.f?.cargo_realiza || '',
+    observaciones: d.f?.observaciones || '',
+    usuario: previo?.usuario || usuario || '',
+    fecha_registro: previo?.fecha_registro || ahora,
+    fecha_modificacion: previo ? ahora : '',
+    datos: JSON.stringify({ _v: 1, ...d }),
+  };
+  const vals = aplanar(f, d).map(x => ({ id_registro: id, formato: f.id, fecha: reg.fecha, ...x }));
+  return { reg, vals };
+}
+
+async function guardarFormato() {
+  if (!actual) return;
+  const f = actual.fmt;
+  const d = limpiarDatos(actual.datos);
+  // Obligatorios: Información general, bloques marcados y "Realizado por" + cargo
+  document.querySelectorAll('#form-cuerpo .field.falta').forEach(el => el.classList.remove('falta'));
+  const faltan = obligatorios(f).filter(c => esVacio(d.f?.[c.k]));
+  if (faltan.length) {
+    faltan.forEach(c => document.querySelector(`#form-cuerpo .field[data-campo="${c.k}"]`)?.classList.add('falta'));
+    const nombres = faltan.map(c => c.k === 'cargo_realiza' ? 'Cargo (realizado por)' : c.l);
+    toast('Faltan campos obligatorios: ' + nombres.slice(0, 4).join(', ') + (nombres.length > 4 ? ` y ${nombres.length - 4} más` : ''), 'error');
+    const primero = document.querySelector('#form-cuerpo .field.falta');
+    primero?.closest('.card')?.classList.remove('collapsed');
+    primero?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    primero?.querySelector('input,select,textarea,button')?.focus({ preventScroll: true });
+    return;
+  }
+  const malas = validarRangoFechas($('form-cuerpo'));
+  if (malas.length) return avisarFechasInvalidas(malas);
+  const mal = document.querySelector('#form-cuerpo .c-malo');
+  if (mal) {
+    const esHora = mal.dataset.t === 'hora';
+    toast(esHora ? 'Hay una hora mal escrita. Usa el formato hh:mm (por ejemplo 08:30).'
+                 : 'Hay un número mal escrito (usa por ejemplo 40,4 o 40.4; los enteros sin decimales y sin negativos).', 'error');
+    mal.closest('.card')?.classList.remove('collapsed');
+    mal.focus();
+    return;
+  }
+  if (!hayHoja() && !window.DATOS_DEMO) {
+    toast('La página aún no tiene hoja de cálculo configurada (SHEET_ID). No se guardó.', 'error');
+    return;
+  }
+  const { reg, vals } = armarRegistro(f, d, actual.reg, userInfo?.email);
+  if (reg.datos.length > 49000) {
+    toast('El formato es demasiado grande para una celda de Google Sheets. Reduce el texto de las observaciones.', 'error');
+    return;
+  }
+  const editando = !!actual.id;
+  const ok = await conBloqueo(editando ? 'Guardando cambios' : 'Guardando', () => escribirRegistro(actual.id, reg, vals));
+  if (!ok) return;
+  sucio = false;
+  toast(editando ? 'Cambios guardados.' : `${nombreCorto(f)} guardado.`, 'success');
+  await cargarDatos();
+  showView(editando ? 'historial' : 'inicio');
+}
+
+async function eliminarActual() { if (actual?.id) return eliminarRegistro(actual.id); }
+
+async function eliminarRegistro(id) {
+  if (!isAdmin()) return toast('Solo un administrador puede eliminar registros.', 'error');
+  const r = registros.find(x => x.id_registro === id);
+  if (!r) return;
+  if (!confirm(`¿Eliminar ${r._fmt} del ${fmtFecha(r.fecha)}? Esta acción no se puede deshacer.`)) return;
+  const ok = await conBloqueo('Eliminando', () => borrarRegistro(id));
+  if (!ok) return;
+  sucio = false;
+  toast('Registro eliminado.', 'success');
+  await cargarDatos();
+  showView('historial');
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// GOOGLE SHEETS - lectura y escritura atómica (mismo esquema de Honda)
+// ════════════════════════════════════════════════════════════════════════
+// Google responde 429/500/503 de vez en cuando sin que haya nada mal: se
+// reintenta con esperas crecientes (0,8 - 1,6 - 3,2 - 6,4 s).
+const REINTENTOS = 4;
+const esperar = ms => new Promise(r => setTimeout(r, ms));
+const TEMPORAL = [408, 429, 500, 502, 503, 504];
+
+async function pedir(url, opts = {}) {
+  let ultimo = null;
+  for (let i = 0; i <= REINTENTOS; i++) {
+    if (i) await esperar(800 * Math.pow(2, i - 1));
+    let r;
+    try { r = await apiFetch(url, { ...opts }); }
+    catch (e) { ultimo = new Error('Sin conexión con Google. Revisa el internet.'); continue; }
+    if (r.status === 401) { forzarLogout('Tu sesión expiró. Inicia sesión nuevamente.'); throw new Error('401'); }
+    if (r.ok) return r.json();
+    if (!TEMPORAL.includes(r.status)) {
+      const detalle = r.status === 403 ? 'no tienes permiso de edición sobre la hoja'
+                    : r.status === 400 ? 'revisa que existan las pestañas REGISTROS y VALORES'
+                    : 'código ' + r.status;
+      throw new Error('Google rechazó la operación (' + detalle + ').');
+    }
+    ultimo = new Error('Google no respondió (código ' + r.status + '). Vuelve a intentar en un momento.');
+  }
+  throw ultimo;
+}
+
+const URL_HOJA = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`;
+const JSON_POST = cuerpo => ({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
+const leerRango = rango => pedir(`${URL_HOJA}/values/${encodeURIComponent(rango)}?valueRenderOption=UNFORMATTED_VALUE`, {});
+const leerVarios = rangos => pedir(`${URL_HOJA}/values:batchGet?` +
+  rangos.map(r => 'ranges=' + encodeURIComponent(r)).join('&') + '&valueRenderOption=UNFORMATTED_VALUE', {});
+
+// Fecha en AAAA-MM-DD venga como venga (texto, número de serie o dd/mm/aaaa)
+function aISO(v) {
+  if (v === '' || v == null) return '';
+  if (typeof v === 'number' && v > 20000 && v < 80000)
+    return new Date(Date.UTC(1899, 11, 30) + v * 86400000).toISOString().split('T')[0];
+  const t = String(v).trim();
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(t)) { const [a, m, d] = t.split('-'); return `${a}-${pad2(m)}-${pad2(d)}`; }
+  const m2 = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
+  if (m2) return `${m2[3]}-${pad2(m2[2])}-${pad2(m2[1])}`;
+  return t;
+}
+
+// Columnas por NOMBRE: el orden real se lee de la fila 1 de cada hoja
+const ordenHoja = {};
+const cols = (hoja, porDefecto) => ordenHoja[hoja] || porDefecto;
+function fijarOrden(hoja, cabecera, porDefecto) {
+  const nombres = (cabecera || []).map(h => String(h || '').trim().toLowerCase());
+  if (!nombres.length) { ordenHoja[hoja] = porDefecto; return; }
+  const faltan = porDefecto.filter(c => !nombres.includes(c));
+  if (faltan.length) {
+    ordenHoja[hoja] = porDefecto;
+    toast(`A la hoja ${hoja} le faltan columnas: ${faltan.join(', ')}. Revísala antes de guardar.`, 'error');
+    return;
+  }
+  ordenHoja[hoja] = nombres;
+}
+
+const celdaDe = v => {
+  if (v === '' || v === null || v === undefined) return {};
+  if (typeof v === 'number' && isFinite(v)) return { userEnteredValue: { numberValue: v } };
+  return { userEnteredValue: { stringValue: String(v) } };
+};
+const filaDe = (obj, columnas) => ({ values: objToRow(obj, columnas).map(celdaDe) });
+
+let guardando = false;
+async function conBloqueo(etiqueta, fn) {
+  if (guardando) { toast('Espera: hay un guardado en curso.', 'error'); return false; }
+  guardando = true;
+  const botones = [...document.querySelectorAll('#view-formato button, #view-historial button')];
+  botones.forEach(b => b.disabled = true);
+  const estado = $('sync-status');
+  const antes = estado.textContent;
+  estado.textContent = etiqueta + '...';
+  try {
+    await fn();
+    estado.textContent = 'Guardado ' + new Date().toLocaleTimeString('es-CO');
+    return true;
+  } catch (e) {
+    console.error(e);
+    estado.textContent = antes;
+    toast('No se pudo guardar en la hoja: ' + e.message, 'error');
+    return false;
+  } finally {
+    guardando = false;
+    botones.forEach(b => b.disabled = false);
+  }
+}
+
+async function asegurarSheetIds() {
+  await obtenerSheetId(HOJA_REG);
+  [HOJA_REG, HOJA_VAL].forEach(h => {
+    if (sheetIds[h] === undefined) throw new Error(`no existe la pestaña ${h} en el Google Sheets`);
+  });
+}
+
+// Dónde está el registro y sus valores (índices de fila 0-based)
+async function ubicar(id) {
+  const lr = colLetra(cols(HOJA_REG, COLS_REG).indexOf('id_registro'));
+  const lv = colLetra(cols(HOJA_VAL, COLS_VAL).indexOf('id_registro'));
+  const d = await leerVarios([`${HOJA_REG}!${lr}:${lr}`, `${HOJA_VAL}!${lv}:${lv}`]);
+  const indices = vr => {
+    const out = [];
+    (vr?.values || []).forEach((f, i) => { if (i > 0 && String(f[0] ?? '').trim() === id) out.push(i); });
+    return out;
+  };
+  return { reg: indices(d.valueRanges?.[0])[0], val: indices(d.valueRanges?.[1]) };
+}
+
+// Borra filas agrupando las contiguas, de abajo hacia arriba
+function pedirBorrado(req, hoja, indices) {
+  const orden = [...indices].sort((a, b) => a - b), rangos = [];
+  orden.forEach(i => { const u = rangos[rangos.length - 1]; if (u && u[1] === i) u[1] = i + 1; else rangos.push([i, i + 1]); });
+  rangos.reverse().forEach(([s, e]) => req.push({ deleteDimension: {
+    range: { sheetId: sheetIds[hoja], dimension: 'ROWS', startIndex: s, endIndex: e } } }));
+}
+function pedirAgregado(req, hoja, columnas, filas) {
+  if (!filas.length) return;
+  req.push({ appendCells: { sheetId: sheetIds[hoja], fields: 'userEnteredValue', rows: filas.map(f => filaDe(f, columnas)) } });
+}
+
+// Todo en UNA operación: Google la aplica entera o no aplica nada, así un
+// fallo a mitad de camino no deja el registro a medias.
+async function escribirRegistro(idPrevio, reg, vals) {
+  if (!hayHoja()) {
+    const L = window.DATOS_DEMO.registros, V = (window.DATOS_DEMO.valores ??= []);
+    const i = L.findIndex(r => r.id_registro === idPrevio);
+    if (i > -1) L[i] = { ...reg }; else L.push({ ...reg });
+    window.DATOS_DEMO.valores = V.filter(v => v.id_registro !== reg.id_registro).concat(vals);
+    return;
+  }
+  await asegurarSheetIds();
+  const cr = cols(HOJA_REG, COLS_REG), cv = cols(HOJA_VAL, COLS_VAL);
+  const req = [];
+  if (idPrevio) {
+    const u = await ubicar(idPrevio);
+    if (u.reg === undefined) throw new Error('el registro ya no está en la hoja (¿lo eliminó otra persona?). Pulsa Actualizar');
+    req.push({ updateCells: { rows: [filaDe(reg, cr)], fields: 'userEnteredValue',
+      start: { sheetId: sheetIds[HOJA_REG], rowIndex: u.reg, columnIndex: 0 } } });
+    pedirBorrado(req, HOJA_VAL, u.val);
+  } else {
+    pedirAgregado(req, HOJA_REG, cr, [reg]);
+  }
+  pedirAgregado(req, HOJA_VAL, cv, vals);
+  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+}
+
+async function borrarRegistro(id) {
+  if (!hayHoja()) {
+    window.DATOS_DEMO.registros = window.DATOS_DEMO.registros.filter(r => r.id_registro !== id);
+    window.DATOS_DEMO.valores = (window.DATOS_DEMO.valores || []).filter(v => v.id_registro !== id);
+    return;
+  }
+  await asegurarSheetIds();
+  const u = await ubicar(id);
+  if (u.reg === undefined) throw new Error('el registro ya no está en la hoja. Pulsa Actualizar');
+  const req = [];
+  pedirBorrado(req, HOJA_REG, [u.reg]);
+  pedirBorrado(req, HOJA_VAL, u.val);
+  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+}
+
+// El JSON del formato se pide solo al abrirlo (el historial no lo necesita)
+async function obtenerDatos(reg) {
+  if (!hayHoja()) {
+    const r = (window.DATOS_DEMO?.registros || []).find(x => x.id_registro === reg.id_registro);
+    return JSON.parse(r?.datos || '{}');
+  }
+  const cr = cols(HOJA_REG, COLS_REG);
+  const lId = colLetra(cr.indexOf('id_registro')), lD = colLetra(cr.indexOf('datos'));
+  let fila = reg._fila + 1;              // número de fila en la hoja (1 = encabezado)
+  for (let intento = 0; intento < 2; intento++) {
+    const d = await leerVarios([`${HOJA_REG}!${lId}${fila}`, `${HOJA_REG}!${lD}${fila}`]);
+    const id = String(d.valueRanges?.[0]?.values?.[0]?.[0] ?? '').trim();
+    if (id === reg.id_registro) return JSON.parse(d.valueRanges?.[1]?.values?.[0]?.[0] || '{}');
+    const u = await ubicar(reg.id_registro);   // alguien movió filas: se busca de nuevo
+    if (u.reg === undefined) throw new Error('el registro ya no existe en la hoja. Pulsa Actualizar');
+    fila = u.reg + 1;
+  }
+  throw new Error('no se pudo ubicar el registro en la hoja');
+}
+
+// ── Carga ────────────────────────────────────────────────────────────────
+async function cargarDatos() {
+  const st = $('sync-status');
+  st.textContent = 'Cargando...';
+  try {
+    if (!hayHoja()) {
+      registros = (window.DATOS_DEMO?.registros || []).map((r, i) => ({ ...r, _fila: i + 1 }));
+    } else {
+      const cab = await leerVarios([`${HOJA_REG}!1:1`, `${HOJA_VAL}!1:1`]);
+      fijarOrden(HOJA_REG, cab.valueRanges?.[0]?.values?.[0], COLS_REG);
+      fijarOrden(HOJA_VAL, cab.valueRanges?.[1]?.values?.[0], COLS_VAL);
+      const cr = cols(HOJA_REG, COLS_REG);
+      // Si "datos" es la última columna no se descarga (es lo más pesado)
+      const aLeer = cr[cr.length - 1] === 'datos' ? cr.slice(0, -1) : cr;
+      const d = await leerRango(`${HOJA_REG}!A2:${colLetra(aLeer.length - 1)}`);
+      registros = (d.values || []).map((f, i) => ({ ...rowToObj(f, aLeer), _fila: i + 1 }))
+        .filter(r => String(r.id_registro ?? '').trim());
+    }
+    registros.forEach(prepararRegistro);
+    renderInicio();
+    prepararFiltros();
+    renderHistorial();
+    const hora = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    st.textContent = hayHoja() ? 'Actualizado ' + hora : (window.DATOS_DEMO ? 'Demo - sin guardar en Google' : 'Sin hoja configurada');
+  } catch (e) {
+    console.error(e);
+    st.textContent = 'Error al cargar';
+    if (e.message !== '401') toast('No se pudo leer la hoja: ' + e.message, 'error');
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// INICIO
+// ════════════════════════════════════════════════════════════════════════
+function renderInicio() {
+  const mes = hoyISO().slice(0, 7);
+  $('formatos-grid').innerHTML = FORMATOS.map(f => {
+    const regs = registros.filter(r => r.formato === f.id);
+    const delMes = regs.filter(r => String(r.fecha).startsWith(mes)).length;
+    const ultimo = regs.reduce((m, r) => (r.fecha > m ? r.fecha : m), '');
+    return `<button class="formato-card" onclick="abrirFormato('${f.id}')">
+      <div class="fc-top">
+        <span class="fc-icon">${f.icono}</span>
+        <div><div class="fc-nombre">${esc(f.nombre)}</div><div class="fc-codigo">${esc(f.codigo)} - Versión ${esc(f.version)}</div></div>
+      </div>
+      <div class="fc-desc">${esc(f.desc)}</div>
+      <div class="fc-pie">
+        <span><b>${delMes}</b> este mes - último ${ultimo ? fmtFecha(ultimo) : '-'}</span>
+        <span class="fc-llenar">Diligenciar →</span>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// HISTORIAL
+// ════════════════════════════════════════════════════════════════════════
+// Semana juliana = semana ISO (empieza el lunes; la 1 contiene el primer jueves)
+function semanaJuliana(fechaISO) {
+  const d = new Date(fechaISO + 'T12:00:00');
+  const j = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  j.setUTCDate(j.getUTCDate() + 4 - (j.getUTCDay() || 7));
+  const enero1 = new Date(Date.UTC(j.getUTCFullYear(), 0, 1));
+  return Math.ceil(((j - enero1) / 86400000 + 1) / 7);
+}
+// '2026-09-21 11:34:02' → '21/09/2026 11:34'
+function fmtRegistro(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(String(s || ''));
+  return m ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : (s || '-');
+}
+const Q1 = 'Q1 (del 1 al 15)', Q2 = 'Q2 (del 16 al fin de mes)';
+
+function prepararRegistro(r) {
+  r.id_registro = String(r.id_registro).trim();
+  r.fecha = aISO(r.fecha);
+  ['formato', 'turno', 'codigo', 'responsable', 'usuario', 'fecha_registro', 'observaciones']
+    .forEach(k => { r[k] = String(r[k] ?? '').trim(); });
+  const f = fmtPorId(r.formato);
+  r._fmt = f ? f.nombre : (r.nombre_formato || r.formato);
+  const ok = /^\d{4}-\d{2}-\d{2}$/.test(r.fecha);
+  r._anio = ok ? r.fecha.slice(0, 4) : '';
+  r._mes = ok ? MESES[+r.fecha.slice(5, 7) - 1] : '';
+  r._q = ok ? (+r.fecha.slice(8, 10) <= 15 ? Q1 : Q2) : '';
+  r._sem = ok ? 'Semana ' + semanaJuliana(r.fecha) : '';
+  r._dia = ok ? fmtFecha(r.fecha) : '';
+  r._resp = r.responsable || '(Sin responsable)';
+}
+
+const FILTROS = { formato: [], responsable: [], anio: [], mes: [], quincena: [], semana: [], dia: [] };
+const CAMPO_FILTRO = { formato: '_fmt', responsable: '_resp', anio: '_anio', mes: '_mes', quincena: '_q', semana: '_sem', dia: '_dia' };
+const ETIQUETA_FILTRO = { formato: 'Formato', responsable: 'Responsable', anio: 'Año', mes: 'Mes',
+  quincena: 'Quincena', semana: 'Semana juliana', dia: 'Día' };
+const selectores = {};
+
+function opcionesFiltro(clave) {
+  const unicos = [...new Set(registros.map(r => r[CAMPO_FILTRO[clave]]).filter(Boolean))];
+  switch (clave) {
+    case 'formato':  return FORMATOS.map(f => f.nombre);
+    case 'anio':     return unicos.sort().reverse();
+    case 'mes':      return MESES.filter(m => unicos.includes(m));
+    case 'quincena': return [Q1, Q2];
+    case 'semana':   return unicos.sort((a, b) => parseInt(b.slice(7)) - parseInt(a.slice(7)));
+    case 'dia': {
+      const aISOcorto = s => s.split('/').reverse().join('-');
+      return unicos.sort((a, b) => aISOcorto(b).localeCompare(aISOcorto(a)));
+    }
+    default:         return unicos.sort((a, b) => a.localeCompare(b, 'es'));
+  }
+}
+
+function prepararFiltros() {
+  Object.keys(FILTROS).forEach(clave => {
+    if (!selectores[clave]) {
+      selectores[clave] = buildMultiSelect(ETIQUETA_FILTRO[clave], opcionesFiltro(clave), FILTROS[clave], renderHistorial);
+      $('h-ms-' + clave).appendChild(selectores[clave]);
+    } else selectores[clave].updateOptions(opcionesFiltro(clave));
+  });
+}
+
+function limpiarFiltros() {
+  Object.keys(FILTROS).forEach(k => { FILTROS[k].length = 0; selectores[k]?.updateOptions(opcionesFiltro(k)); });
+  $('h-buscar').value = '';
+  renderHistorial();
+}
+
+function registrosFiltrados() {
+  const q = ($('h-buscar')?.value || '').trim().toLowerCase();
+  return registros.filter(r => {
+    for (const k of Object.keys(FILTROS)) {
+      if (FILTROS[k].length && !FILTROS[k].includes(r[CAMPO_FILTRO[k]])) return false;
+    }
+    if (q) {
+      const texto = [r._fmt, r.codigo_formato, r.turno, r.codigo, r.responsable,
+                     r.usuario, r.observaciones, r._dia].join(' ').toLowerCase();
+      if (!texto.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderHistorial() {
+  const tbody = $('tbody-historial');
+  if (!tbody) return;
+  let lista = registrosFiltrados()
+    .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fecha_registro.localeCompare(a.fecha_registro));
+  lista = aplicarOrden(lista, 'historial', {
+    fecha: r => r.fecha, formato: r => r._fmt, turno: r => r.turno, codigo: r => r.codigo,
+    responsable: r => r.responsable, usuario: r => r.usuario,
+    fecha_registro: r => r.fecha_registro,
+  });
+  tbody.innerHTML = lista.map(r => `<tr>
+    <td class="mono">${esc(r._dia || r.fecha)}</td>
+    <td class="col-formato"><div class="nombre">${esc(r._fmt)}</div><div class="fc-codigo">${esc(r.codigo_formato || '')}</div></td>
+    <td>${esc(r.turno || '-')}</td>
+    <td>${esc(r.codigo || '-')}</td>
+    <td>${esc(r.responsable || '-')}</td>
+    <td class="text-muted" style="font-size:12px" title="${esc(r.usuario)}">${esc((r.usuario || '-').split('@')[0])}</td>
+    <td class="mono text-muted nowrap" style="font-size:11.5px">${esc(fmtRegistro(r.fecha_registro))}</td>
+    <td class="nowrap"><div class="acciones-fila">
+      <button class="btn btn-xs" onclick="abrirRegistro('${esc(r.id_registro)}')">Ver / editar</button>
+      ${isAdmin() ? `<button class="btn btn-xs btn-danger" onclick="eliminarRegistro('${esc(r.id_registro)}')">Eliminar</button>` : ''}
+    </div></td>
+  </tr>`).join('');
+  $('historial-vacio').style.display = lista.length ? 'none' : '';
+  prepararOrden('#tabla-historial', 'historial', renderHistorial);
+
+  const unicos = campo => new Set(lista.map(r => r[campo]).filter(Boolean)).size;
+  $('m-registros').textContent = lista.length.toLocaleString('es-CO');
+  $('m-formatos').textContent = unicos('formato');
+  $('m-responsables').textContent = new Set(lista.map(r => r.responsable).filter(Boolean)).size;
+  $('m-dias').textContent = unicos('fecha');
+  const fechas = lista.map(r => r.fecha).filter(Boolean).sort();
+  $('m-rango').textContent = fechas.length ? `${fmtFecha(fechas[0])} - ${fmtFecha(fechas[fechas.length - 1])}` : '-';
+  $('h-conteo').textContent = `${lista.length} de ${registros.length} registros`;
+  espejarScrollTodos('#view-historial .table-wrap');
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BARRA DE DESPLAZAMIENTO SUPERIOR (portada del módulo de Mosquera/Honda)
+// Cuando una tabla es más ancha que la pantalla, arriba aparece una barra
+// que acompaña al bajar, con una copia del encabezado sincronizada.
+// ════════════════════════════════════════════════════════════════════════
+function espejarScroll(wrap) {
+  if (!wrap || !wrap.parentNode) return;
+  let esp = wrap.previousElementSibling;
+  if (!esp || !esp.classList || !esp.classList.contains('scroll-espejo')) {
+    esp = document.createElement('div');
+    esp.className = 'scroll-espejo';
+    esp.innerHTML = '<div class="espejo-barra"><div></div></div><div class="espejo-head"></div>';
+    wrap.parentNode.insertBefore(esp, wrap);
+    esp._barra = esp.querySelector('.espejo-barra');
+    esp._cab   = esp.querySelector('.espejo-head');
+    esp._wrap  = wrap;
+    let cuadro = 0;
+    const sincronizar = origen => {
+      if (cuadro) return;
+      cuadro = requestAnimationFrame(() => {
+        cuadro = 0;
+        const x = Math.round(origen.scrollLeft);
+        if (Math.round(wrap.scrollLeft)       !== x) wrap.scrollLeft       = x;
+        if (Math.round(esp._barra.scrollLeft) !== x) esp._barra.scrollLeft = x;
+        if (Math.round(esp._cab.scrollLeft)   !== x) esp._cab.scrollLeft   = x;
+      });
+    };
+    esp._barra.addEventListener('scroll', () => sincronizar(esp._barra), { passive: true });
+    wrap.addEventListener('scroll',       () => sincronizar(wrap),       { passive: true });
+    vigilarEncabezado(esp.closest('.view'));
+  }
+  const ancho = wrap.scrollWidth;
+  if (!wrap.clientWidth) { esp.style.display = 'none'; return; }
+  esp._barra.firstElementChild.style.width = ancho + 'px';
+  esp.style.display = ancho > wrap.clientWidth + 1 ? '' : 'none';
+  esp._barra.style.blockSize = '';
+  if (esp._barra.offsetHeight - esp._barra.clientHeight === 0) esp._barra.style.blockSize = '14px';
+  clonarEncabezado(esp);
+  esp._barra.scrollLeft = wrap.scrollLeft;
+  esp._cab.scrollLeft   = wrap.scrollLeft;
+  actualizarPegada(esp);
+}
+
+function clonarEncabezado(esp) {
+  const tabla = esp._wrap.querySelector('table.data-table');
+  if (!tabla || !tabla.tHead) { esp._cab.innerHTML = ''; return; }
+  const copia = document.createElement('table');
+  copia.className = tabla.className;
+  copia.style.tableLayout = 'fixed';
+  copia.style.width = tabla.getBoundingClientRect().width + 'px';
+  const reales = tabla.tHead.rows[tabla.tHead.rows.length - 1].cells;
+  const grupo = document.createElement('colgroup');
+  for (const celda of reales) {
+    const col = document.createElement('col');
+    col.style.width = celda.getBoundingClientRect().width + 'px';
+    grupo.appendChild(col);
+  }
+  copia.appendChild(grupo);
+  const cab = tabla.tHead.cloneNode(true);
+  // Las horas escritas en el encabezado se copian como texto (la copia no se edita)
+  cab.querySelectorAll('input').forEach(inp => {
+    const orig = tabla.tHead.querySelector(`input[data-b="${inp.dataset.b}"][data-r="${inp.dataset.r}"][data-c="${inp.dataset.c}"]`);
+    const span = document.createElement('span');
+    span.className = 'hora-copia';
+    span.textContent = orig?.value || '--:--';
+    inp.replaceWith(span);
+  });
+  copia.appendChild(cab);
+  esp._cab.innerHTML = '';
+  esp._cab.appendChild(copia);
+}
+
+function actualizarPegada(esp) {
+  const vista = esp.closest('.view');
+  const tabla = esp._wrap && esp._wrap.querySelector('table.data-table');
+  if (!vista || !tabla || esp.style.display === 'none') return;
+  const cs = getComputedStyle(vista);
+  const tope = vista.getBoundingClientRect().top + parseFloat(cs.paddingTop || 0);
+  const altoBarra = esp._barra.offsetHeight;
+  const rTabla = tabla.getBoundingClientRect();
+  const rCabeza = tabla.tHead ? tabla.tHead.getBoundingClientRect() : rTabla;
+  const enElTope = esp.getBoundingClientRect().top <= tope + 1;
+  const mostrar = enElTope && rCabeza.bottom < tope + altoBarra + 4 && rTabla.bottom > tope + altoBarra + 50;
+  if (mostrar && !esp.classList.contains('con-encabezado')) clonarEncabezado(esp);
+  esp.classList.toggle('con-encabezado', mostrar);
+  esp.classList.toggle('pegada', enElTope);
+}
+
+function vigilarEncabezado(vista) {
+  if (!vista || vista._vigilada) return;
+  vista._vigilada = true;
+  let cuadro = 0;
+  vista.addEventListener('scroll', () => {
+    if (cuadro) return;
+    cuadro = requestAnimationFrame(() => {
+      cuadro = 0;
+      vista.querySelectorAll('.scroll-espejo').forEach(actualizarPegada);
+    });
+  }, { passive: true });
+}
+
+function espejarScrollTodos(selector) {
+  requestAnimationFrame(() => document.querySelectorAll(selector).forEach(espejarScroll));
+}
+window.addEventListener('resize', () => espejarScrollTodos('.view.active .table-wrap'));
+// La barra lateral cambia el ancho disponible: se recalcula al terminar su animación
+document.addEventListener('click', e => {
+  if (e.target.closest('#btn-sidebar')) setTimeout(() => espejarScrollTodos('.view.active .table-wrap'), 400);
+});
+</script>
+
+</body>
+</html>
