@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="compartido/estilos.css">
+<script src="config.js" onerror="console.warn('config.js no encontrado: se usa el ID que trae la página')"></script>
 <script src="https://accounts.google.com/gsi/client"></script>
 <style>
 /* ════════════════════════════════════════════════════════════════════════
@@ -208,12 +209,20 @@
 .tabla-captura tbody tr:hover td.col-fila { background: #eaeef4; }
 
 /* Muestras de peso: cinco bloques de 40, cada uno su propia tabla */
+/* Rejilla pareja: los cinco bloques ocupan lo mismo y, al pasar a dos
+   filas, las columnas siguen alineadas (con flex quedaban descuadradas) */
 .bloques-muestras {
-  display: flex; flex-wrap: wrap; gap: 10px;
-  border-radius: var(--radius); background: var(--bg); box-shadow: var(--nm-in-xs); padding: 6px 8px;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px 14px;
+  border-radius: var(--radius); background: var(--bg); box-shadow: var(--nm-in-xs); padding: 8px 10px;
 }
-.bloques-muestras .tabla-muestras { flex: 1 1 190px; min-inline-size: 170px; max-inline-size: 260px; }
+.bloques-muestras .tabla-muestras { inline-size: 100%; }
 .bloques-muestras .tabla-muestras th { padding: 10px 8px; }
+/* Cada bloque tiene su propio encabezado: si se quedan pegados arriba se
+   ven flotando en mitad de la lista */
+.bloques-muestras .tabla-muestras th { position: static; }
+@media (max-width: 1400px) { .bloques-muestras { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px)  { .bloques-muestras { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px)  { .bloques-muestras { grid-template-columns: 1fr; } }
 
 /* Muestras de peso: cinco bloques de 40, como en el papel */
 .tabla-muestras td { padding: 4px 6px; }
@@ -547,9 +556,10 @@
 // Configuración de esta página. Tiene que ir ANTES de compartido/entorno.js
 // ════════════════════════════════════════════════════════════════════════
 window.APP = {
-  // Hoja de cálculo "MOSQUERA - FORMATOS DE PROCESO". Pegar aquí su ID
-  // (el trozo largo de la URL entre /d/ y /edit). Vacío = no guarda.
-  SHEET_ID: '',
+  // Hoja de cálculo "MOSQUERA - FORMATOS DE PROCESO".
+  // El ID sale de config.js (que no se sobrescribe al actualizar la página);
+  // si ese archivo no está, se usa el de aquí abajo.
+  SHEET_ID: window.CONFIG_PENIEL?.SHEET_ID || '1Zzja4qLGEyRdS5OlOOIQYooAhFz1kRXntOZecX1eU5g',
   CLIENT_ID: '472930002147-of08gfnkeuu57gsbpgl48g5b20bvk3sp.apps.googleusercontent.com',
   SCOPES: 'https://www.googleapis.com/auth/spreadsheets ' +
           'https://www.googleapis.com/auth/userinfo.profile ' +
