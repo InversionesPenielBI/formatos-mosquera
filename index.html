@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Formatos de Proceso - Mosquera</title>
 <link rel="icon" type="image/png" href="logo.png">
+<!-- Aplicación instalable (tablet): manifest + service worker (sw.js) -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1b354a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Formatos Mosquera">
+<link rel="apple-touch-icon" href="icono-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -199,6 +207,14 @@
 .tabla-captura tbody tr:hover td { background: rgba(255,255,255,.35); }
 .tabla-captura tbody tr:hover td.col-fila { background: #eaeef4; }
 
+/* Muestras de peso: cinco bloques de 40, cada uno su propia tabla */
+.bloques-muestras {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  border-radius: var(--radius); background: var(--bg); box-shadow: var(--nm-in-xs); padding: 6px 8px;
+}
+.bloques-muestras .tabla-muestras { flex: 1 1 190px; min-inline-size: 170px; max-inline-size: 260px; }
+.bloques-muestras .tabla-muestras th { padding: 10px 8px; }
+
 /* Muestras de peso: cinco bloques de 40, como en el papel */
 .tabla-muestras td { padding: 4px 6px; }
 .tabla-muestras .c-in { max-width: 96px; min-width: 70px; }
@@ -297,6 +313,64 @@
 .col-formato { min-width: 260px; }
 .col-formato .nombre { font-weight: 600; font-size: 12.5px; }
 #tabla-historial td.nowrap { white-space: nowrap; }
+
+/* ════════════════════════════════════════════════════════════════════
+   TABLET Y MÓVIL
+   La misma página: solo se contrae la barra lateral (quedan los íconos),
+   se achican los márgenes y los formularios pasan a una columna.
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  /* Barra lateral siempre contraída, sin tocar la preferencia del PC */
+  .app .sidebar { width: 76px; min-width: 76px; }
+  .app .sidebar-logo { justify-content: center; gap: 0; padding: 18px 10px 14px; }
+  .app .sidebar-logo::after { left: 12px; right: 12px; }
+  .app .brand-text, .app .nav-label, .app .sidebar-section-label,
+  .app .user-chip > div:not(.user-avatar), .app .sidebar-toggle { display: none; }
+  .app .sidebar-section { padding: 14px 10px 4px; }
+  .app .nav-item { padding: 9px; justify-content: center; gap: 0; }
+  .app .sidebar-bottom { padding: 16px 10px 18px; }
+  .app .sidebar-bottom::before { left: 12px; right: 12px; }
+  .app .user-chip { justify-content: center; padding: 10px; gap: 0; }
+
+  .view { --pad-vista: 20px; padding: 20px 18px 40px; }
+  .topbar { padding-inline: 18px; gap: 10px; }
+  .topbar-title { font-size: 16px; }
+  .card-body { padding: 20px 18px 22px; }
+  .card-header { padding: 18px 18px; }
+  .card-header::after { left: 18px; right: 18px; }
+  .formatos-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+  .ficha-body { gap: 18px; }
+  .ficha-nombre { font-size: 17px; }
+  .metrics-grid.cuatro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .resumen-peso { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  .view { padding: 16px 12px 40px; }
+  .topbar { padding: 14px 12px; }
+  .topbar-date { display: none; }
+  /* Los formularios van a una columna (la rejilla la pone el JS en línea) */
+  #form-cuerpo .form-grid { grid-template-columns: 1fr !important; max-width: none !important; gap: 16px; }
+  .ficha-body { grid-template-columns: 1fr; }
+  .ficha-meta { grid-template-columns: auto 1fr; }
+  .acciones-form { padding: 12px; gap: 8px; }
+  .acciones-form .btn { flex: 1 1 auto; justify-content: center; }
+  .resumen-peso { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bloques-muestras .tabla-muestras { max-inline-size: none; }
+  .filter-bar { padding: 14px; }
+  #h-buscar { flex: 1 1 100%; max-inline-size: none; }
+}
+
+/* Pantallas táctiles: botones y campos más grandes para el dedo */
+@media (pointer: coarse) {
+  .c-marca, .c-x { height: 38px; min-width: 40px; }
+  .c-in { padding: 11px 12px; font-size: 13.5px; }
+  .seg button { padding: 9px 12px; font-size: 12.5px; }
+  .chips button { padding: 9px 14px; }
+  .btn-xs { padding: 9px 14px; }
+  /* El arrastre horizontal de las tablas no debe "pelear" con el vertical */
+  .table-wrap, .espejo-barra { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+}
 .conteo-filtro { font-size: 12px; color: var(--text3); margin-left: auto; }
 </style>
 </head>
@@ -475,7 +549,7 @@
 window.APP = {
   // Hoja de cálculo "MOSQUERA - FORMATOS DE PROCESO". Pegar aquí su ID
   // (el trozo largo de la URL entre /d/ y /edit). Vacío = no guarda.
-  SHEET_ID: '1Zzja4qLGEyRdS5OlOOIQYooAhFz1kRXntOZecX1eU5g',
+  SHEET_ID: '',
   CLIENT_ID: '472930002147-of08gfnkeuu57gsbpgl48g5b20bvk3sp.apps.googleusercontent.com',
   SCOPES: 'https://www.googleapis.com/auth/spreadsheets ' +
           'https://www.googleapis.com/auth/userinfo.profile ' +
@@ -1018,11 +1092,21 @@ const $ = id => document.getElementById(id);
 // VALORES:   una fila por dato escrito, en formato largo, para Power BI y el
 //            futuro dashboard. La página no la lee: solo escribe en ella.
 const HOJA_REG = 'REGISTROS';
-const HOJA_VAL = 'VALORES';
+// VALORES se parte por año (VALORES_2026, VALORES_2027…) para que ni la hoja
+// ni las búsquedas al editar crezcan sin fin. Las pestañas las crea la página
+// sola la primera vez que se guarda un registro de ese año.
+const hojaValores = fecha => 'VALORES_' + (/^\d{4}/.test(String(fecha)) ? String(fecha).slice(0, 4) : new Date().getFullYear());
+// Las 200 muestras del control de peso van aparte y ANCHAS (una fila por
+// registro): en formato largo serían ~1.700 filas al día ellas solas.
+const HOJA_MUESTRAS = 'MUESTRAS_PESO';
 const COLS_REG = ['id_registro', 'formato', 'nombre_formato', 'codigo_formato', 'fecha', 'turno',
   'codigo', 'responsable', 'cargo_responsable', 'observaciones',
   'usuario', 'fecha_registro', 'fecha_modificacion', 'datos'];
 const COLS_VAL = ['id_registro', 'formato', 'fecha', 'seccion', 'item', 'columna', 'valor'];
+const COLS_MUESTRAS = ['id_registro', 'fecha', 'turno', 'codigo', 'tipo_queso', 'presentacion',
+  'gramaje', 'fecha_fabricacion', 'lote_vencimiento', 'total_unidades', 'n_muestras', 'promedio',
+  'minimo', 'maximo', 'peso_minimo', 'bajo_minimo',
+  ...Array.from({ length: 200 }, (_, i) => 'muestra_' + (i + 1))];
 
 // Interruptor único: sin SHEET_ID o en la demo, no se toca Google.
 // Es función (no constante) porque el bloque de la demo se inyecta al final.
@@ -1140,7 +1224,7 @@ function ctrl(def, b, r, c, modo, apagado) {
   const val = esc(v ?? '');
   switch (def.t) {
     case 'num':
-      return `<input type="text" inputmode="decimal" class="${cls} c-num" data-t="num"${def.min !== undefined ? ` data-min="${def.min}"` : ''} ${a} value="${esc(mostrarDecimal(v))}">`;
+      return `<input type="text" inputmode="decimal" enterkeyhint="next" class="${cls} c-num" data-t="num"${def.min !== undefined ? ` data-min="${def.min}"` : ''} ${a} value="${esc(mostrarDecimal(v))}">`;
     case 'ent':
       return `<input type="number" min="0" step="1" inputmode="numeric" class="${cls}" data-t="ent" ${a} value="${val}">`;
     case 'fecha':
@@ -1349,18 +1433,21 @@ function aplicarHoras() {
 }
 
 function muestrasHTML(b) {
+  // Cinco bloques de 40, cada uno en su propia tabla. Así el orden del DOM va
+  // 1, 2, 3… hacia abajo: en la tablet, el botón "siguiente" del teclado baja
+  // en vez de saltar a la muestra 41.
   const filas = b.bloquesDe, grupos = Math.ceil(b.n / filas);
-  const cab = '<tr>' + Array.from({ length: grupos }, () => '<th class="centro">N° muestra</th><th>Peso unidad</th>').join('') + '</tr>';
-  let cuerpo = '';
-  for (let i = 0; i < filas; i++) {
-    cuerpo += '<tr>';
-    for (let g = 0; g < grupos; g++) {
+  let bloques = '';
+  for (let g = 0; g < grupos; g++) {
+    let cuerpo = '';
+    for (let i = 0; i < filas; i++) {
       const n = g * filas + i;
-      cuerpo += n < b.n
-        ? `<td class="col-num">${n + 1}</td><td data-m="${n}">${ctrl({ t: 'num', min: 0 }, b.k, 'm', String(n))}</td>`
-        : '<td></td><td></td>';
+      if (n >= b.n) break;
+      cuerpo += `<tr><td class="col-num">${n + 1}</td><td data-m="${n}">${ctrl({ t: 'num', min: 0 }, b.k, 'm', String(n))}</td></tr>`;
     }
-    cuerpo += '</tr>';
+    bloques += `<table class="data-table tabla-captura tabla-muestras">
+      <thead><tr><th class="centro">N°</th><th>Peso unidad (g)</th></tr></thead>
+      <tbody>${cuerpo}</tbody></table>`;
   }
   const tarjetaRes = (id, l) => `<div class="metric-card"><div class="metric-label">${l}</div><div class="metric-value" id="${id}">-</div></div>`;
   return `<div class="resumen-peso">
@@ -1368,7 +1455,7 @@ function muestrasHTML(b) {
       ${tarjetaRes('rp-min', 'Mínimo (g)')}${tarjetaRes('rp-max', 'Máximo (g)')}
       ${tarjetaRes('rp-lim', 'Peso mínimo aceptable')}${tarjetaRes('rp-bajo', 'Por debajo del peso')}
     </div>
-    <div class="table-wrap"><table class="data-table tabla-captura tabla-muestras"><thead>${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
+    <div class="bloques-muestras">${bloques}</div>`;
 }
 
 function horasHTML(b) {
@@ -1680,7 +1767,16 @@ function aplanar(f, d) {
     const tit = b.titulo;
     if (b.tipo === 'campos') b.campos.forEach(c => push(tit, c.l, '', d.f?.[c.k]));
     if (b.tipo === 'horas') for (let i = 0; i < b.n; i++) push(tit, 'Hora ' + (i + 1), '', d[b.k]?._?.[i]);
-    if (b.tipo === 'muestras') for (let i = 0; i < b.n; i++) push('Muestras de peso', 'Muestra ' + (i + 1), 'Peso unidad (g)', d[b.k]?.m?.[i]);
+    if (b.tipo === 'muestras') {
+      // Las 200 muestras van a la pestaña MUESTRAS_PESO; aquí solo el resumen
+      const r = resumenMuestras(d, b);
+      push('Muestras de peso', 'N° de muestras', '', r.n);
+      push('Muestras de peso', 'Promedio (g)', '', r.prom);
+      push('Muestras de peso', 'Mínimo (g)', '', r.min);
+      push('Muestras de peso', 'Máximo (g)', '', r.max);
+      push('Muestras de peso', 'Peso mínimo aceptable (g)', '', r.lim);
+      push('Muestras de peso', 'Por debajo del peso', '', r.n ? r.bajo : '');
+    }
     if (b.tipo === 'tabla') {
       b._filas.forEach(fl => {
         const filaD = d[b.k]?.[fl.key] || {};
@@ -1711,6 +1807,41 @@ function aplanar(f, d) {
   });
   cierreDe(f).forEach(c => push('Observaciones y firmas', ETIQUETA_CIERRE[c.k] || c.l, '', d.f?.[c.k]));
   return out;
+}
+
+// Resumen de las muestras de peso (también es lo que se guarda en VALORES)
+function resumenMuestras(d, b) {
+  const m = d[b.k]?.m || {};
+  const v = Object.values(m).map(Number).filter(x => isFinite(x) && x > 0);
+  const lim = limitePeso(d.f?.gramaje);
+  const r1 = x => Math.round(x * 100) / 100;
+  return {
+    n: v.length,
+    prom: v.length ? r1(v.reduce((a, z) => a + z, 0) / v.length) : '',
+    min: v.length ? Math.min(...v) : '',
+    max: v.length ? Math.max(...v) : '',
+    lim: lim === null ? '' : lim,
+    bajo: lim === null ? '' : v.filter(x => x < lim).length,
+  };
+}
+
+// Fila ancha para MUESTRAS_PESO: una sola fila por registro, con las 200
+// muestras en columnas (muestra_1 … muestra_200)
+function filaMuestras(reg, f, d) {
+  const b = f.bloques.find(x => x.tipo === 'muestras');
+  if (!b) return null;
+  const m = d[b.k]?.m || {};
+  const r = resumenMuestras(d, b);
+  const fila = {
+    id_registro: reg.id_registro, fecha: reg.fecha, turno: reg.turno, codigo: reg.codigo,
+    tipo_queso: d.f?.tipo_queso || '', presentacion: d.f?.presentacion || '',
+    gramaje: d.f?.gramaje ?? '', fecha_fabricacion: d.f?.fecha_fab || '',
+    lote_vencimiento: d.f?.lote_vto || '', total_unidades: d.f?.total_unidades ?? '',
+    n_muestras: r.n, promedio: r.prom, minimo: r.min, maximo: r.max,
+    peso_minimo: r.lim, bajo_minimo: r.bajo,
+  };
+  for (let i = 0; i < b.n; i++) fila['muestra_' + (i + 1)] = m[i] ?? '';
+  return fila;
 }
 
 function nuevoId(f) {
@@ -1753,7 +1884,7 @@ function armarRegistro(f, datos, previo, usuario) {
     datos: JSON.stringify({ _v: 1, ...d }),
   };
   const vals = aplanar(f, d).map(x => ({ id_registro: id, formato: f.id, fecha: reg.fecha, ...x }));
-  return { reg, vals };
+  return { reg, vals, muestras: filaMuestras(reg, f, d) };
 }
 
 async function guardarFormato() {
@@ -1788,13 +1919,14 @@ async function guardarFormato() {
     toast('La página aún no tiene hoja de cálculo configurada (SHEET_ID). No se guardó.', 'error');
     return;
   }
-  const { reg, vals } = armarRegistro(f, d, actual.reg, userInfo?.email);
+  const { reg, vals, muestras } = armarRegistro(f, d, actual.reg, userInfo?.email);
   if (reg.datos.length > 49000) {
     toast('El formato es demasiado grande para una celda de Google Sheets. Reduce el texto de las observaciones.', 'error');
     return;
   }
   const editando = !!actual.id;
-  const ok = await conBloqueo(editando ? 'Guardando cambios' : 'Guardando', () => escribirRegistro(actual.id, reg, vals));
+  const ok = await conBloqueo(editando ? 'Guardando cambios' : 'Guardando',
+    () => escribirRegistro(actual.id, reg, { vals, muestras }, actual.reg));
   if (!ok) return;
   sucio = false;
   toast(editando ? 'Cambios guardados.' : `${nombreCorto(f)} guardado.`, 'success');
@@ -1837,7 +1969,7 @@ async function pedir(url, opts = {}) {
     if (r.ok) return r.json();
     if (!TEMPORAL.includes(r.status)) {
       const detalle = r.status === 403 ? 'no tienes permiso de edición sobre la hoja'
-                    : r.status === 400 ? 'revisa que existan las pestañas REGISTROS y VALORES'
+                    : r.status === 400 ? 'revisa que exista la pestaña REGISTROS con sus encabezados'
                     : 'código ' + r.status;
       throw new Error('Google rechazó la operación (' + detalle + ').');
     }
@@ -1910,29 +2042,51 @@ async function conBloqueo(etiqueta, fn) {
   }
 }
 
-async function asegurarSheetIds() {
+// Crea las pestañas que falten (VALORES del año, MUESTRAS_PESO) con su
+// encabezado, y aprende el orden real de columnas de las que ya existen.
+async function asegurarHojas(hojas) {
   await obtenerSheetId(HOJA_REG);
-  [HOJA_REG, HOJA_VAL].forEach(h => {
-    if (sheetIds[h] === undefined) throw new Error(`no existe la pestaña ${h} en el Google Sheets`);
-  });
+  if (sheetIds[HOJA_REG] === undefined) throw new Error(`no existe la pestaña ${HOJA_REG} en el Google Sheets`);
+  const faltan = hojas.filter(h => sheetIds[h.nombre] === undefined);
+  if (faltan.length) {
+    const r = await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
+      addSheet: { properties: { title: h.nombre, gridProperties: { rowCount: 2000, columnCount: h.cols.length + 2 } } } })) }));
+    (r.replies || []).forEach(rep => {
+      const p = rep.addSheet?.properties;
+      if (p) sheetIds[p.title] = p.sheetId;
+    });
+    await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
+      updateCells: { rows: [{ values: h.cols.map(c => celdaDe(c)) }], fields: 'userEnteredValue',
+        start: { sheetId: sheetIds[h.nombre], rowIndex: 0, columnIndex: 0 } } })) }));
+    faltan.forEach(h => { ordenHoja[h.nombre] = h.cols; });
+  }
+  const porLeer = hojas.filter(h => !ordenHoja[h.nombre]);
+  if (porLeer.length) {
+    const d = await leerVarios(porLeer.map(h => `${h.nombre}!1:1`));
+    porLeer.forEach((h, i) => fijarOrden(h.nombre, d.valueRanges?.[i]?.values?.[0], h.cols));
+  }
 }
 
-// Dónde está el registro y sus valores (índices de fila 0-based)
-async function ubicar(id) {
-  const lr = colLetra(cols(HOJA_REG, COLS_REG).indexOf('id_registro'));
-  const lv = colLetra(cols(HOJA_VAL, COLS_VAL).indexOf('id_registro'));
-  const d = await leerVarios([`${HOJA_REG}!${lr}:${lr}`, `${HOJA_VAL}!${lv}:${lv}`]);
-  const indices = vr => {
+// Dónde está el registro y sus filas en cada pestaña (índices 0-based)
+async function ubicar(id, hojas) {
+  const columnas = { [HOJA_REG]: COLS_REG, [HOJA_MUESTRAS]: COLS_MUESTRAS };
+  const rangos = hojas.map(h => {
+    const l = colLetra(cols(h, columnas[h] || COLS_VAL).indexOf('id_registro'));
+    return `${h}!${l}:${l}`;
+  });
+  const d = await leerVarios(rangos);
+  const salida = {};
+  hojas.forEach((h, i) => {
     const out = [];
-    (vr?.values || []).forEach((f, i) => { if (i > 0 && String(f[0] ?? '').trim() === id) out.push(i); });
-    return out;
-  };
-  return { reg: indices(d.valueRanges?.[0])[0], val: indices(d.valueRanges?.[1]) };
+    (d.valueRanges?.[i]?.values || []).forEach((f, j) => { if (j > 0 && String(f[0] ?? '').trim() === id) out.push(j); });
+    salida[h] = out;
+  });
+  return salida;
 }
 
 // Borra filas agrupando las contiguas, de abajo hacia arriba
 function pedirBorrado(req, hoja, indices) {
-  const orden = [...indices].sort((a, b) => a - b), rangos = [];
+  const orden = [...(indices || [])].sort((a, b) => a - b), rangos = [];
   orden.forEach(i => { const u = rangos[rangos.length - 1]; if (u && u[1] === i) u[1] = i + 1; else rangos.push([i, i + 1]); });
   rangos.reverse().forEach(([s, e]) => req.push({ deleteDimension: {
     range: { sheetId: sheetIds[hoja], dimension: 'ROWS', startIndex: s, endIndex: e } } }));
@@ -1944,42 +2098,61 @@ function pedirAgregado(req, hoja, columnas, filas) {
 
 // Todo en UNA operación: Google la aplica entera o no aplica nada, así un
 // fallo a mitad de camino no deja el registro a medias.
-async function escribirRegistro(idPrevio, reg, vals) {
+// `previo` es la fila de REGISTROS que se está editando (para saber en qué
+// pestaña de año estaba, por si se le cambió la fecha).
+async function escribirRegistro(idPrevio, reg, extra, previo) {
+  const hojaVal = hojaValores(reg.fecha);
+  const hojaValVieja = idPrevio ? hojaValores(previo?.fecha || reg.fecha) : null;
+  const tocaMuestras = !!extra.muestras || (idPrevio && previo?.formato === 'CPUC');
+
   if (!hayHoja()) {
-    const L = window.DATOS_DEMO.registros, V = (window.DATOS_DEMO.valores ??= []);
-    const i = L.findIndex(r => r.id_registro === idPrevio);
-    if (i > -1) L[i] = { ...reg }; else L.push({ ...reg });
-    window.DATOS_DEMO.valores = V.filter(v => v.id_registro !== reg.id_registro).concat(vals);
+    const D = window.DATOS_DEMO;
+    D.valores ??= []; D.muestras ??= [];
+    const i = D.registros.findIndex(r => r.id_registro === idPrevio);
+    if (i > -1) D.registros[i] = { ...reg }; else D.registros.push({ ...reg });
+    D.valores = D.valores.filter(v => v.id_registro !== reg.id_registro).concat(extra.vals);
+    D.muestras = D.muestras.filter(m => m.id_registro !== reg.id_registro);
+    if (extra.muestras) D.muestras.push(extra.muestras);
     return;
   }
-  await asegurarSheetIds();
-  const cr = cols(HOJA_REG, COLS_REG), cv = cols(HOJA_VAL, COLS_VAL);
+
+  const hojas = [{ nombre: hojaVal, cols: COLS_VAL }];
+  if (hojaValVieja && hojaValVieja !== hojaVal) hojas.push({ nombre: hojaValVieja, cols: COLS_VAL });
+  if (tocaMuestras) hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
+  await asegurarHojas(hojas);
+
   const req = [];
   if (idPrevio) {
-    const u = await ubicar(idPrevio);
-    if (u.reg === undefined) throw new Error('el registro ya no está en la hoja (¿lo eliminó otra persona?). Pulsa Actualizar');
-    req.push({ updateCells: { rows: [filaDe(reg, cr)], fields: 'userEnteredValue',
-      start: { sheetId: sheetIds[HOJA_REG], rowIndex: u.reg, columnIndex: 0 } } });
-    pedirBorrado(req, HOJA_VAL, u.val);
+    const u = await ubicar(idPrevio, [HOJA_REG, ...hojas.map(h => h.nombre)]);
+    if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja (¿lo eliminó otra persona?). Pulsa Actualizar');
+    req.push({ updateCells: { rows: [filaDe(reg, cols(HOJA_REG, COLS_REG))], fields: 'userEnteredValue',
+      start: { sheetId: sheetIds[HOJA_REG], rowIndex: u[HOJA_REG][0], columnIndex: 0 } } });
+    hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
   } else {
-    pedirAgregado(req, HOJA_REG, cr, [reg]);
+    pedirAgregado(req, HOJA_REG, cols(HOJA_REG, COLS_REG), [reg]);
   }
-  pedirAgregado(req, HOJA_VAL, cv, vals);
+  pedirAgregado(req, hojaVal, cols(hojaVal, COLS_VAL), extra.vals);
+  if (extra.muestras) pedirAgregado(req, HOJA_MUESTRAS, cols(HOJA_MUESTRAS, COLS_MUESTRAS), [extra.muestras]);
   await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
 }
 
 async function borrarRegistro(id) {
+  const r = registros.find(x => x.id_registro === id);
   if (!hayHoja()) {
-    window.DATOS_DEMO.registros = window.DATOS_DEMO.registros.filter(r => r.id_registro !== id);
-    window.DATOS_DEMO.valores = (window.DATOS_DEMO.valores || []).filter(v => v.id_registro !== id);
+    const D = window.DATOS_DEMO;
+    D.registros = D.registros.filter(x => x.id_registro !== id);
+    D.valores = (D.valores || []).filter(v => v.id_registro !== id);
+    D.muestras = (D.muestras || []).filter(m => m.id_registro !== id);
     return;
   }
-  await asegurarSheetIds();
-  const u = await ubicar(id);
-  if (u.reg === undefined) throw new Error('el registro ya no está en la hoja. Pulsa Actualizar');
+  const hojas = [{ nombre: hojaValores(r?.fecha), cols: COLS_VAL }];
+  if (r?.formato === 'CPUC') hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
+  await asegurarHojas(hojas);
+  const u = await ubicar(id, [HOJA_REG, ...hojas.map(h => h.nombre)]);
+  if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja. Pulsa Actualizar');
   const req = [];
-  pedirBorrado(req, HOJA_REG, [u.reg]);
-  pedirBorrado(req, HOJA_VAL, u.val);
+  pedirBorrado(req, HOJA_REG, u[HOJA_REG]);
+  hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
   await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
 }
 
@@ -2011,9 +2184,8 @@ async function cargarDatos() {
     if (!hayHoja()) {
       registros = (window.DATOS_DEMO?.registros || []).map((r, i) => ({ ...r, _fila: i + 1 }));
     } else {
-      const cab = await leerVarios([`${HOJA_REG}!1:1`, `${HOJA_VAL}!1:1`]);
+      const cab = await leerVarios([`${HOJA_REG}!1:1`]);
       fijarOrden(HOJA_REG, cab.valueRanges?.[0]?.values?.[0], COLS_REG);
-      fijarOrden(HOJA_VAL, cab.valueRanges?.[1]?.values?.[0], COLS_VAL);
       const cr = cols(HOJA_REG, COLS_REG);
       // Si "datos" es la última columna no se descarga (es lo más pesado)
       const aLeer = cr[cr.length - 1] === 'datos' ? cr.slice(0, -1) : cr;
@@ -2196,33 +2368,48 @@ function espejarScroll(wrap) {
     esp._barra = esp.querySelector('.espejo-barra');
     esp._cab   = esp.querySelector('.espejo-head');
     esp._wrap  = wrap;
-    let cuadro = 0;
-    const sincronizar = origen => {
-      if (cuadro) return;
-      cuadro = requestAnimationFrame(() => {
-        cuadro = 0;
-        const x = Math.round(origen.scrollLeft);
-        if (Math.round(wrap.scrollLeft)       !== x) wrap.scrollLeft       = x;
-        if (Math.round(esp._barra.scrollLeft) !== x) esp._barra.scrollLeft = x;
-        if (Math.round(esp._cab.scrollLeft)   !== x) esp._cab.scrollLeft   = x;
-      });
+
+    // Sincronizar las dos barras tiene una trampa: cada escritura nuestra
+    // dispara otro evento de scroll, y ese eco llega un cuadro tarde. Si se
+    // atiende, devuelve la barra a la posición vieja - eso era el tirón.
+    // Se recuerda el último valor escrito: si el evento trae justo ese valor
+    // es nuestro propio eco y se ignora. Se aplica en el acto (sin rAF) para
+    // que barra y tabla se muevan en el mismo cuadro. (Portado de Mosquera.)
+    esp._ultimo = -1;
+    const aplicar = x => {
+      esp._ultimo = x;
+      if (Math.round(wrap.scrollLeft)       !== x) wrap.scrollLeft       = x;
+      if (Math.round(esp._barra.scrollLeft) !== x) esp._barra.scrollLeft = x;
+      if (esp.classList.contains('con-encabezado') &&
+          Math.round(esp._cab.scrollLeft) !== x) esp._cab.scrollLeft = x;
     };
-    esp._barra.addEventListener('scroll', () => sincronizar(esp._barra), { passive: true });
-    wrap.addEventListener('scroll',       () => sincronizar(wrap),       { passive: true });
+    const alDesplazar = origen => () => {
+      const x = Math.round(origen.scrollLeft);
+      if (x === esp._ultimo) return;
+      aplicar(x);
+    };
+    esp._aplicar = aplicar;
+    esp._barra.addEventListener('scroll', alDesplazar(esp._barra), { passive: true });
+    wrap.addEventListener('scroll',       alDesplazar(wrap),       { passive: true });
     vigilarEncabezado(esp.closest('.view'));
   }
+
   const ancho = wrap.scrollWidth;
   if (!wrap.clientWidth) { esp.style.display = 'none'; return; }
   esp._barra.firstElementChild.style.width = ancho + 'px';
   esp.style.display = ancho > wrap.clientWidth + 1 ? '' : 'none';
+  // Si el navegador usa barras superpuestas no ocupan alto: se reserva a mano
   esp._barra.style.blockSize = '';
   if (esp._barra.offsetHeight - esp._barra.clientHeight === 0) esp._barra.style.blockSize = '14px';
+
   clonarEncabezado(esp);
-  esp._barra.scrollLeft = wrap.scrollLeft;
-  esp._cab.scrollLeft   = wrap.scrollLeft;
   actualizarPegada(esp);
+  esp._aplicar(Math.round(wrap.scrollLeft));
 }
 
+// Copia del encabezado con los anchos ya medidos, para que las columnas
+// calcen. Los clics se reenvían al encabezado real (ordenar sigue sirviendo)
+// y las horas escritas se copian como texto: la copia no se edita.
 function clonarEncabezado(esp) {
   const tabla = esp._wrap.querySelector('table.data-table');
   if (!tabla || !tabla.tHead) { esp._cab.innerHTML = ''; return; }
@@ -2230,28 +2417,34 @@ function clonarEncabezado(esp) {
   copia.className = tabla.className;
   copia.style.tableLayout = 'fixed';
   copia.style.width = tabla.getBoundingClientRect().width + 'px';
-  const reales = tabla.tHead.rows[tabla.tHead.rows.length - 1].cells;
-  const grupo = document.createElement('colgroup');
-  for (const celda of reales) {
-    const col = document.createElement('col');
-    col.style.width = celda.getBoundingClientRect().width + 'px';
-    grupo.appendChild(col);
+  copia.appendChild(tabla.tHead.cloneNode(true));
+
+  // La última fila del encabezado es la de las columnas reales (la primera
+  // puede llevar colspan de grupo)
+  const ultima = t => t.rows[t.rows.length - 1];
+  const reales = ultima(tabla.tHead).cells;
+  const copias = ultima(copia.tHead).cells;
+  for (let i = 0; i < copias.length && i < reales.length; i++) {
+    const ancho = reales[i].getBoundingClientRect().width + 'px';
+    copias[i].style.width = copias[i].style.minWidth = copias[i].style.maxWidth = ancho;
+    if (reales[i].dataset.orden) {
+      const real = reales[i];
+      copias[i].style.cursor = 'pointer';
+      copias[i].addEventListener('click', () => real.click());
+    }
   }
-  copia.appendChild(grupo);
-  const cab = tabla.tHead.cloneNode(true);
-  // Las horas escritas en el encabezado se copian como texto (la copia no se edita)
-  cab.querySelectorAll('input').forEach(inp => {
+  copia.querySelectorAll('input').forEach(inp => {
     const orig = tabla.tHead.querySelector(`input[data-b="${inp.dataset.b}"][data-r="${inp.dataset.r}"][data-c="${inp.dataset.c}"]`);
     const span = document.createElement('span');
     span.className = 'hora-copia';
     span.textContent = orig?.value || '--:--';
     inp.replaceWith(span);
   });
-  copia.appendChild(cab);
   esp._cab.innerHTML = '';
   esp._cab.appendChild(copia);
 }
 
+// Muestra la copia del encabezado solo cuando el real ya pasó por debajo
 function actualizarPegada(esp) {
   const vista = esp.closest('.view');
   const tabla = esp._wrap && esp._wrap.querySelector('table.data-table');
@@ -2262,10 +2455,13 @@ function actualizarPegada(esp) {
   const rTabla = tabla.getBoundingClientRect();
   const rCabeza = tabla.tHead ? tabla.tHead.getBoundingClientRect() : rTabla;
   const enElTope = esp.getBoundingClientRect().top <= tope + 1;
-  const mostrar = enElTope && rCabeza.bottom < tope + altoBarra + 4 && rTabla.bottom > tope + altoBarra + 50;
-  if (mostrar && !esp.classList.contains('con-encabezado')) clonarEncabezado(esp);
+  const mostrar = enElTope && rCabeza.bottom < tope + altoBarra + 4
+                  && rTabla.bottom > tope + altoBarra + 50;
+  const cambio = mostrar !== esp.classList.contains('con-encabezado');
+  if (cambio && mostrar) clonarEncabezado(esp);
   esp.classList.toggle('con-encabezado', mostrar);
   esp.classList.toggle('pegada', enElTope);
+  if (cambio && mostrar) esp._cab.scrollLeft = Math.round(esp._wrap.scrollLeft);
 }
 
 function vigilarEncabezado(vista) {
@@ -2289,6 +2485,20 @@ window.addEventListener('resize', () => espejarScrollTodos('.view.active .table-
 document.addEventListener('click', e => {
   if (e.target.closest('#btn-sidebar')) setTimeout(() => espejarScrollTodos('.view.active .table-wrap'), 400);
 });
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// APLICACIÓN INSTALABLE (tablet)
+// Con manifest.webmanifest + este service worker, Chrome instala la página
+// como aplicación: se abre a pantalla completa, sin la barra del navegador.
+// Sirve para que la planta la use como una app más en la tablet.
+// ════════════════════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW no registrado:', e));
+  });
+}
 </script>
 
 </body>
