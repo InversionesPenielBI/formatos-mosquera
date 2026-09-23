@@ -28,6 +28,13 @@
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ── Inicio: tarjetas de formatos ───────────────────────────────────── */
+.aviso-faltan {
+  font-size: 12.5px; color: var(--warn); line-height: 1.6;
+  padding: 14px 18px; margin: 0 0 18px; border-radius: var(--radius);
+  background: var(--bg); box-shadow: var(--nm-in-xs);
+}
+.aviso-faltan b { color: var(--accent); }
+.aviso-faltan code { font-family: 'DM Mono', monospace; font-size: 12px; }
 .inicio-intro { font-size: 13px; color: var(--text2); margin: -6px 0 24px 4px; max-width: 760px; }
 .formatos-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
@@ -221,8 +228,8 @@
    ven flotando en mitad de la lista */
 .bloques-muestras .tabla-muestras th { position: static; }
 @media (max-width: 1400px) { .bloques-muestras { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 900px)  { .bloques-muestras { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px)  { .bloques-muestras { grid-template-columns: 1fr; } }
+@media (max-width: 560px)  { .bloques-muestras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 6px; } }
+@media (max-width: 560px)  { .bloques-muestras .col-num { width: 34px; font-size: 11px; } .bloques-muestras td { padding: 4px 3px; } }
 
 /* Muestras de peso: cinco bloques de 40, como en el papel */
 .tabla-muestras td { padding: 4px 6px; }
@@ -472,6 +479,7 @@
 
     <!-- ═══ VIEW: INICIO - selector de formato ═══ -->
     <div class="view active" id="view-inicio">
+      <div class="aviso-faltan" id="aviso-instalacion" style="display:none"></div>
       <div class="inicio-intro">Selecciona el formato de calidad que vas a diligenciar. Cada formato se guarda por separado y queda en el historial.</div>
       <div class="formatos-grid" id="formatos-grid"></div>
     </div>
@@ -2509,6 +2517,26 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW no registrado:', e));
   });
 }
+
+// Si alguno de esos archivos no quedó subido al repositorio, la tablet no
+// puede instalar la aplicación y no hay forma de adivinar por qué. Se
+// comprueba al abrir el inicio y se avisa con el nombre exacto que falta.
+async function revisarArchivosApp() {
+  const aviso = document.getElementById('aviso-instalacion');
+  if (!aviso || !location.protocol.startsWith('http')) return;
+  const archivos = ['manifest.webmanifest', 'sw.js', 'icono-192.png', 'icono-512.png', 'icono-maskable-512.png'];
+  const faltan = [];
+  await Promise.all(archivos.map(async a => {
+    try { const r = await fetch(a, { method: 'HEAD', cache: 'no-store' }); if (!r.ok) faltan.push(a); }
+    catch (e) { faltan.push(a); }
+  }));
+  if (!faltan.length) { aviso.style.display = 'none'; return; }
+  aviso.innerHTML = `<b>Para instalar la página como aplicación en la tablet faltan estos archivos en el repositorio:</b><br>` +
+    faltan.map(a => `<code>${esc(a)}</code>`).join(' · ') +
+    `<br>Súbelos a la raíz del repositorio (Add file → Upload files) y vuelve a abrir esta página.`;
+  aviso.style.display = '';
+}
+window.addEventListener('load', () => setTimeout(revisarArchivosApp, 1500));
 </script>
 
 </body>
