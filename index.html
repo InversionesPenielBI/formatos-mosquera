@@ -27,6 +27,81 @@
    sale de --nm-out (saliente) y --nm-in (hundido).
    ════════════════════════════════════════════════════════════════════════ */
 
+/* ════════════════════════════════════════════════════════════════════════
+   TEMA DE CALIDAD
+   Las páginas de producción (Mosquera y Honda) usan el gris azulado del
+   entorno. Esta, que es de calidad, usa azul verdoso para que se distinga de
+   un vistazo: la barra lateral en #c5d9e0 y la zona de trabajo un punto más
+   clara (#d5e5eb), para que se note el paso de una a otra. Los textos y los
+   tonos oscuros siguen en #1B354A.
+   Solo se redefinen aquí las variables: todo lo demás del entorno compartido
+   se recalcula solo.
+   ════════════════════════════════════════════════════════════════════════ */
+:root {
+  --bg:       #d5e5eb;   /* color base de la zona de trabajo */
+  --nm-light: #f4fdff;   /* luz  - base aclarada */
+  --nm-dark:  #aabdc4;   /* sombra - base oscurecida */
+  --nm-dark-soft: rgba(170, 189, 196, .55);
+
+  /* Relieve del ejemplo: más ancho y más difuso que el del entorno */
+  --nm-out:    12px 12px 28px var(--nm-dark), -12px -12px 28px var(--nm-light);
+  --nm-out-md:  8px  8px 20px var(--nm-dark),  -8px  -8px 20px var(--nm-light);
+  --nm-out-sm:  5px  5px 12px var(--nm-dark),  -5px  -5px 12px var(--nm-light);
+  --nm-out-xs:  2px  2px  6px var(--nm-dark),  -2px  -2px  6px var(--nm-light);
+  --nm-in:     inset 7px 7px 15px var(--nm-dark), inset -7px -7px 15px var(--nm-light);
+  --nm-in-sm:  inset 5px 5px 10px var(--nm-dark), inset -5px -5px 10px var(--nm-light);
+  --nm-in-xs:  inset 2px 2px  6px var(--nm-dark), inset -2px -2px  6px var(--nm-light);
+
+  /* Esquinas más redondas, como el recuadro del ejemplo */
+  --radius-xs:    12px;
+  --radius:       20px;
+  --radius-campo: 14px;
+  --radius-lg:    30px;
+  --radius-xl:    40px;
+
+  /* Textos un punto más oscuros: el fondo también lo es */
+  --text2: #4c6274;
+  --text3: #70889a;
+  --accent-light: #d2e4eb;
+
+  /* Relleno curvo de las superficies salientes (el degradado del ejemplo):
+     más claro arriba a la izquierda, para que la tarjeta se vea abombada */
+  --nm-curvo: linear-gradient(145deg, #deeef3, #cadde4);
+  --tono: var(--accent-mid);      /* color propio del formato abierto */
+}
+
+/* La barra lateral conserva el azul verdoso #c5d9e0 con su propia luz y sombra */
+.sidebar {
+  --bg:       #c5d9e0;
+  --nm-light: #eafbff;
+  --nm-dark:  #9cb0b7;
+  --nm-dark-soft: rgba(156, 176, 183, .55);
+  --nm-curvo: linear-gradient(145deg, #d2e5ec, #bcd2da);
+}
+
+/* Luz ambiental en la zona de trabajo: evita un solo tono plano */
+.main {
+  background:
+    radial-gradient(1200px 680px at 85% -15%, #e9f6fa 0%, rgba(233, 246, 250, 0) 60%),
+    radial-gradient(1000px 600px at -5% 110%, #c3d7df 0%, rgba(195, 215, 223, 0) 55%),
+    var(--bg);
+}
+
+/* Las superficies salientes llevan el degradado; las hundidas quedan planas */
+.card, .formato-card, .metric-card, .subsection { background: var(--nm-curvo); }
+
+/* Viñeta del color del formato en los títulos de sus tarjetas */
+#form-cuerpo .card-title::before {
+  content: ''; display: inline-block; vertical-align: middle;
+  width: 9px; height: 9px; border-radius: 3px; margin: -2px 10px 0 0;
+  background: var(--tono);
+}
+/* Punto del formato en el historial */
+.punto-fmt {
+  display: inline-block; width: 8px; height: 8px; border-radius: 3px;
+  margin-right: 8px; background: var(--tono); vertical-align: middle;
+}
+
 /* ── Inicio: tarjetas de formatos ───────────────────────────────────── */
 .aviso-faltan {
   font-size: 12.5px; color: var(--warn); line-height: 1.6;
@@ -50,13 +125,18 @@
 }
 .formato-card:hover { box-shadow: var(--nm-out); transform: translateY(-2px); }
 .formato-card:active { box-shadow: var(--nm-in-sm); transform: none; }
-.formato-card:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
+.formato-card:focus-visible { outline: 2px solid var(--tono); outline-offset: 3px; }
 .fc-top { display: flex; align-items: center; gap: 14px; }
+/* El icono lleva el color propio del formato: así se reconoce de lejos */
 .fc-icon {
-  flex: 0 0 48px; height: 48px; border-radius: 15px;
-  display: grid; place-items: center; color: var(--accent-mid);
-  background: var(--bg); box-shadow: var(--nm-out-sm);
+  flex: 0 0 50px; height: 50px; border-radius: 17px;
+  display: grid; place-items: center; color: var(--tono);
+  background: var(--bg);
+  background: color-mix(in srgb, var(--tono) 16%, #e4f1f5);
+  box-shadow: var(--nm-out-sm);
+  transition: box-shadow .2s ease;
 }
+.formato-card:hover .fc-icon { box-shadow: var(--nm-out-md); }
 .fc-icon svg { width: 23px; height: 23px; }
 .fc-nombre { font-size: 14.5px; font-weight: 700; line-height: 1.3; color: var(--accent); }
 .fc-codigo { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); margin-top: 3px; }
@@ -68,10 +148,12 @@
 }
 .fc-pie::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px;
-  background: linear-gradient(180deg, var(--nm-dark-soft), var(--nm-light));
+  background: linear-gradient(90deg, var(--tono), rgba(156, 176, 183, .35) 70%);
+  opacity: .5;
 }
+.formato-card:hover .fc-pie::before { opacity: .9; }
 .fc-pie b { color: var(--text2); font-weight: 700; }
-.fc-llenar { color: var(--accent-mid); font-weight: 700; }
+.fc-llenar { color: var(--tono); font-weight: 700; }
 
 /* ── Ficha del formato (encabezado como el del papel) ───────────────── */
 .barra-form {
@@ -137,6 +219,24 @@
   background-image: linear-gradient(45deg, transparent 50%, var(--text3) 50%), linear-gradient(135deg, var(--text3) 50%, transparent 50%);
   background-position: calc(100% - 13px) 55%, calc(100% - 8px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
 .c-in.c-num { text-align: right; font-family: 'DM Mono', monospace; }
+
+/* Hora con AM / PM: casilla de la hora + lista de AM o PM */
+.c-hora12 { display: inline-flex; align-items: center; gap: 5px; }
+.c-hora12 .c-hora, .c-hora12 input.c-hora { max-width: 68px; min-width: 56px; }
+.c-hora12 .c-ampm {
+  appearance: none; border: none; cursor: pointer;
+  padding: 8px 20px 8px 8px; border-radius: var(--radius-campo);
+  background: var(--bg); color: var(--text);
+  font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600;
+  box-shadow: var(--nm-in-xs);
+  background-image: linear-gradient(45deg, transparent 50%, var(--text3) 50%), linear-gradient(135deg, var(--text3) 50%, transparent 50%);
+  background-position: calc(100% - 11px) 55%, calc(100% - 7px) 55%; background-size: 5px 5px; background-repeat: no-repeat;
+}
+.c-hora12 .c-ampm { flex: 0 0 auto; width: 70px; }
+.c-hora12 > input { flex: 0 0 auto; }
+.c-hora12 .c-ampm:focus { outline: none; box-shadow: var(--nm-in-xs), 0 0 0 2px var(--accent-soft); }
+.c-hora12 .c-ampm[disabled] { opacity: .35; cursor: not-allowed; }
+.field .c-hora12 input.c-hora { padding: 10px 12px; font-size: 13px; }
 /* Fechas calculadas (lote / vencimiento): solo lectura */
 .c-calc, .field input.c-calc { color: #2f6b52 !important; font-weight: 600; cursor: default; }
 
@@ -166,19 +266,39 @@
 .seg button {
   border: none; background: transparent; cursor: pointer;
   padding: 5px 9px; border-radius: 8px; min-width: 30px;
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; color: var(--text3);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; color: var(--text2);
 }
-.seg button:hover { color: var(--text2); }
+.seg button:hover { color: var(--accent); }
 .seg button.on { background: var(--bg); color: var(--accent); box-shadow: var(--nm-out-xs); }
 .seg button.on.v-bien { background: #d3ebdc; color: #1e5c3d; box-shadow: none; }   /* C / B */
 .seg button.on.v-mal  { background: #f5d7db; color: #8f1f30; box-shadow: none; }   /* NC / R */
+/* Los campos de una misma línea arrancan arriba, aunque uno sea más alto */
+#form-cuerpo .form-grid { align-items: start; }
+
+/* Anchos propios de un formato (Porción y tajado): se usan solo si caben en
+   una línea; si la tarjeta es más angosta, los campos se acomodan solos */
+.rejilla-cont { container-type: inline-size; }
+.form-grid.anchos-propios { grid-template-columns: var(--anchos); column-gap: 16px; }
+.form-grid.anchos-propios .chips { flex-wrap: nowrap; padding: 4px 2px; }
+@container (max-width: 975px) {
+  .form-grid.anchos-propios { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .form-grid.anchos-propios .chips { flex-wrap: wrap; }
+}
+/* Fichas de selección única: la elegida queda hundida y resaltada.
+   Van centradas a la altura de los demás campos de la línea */
+.chips-unica button { padding: 7px 11px; }
+.field .chips-unica { min-height: 44px; align-items: center; align-content: center; padding: 0 2px; }
+/* Opciones una debajo de otra (presentación de porción y tajado) */
+.seg-vert { display: inline-flex; flex-direction: column; align-items: stretch; }
+.seg-vert button { padding: 6px 12px; text-align: center; }
+.field .seg-vert { width: 100%; max-width: 200px; }
 
 /* Selección múltiple con fichas (presentación) */
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips button {
   border: none; cursor: pointer; padding: 6px 11px; border-radius: var(--pill);
   background: var(--bg); box-shadow: var(--nm-out-xs);
-  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; color: var(--text3);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11.5px; font-weight: 700; color: var(--text2);
 }
 .chips button.on { background: #d3ebdc; color: #1e5c3d; box-shadow: var(--nm-in-xs); }
 .field .chips { padding: 6px 2px; }
@@ -211,6 +331,9 @@
 .tabla-captura .th-hora { min-width: 96px; }
 .tabla-captura .th-hora .c-in { margin-top: 6px; }
 .tabla-captura td.celda-mat { min-width: 118px; }
+/* Una sola casilla para toda la fila (observaciones de cada fase) */
+.tabla-captura td.celda-unica { text-align: left; }
+.tabla-captura td.celda-unica .c-in { width: 100%; }
 .tabla-captura td .cual { margin-top: 6px; }
 .tabla-captura tbody tr:hover td { background: rgba(255,255,255,.35); }
 .tabla-captura tbody tr:hover td.col-fila { background: #eaeef4; }
@@ -227,9 +350,20 @@
 /* Cada bloque tiene su propio encabezado: si se quedan pegados arriba se
    ven flotando en mitad de la lista */
 .bloques-muestras .tabla-muestras th { position: static; }
-@media (max-width: 1400px) { .bloques-muestras { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 560px)  { .bloques-muestras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 6px; } }
-@media (max-width: 560px)  { .bloques-muestras .col-num { width: 34px; font-size: 11px; } .bloques-muestras td { padding: 4px 3px; } }
+/* Tablet acostada (y PC angosto): siguen los cinco bloques.
+   Tablet de pie: tres. Celular: dos. */
+@media (max-width: 1100px) { .bloques-muestras { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px)  {
+  .bloques-muestras { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 6px; }
+  .bloques-muestras .col-num { width: 34px; font-size: 11px; }
+  .bloques-muestras td { padding: 4px 3px; }
+}
+/* Con poco ancho por columna, el número y el campo se aprietan un poco */
+@media (max-width: 1500px) {
+  .bloques-muestras .col-num { width: 38px; }
+  .bloques-muestras td { padding: 5px 4px; }
+  .bloques-muestras .c-in { min-width: 56px; padding: 8px 8px; }
+}
 
 /* Muestras de peso: cinco bloques de 40, como en el papel */
 .tabla-muestras td { padding: 4px 6px; }
@@ -330,13 +464,36 @@
 .col-formato .nombre { font-weight: 600; font-size: 12.5px; }
 #tabla-historial td.nowrap { white-space: nowrap; }
 
+/* Estado del historial según la fecha del formato */
+#tabla-historial tr > td:first-child { box-shadow: inset 4px 0 0 transparent; white-space: nowrap; }
+#tabla-historial tr.est-hoy > td { background: rgba(47, 125, 92, .10); }
+#tabla-historial tr.est-hoy > td:first-child { box-shadow: inset 4px 0 0 var(--ok); }
+#tabla-historial tr.est-semana > td:first-child { box-shadow: inset 4px 0 0 var(--accent-soft); }
+#tabla-historial tr.est-viejo > td:first-child { box-shadow: inset 4px 0 0 #a9b8c2; }
+#tabla-historial tr.est-viejo > td:not(:last-child) { color: var(--text3); }
+#tabla-historial tr.est-viejo .col-formato .nombre { color: var(--text2); }
+#tabla-historial tr.est-viejo .punto-fmt { opacity: .55; }
+.chip-hoy {
+  display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: var(--pill);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 9.5px; font-weight: 800; letter-spacing: .06em;
+  color: #1e5c3d; background: #cde8d9; vertical-align: middle;
+}
+.leyenda-estado { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; font-size: 11.5px; color: var(--text2); }
+.leyenda-estado span { display: inline-flex; align-items: center; gap: 7px; }
+.leyenda-estado i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+.leyenda-estado .e-hoy    { background: var(--ok); }
+.leyenda-estado .e-semana { background: var(--accent-soft); }
+.leyenda-estado .e-viejo  { background: #a9b8c2; }
+
 /* ════════════════════════════════════════════════════════════════════
    TABLET Y MÓVIL
    La misma página: solo se contrae la barra lateral (quedan los íconos),
    se achican los márgenes y los formularios pasan a una columna.
    ════════════════════════════════════════════════════════════════════ */
-@media (max-width: 1100px) {
-  /* Barra lateral siempre contraída, sin tocar la preferencia del PC */
+/* La barra lateral se contrae en pantallas chicas y en cualquier pantalla
+   táctil de hasta 1400 px (tablet acostada), pero no en el PC de escritorio */
+@media (max-width: 1100px), (pointer: coarse) and (max-width: 1400px) {
+  /* Barra lateral contraída, sin tocar la preferencia del PC */
   .app .sidebar { width: 76px; min-width: 76px; }
   .app .sidebar-logo { justify-content: center; gap: 0; padding: 18px 10px 14px; }
   .app .sidebar-logo::after { left: 12px; right: 12px; }
@@ -525,6 +682,11 @@
           <button class="btn btn-sm" onclick="limpiarFiltros()">Limpiar filtros</button>
           <span class="conteo-filtro" id="h-conteo"></span>
         </div>
+        <div class="leyenda-estado">
+          <span><i class="e-hoy"></i>Hoy</span>
+          <span><i class="e-semana"></i>Últimos 7 días</span>
+          <span><i class="e-viejo"></i>Más de 7 días</span>
+        </div>
       </div>
 
       <div class="card">
@@ -604,12 +766,16 @@ window.APP = {
 //   sel    lista desplegable (ops)
 //   calc   fecha calculada: desde + dias (lote / fecha de vencimiento)
 //   fecha  fecha AAAA-MM-DD
-//   hora   hh:mm (se acepta 830, 8:30, 0830…)
-//   x      casilla que se marca con X
+//   hora   hh:mm en hora militar (se acepta 830, 8:30, 0830…)
+//   hora12 hora de 1 a 12 con AM / PM - se guarda en hora militar
+//   x      casilla que se marca con X (unico: 'grupo' = solo una por fila)
 //   marca  verificación: ✔ Cumple (C) - ✗ No cumple (NC) - NA No aplica
-//   op     una opción de una lista corta (botones)
+//   op     una opción de una lista corta (botones; vertical: true = en columna;
+//          estilo: 'fichas' = fichas separadas, como las de selección múltiple)
 //   chips  varias opciones de una lista (fichas)
 //   lista  texto libre con sugerencias
+// `tono`: color propio de cada formato (icono del inicio, viñeta de los
+// títulos y punto del historial). Todo lo demás sigue en azul #1B354A.
 // Las listas (cargos, tipo de queso, presentación, gramajes) están abajo,
 // en "Listas": se cambian ahí y se actualizan en todos los formatos.
 // ════════════════════════════════════════════════════════════════════════
@@ -636,14 +802,18 @@ const TIPOS_QUESO = [
 const OP_QUESO_LARGO = { ops: TIPOS_QUESO.map(q => q.nombre) };
 const OP_QUESO_CORTO = { ops: TIPOS_QUESO.map(q => q.ab), txt: Object.fromEntries(TIPOS_QUESO.map(q => [q.ab, q.nombre])) };
 const PRESENTACIONES = ['TAJADO', 'PORCION', 'BLOQUE'];
+// Gramaje: la misma lista en todos los formatos (no confundir con gramaje bloque)
 const GRAMAJES = ['10', '20', '25', '30', '35', '40', '45', '50', '60', '80', '90', '125', '250', '300', '350', '500', '2500'];
+// Gramaje bloque: la misma lista en todos los formatos que lo piden
 const GRAMAJES_BLOQUE = ['10', '20', '30', '45', '300', '350', '1800', '2000', '2100', '2200', '2400', '2500'];
+const MAQUINAS = ['FLOW PACK 1', 'FLOW PACK 2', 'FLOW PACK 3', 'TERMOFORMADORA 4',
+                  'SELLADORA DE PEDAL', 'EMPACADORA AL VACÍO'];
 const DIAS_VENCIMIENTO = 29;   // lote / fecha de vencimiento = fecha de fabricación + 29 días
 
 // ── Piezas repetidas ─────────────────────────────────────────────────────
 // Todos los campos de "Información general" son obligatorios
 const F_FECHA  = { k: 'fecha',  l: 'Fecha', t: 'fecha' };
-const F_TURNO  = { k: 'turno',  l: 'Turno', t: 'sel', ops: ['1', '2'] };
+const F_TURNO  = { k: 'turno',  l: 'Turno', t: 'sel', ops: ['1', '2', '3'] };
 const F_CODIGO = { k: 'codigo', l: 'Código', t: 'txt' };
 
 // Cierre común (observaciones y firmas). "Realizado por" y su cargo son
@@ -709,7 +879,7 @@ const ICONO = {
 const FORMATOS = [
 // ── 1. CONTROL PESO ──────────────────────────────────────────────────────
 {
-  id: 'CPUC', hoja: 'CONTROL PESO',
+  id: 'CPUC', hoja: 'CONTROL PESO', tono: '#2d5a7b',
   nombre: 'CONTROL PESO UNIDADES CORTADAS',
   codigo: 'M-GISI-CPUC-1', version: '1', actualizado: '30/04/2026',
   icono: ICONO.balanza,
@@ -719,7 +889,7 @@ const FORMATOS = [
     { tipo: 'campos', k: 'producto', titulo: 'Producto', columnas: 3, req: true, campos: [
       { k: 'tipo_queso',     l: 'Tipo de queso', t: 'sel', ...OP_QUESO_LARGO },
       { k: 'presentacion',   l: 'Presentación', t: 'sel', ops: PRESENTACIONES },
-      { k: 'gramaje',        l: 'Gramaje (g)', t: 'num', min: 0 },
+      { k: 'gramaje',        l: 'Gramaje (g)', t: 'sel', ops: GRAMAJES },
       { k: 'fecha_fab',      l: 'Fecha de fabricación (F.F.)', t: 'fecha' },
       { k: 'lote_vto',       l: 'Lote / fecha vencimiento (L/F. Vto.)', t: 'calc', desde: 'fecha_fab', dias: DIAS_VENCIMIENTO },
       { k: 'total_unidades', l: 'Total unidades cortadas', t: 'ent' },
@@ -732,7 +902,7 @@ const FORMATOS = [
 
 // ── 2. T SELLADO ─────────────────────────────────────────────────────────
 {
-  id: 'CTS', hoja: 'T SELLADO',
+  id: 'CTS', hoja: 'T SELLADO', tono: '#b0603c',
   nombre: 'CONTROL TEMPERATURA DE SELLADO EMPACADORAS',
   codigo: 'M-GISI-CTS-1', version: '1', actualizado: '01/05/2026',
   icono: ICONO.termometro,
@@ -742,12 +912,12 @@ const FORMATOS = [
     { tipo: 'campos', k: 'producto', titulo: 'Producto y máquina', columnas: 3, campos: [
       { k: 'tipo_queso',   l: 'Tipo de queso', t: 'sel', ...OP_QUESO_LARGO },
       { k: 'presentacion', l: 'Presentación', t: 'sel', ops: PRESENTACIONES },
-      { k: 'gramaje',      l: 'Gramaje', t: 'txt' },
+      { k: 'gramaje',      l: 'Gramaje', t: 'sel', ops: GRAMAJES },
       { k: 'lote_vto',     l: 'Lote / fecha vencimiento (L/F. Vto.)', t: 'fecha' },
-      { k: 'maquina',      l: '# Máquina', t: 'sel', ops: ['1', '2', '3'] },
+      { k: 'maquina',      l: '# Máquina', t: 'sel', ops: MAQUINAS },
     ]},
     { tipo: 'tabla', k: 'sellado', titulo: 'Temperaturas de sellado', filas: 20, columnas: [
-      { k: 'hora',  l: 'Hora', t: 'hora' },
+      { k: 'hora',  l: 'Hora', t: 'hora12' },
       { k: 'long',  l: 'Sellado longitudinal (°C)', t: 'num', min: 0 },
       { k: 'horiz', l: 'Sellado horizontal (°C)', t: 'num', min: 0 },
       { k: 'cumple', l: 'Cumple / No cumple', t: 'op', ...OP_CNC },
@@ -768,7 +938,7 @@ const FORMATOS = [
 
 // ── 3. CONTAMINACIÓN FÍSICA ─────────────────────────────────────────────
 {
-  id: 'FICF', hoja: 'CONTAMINACION FISICA',
+  id: 'FICF', hoja: 'CONTAMINACION FISICA', tono: '#6a5a9c',
   nombre: 'FORMATO INSPECCIÓN CONTAMINACIÓN FÍSICA',
   codigo: 'M-GISI-FICF-1', version: '1', actualizado: '21/04/2026',
   icono: ICONO.lupa,
@@ -782,27 +952,29 @@ const FORMATOS = [
               { l: 'OTROS', cual: true }, { l: 'OTROS', cual: true },
               { l: 'OTROS', cual: true }, { l: 'OTROS', cual: true }],
       columnas: [
+        // El tipo de queso y el origen son de selección única por fila: al marcar
+        // uno se desmarca el que estuviera marcado (unico: identifica el grupo)
         { k: 'total1', l: 'Total', t: 'ent', g: 'Producto afectado' },
-        { k: 'mz1', l: 'Mozarella', t: 'x', g: 'Producto afectado', color: 'azul' },
-        { k: 'dc1', l: 'Doble crema', t: 'x', g: 'Producto afectado', color: 'rojo' },
-        { k: 'cp1', l: 'Campesino', t: 'x', g: 'Producto afectado', color: 'verde' },
-        { k: 'pe1', l: 'Pera', t: 'x', g: 'Producto afectado', color: 'amarillo' },
+        { k: 'mz1', l: 'Mozarella', t: 'x', g: 'Producto afectado', color: 'azul', unico: 'queso1' },
+        { k: 'dc1', l: 'Doble crema', t: 'x', g: 'Producto afectado', color: 'rojo', unico: 'queso1' },
+        { k: 'cp1', l: 'Campesino', t: 'x', g: 'Producto afectado', color: 'verde', unico: 'queso1' },
+        { k: 'pe1', l: 'Pera', t: 'x', g: 'Producto afectado', color: 'amarillo', unico: 'queso1' },
         { k: 'lote1', l: 'Lote', t: 'fecha', g: 'Producto afectado' },
-        { k: 'gram1', l: 'Gramaje bloque', t: 'txt', g: 'Producto afectado' },
-        { k: 'pres1', l: 'Presentación final', t: 'txt', g: 'Producto afectado' },
+        { k: 'gram1', l: 'Gramaje bloque', t: 'sel', ops: GRAMAJES_BLOQUE, g: 'Producto afectado' },
+        { k: 'pres1', l: 'Presentación final', t: 'ent', g: 'Producto afectado' },
         // Segundo producto: solo aparece si se pulsa "+ Agregar producto afectado 2"
         { k: 'total2', l: 'Total', t: 'ent', g: 'Producto afectado 2', opc: 'p2' },
-        { k: 'mz2', l: 'Mozarella', t: 'x', g: 'Producto afectado 2', color: 'azul', opc: 'p2' },
-        { k: 'dc2', l: 'Doble crema', t: 'x', g: 'Producto afectado 2', color: 'rojo', opc: 'p2' },
-        { k: 'cp2', l: 'Campesino', t: 'x', g: 'Producto afectado 2', color: 'verde', opc: 'p2' },
-        { k: 'pe2', l: 'Pera', t: 'x', g: 'Producto afectado 2', color: 'amarillo', opc: 'p2' },
+        { k: 'mz2', l: 'Mozarella', t: 'x', g: 'Producto afectado 2', color: 'azul', opc: 'p2', unico: 'queso2' },
+        { k: 'dc2', l: 'Doble crema', t: 'x', g: 'Producto afectado 2', color: 'rojo', opc: 'p2', unico: 'queso2' },
+        { k: 'cp2', l: 'Campesino', t: 'x', g: 'Producto afectado 2', color: 'verde', opc: 'p2', unico: 'queso2' },
+        { k: 'pe2', l: 'Pera', t: 'x', g: 'Producto afectado 2', color: 'amarillo', opc: 'p2', unico: 'queso2' },
         { k: 'lote2', l: 'Lote', t: 'fecha', g: 'Producto afectado 2', opc: 'p2' },
-        { k: 'gram2', l: 'Gramaje bloque', t: 'txt', g: 'Producto afectado 2', opc: 'p2' },
-        { k: 'pres2', l: 'Presentación final', t: 'txt', g: 'Producto afectado 2', opc: 'p2' },
+        { k: 'gram2', l: 'Gramaje bloque', t: 'sel', ops: GRAMAJES_BLOQUE, g: 'Producto afectado 2', opc: 'p2' },
+        { k: 'pres2', l: 'Presentación final', t: 'ent', g: 'Producto afectado 2', opc: 'p2' },
         { k: 'correccion', l: 'Corrección', t: 'txt' },
-        { k: 'honda', l: 'Honda', t: 'x', g: 'Origen' },
-        { k: 'guaduas', l: 'Guaduas', t: 'x', g: 'Origen' },
-        { k: 'mosquera', l: 'Mosquera', t: 'x', g: 'Origen' },
+        { k: 'honda', l: 'Honda', t: 'x', g: 'Origen', unico: 'origen' },
+        { k: 'guaduas', l: 'Guaduas', t: 'x', g: 'Origen', unico: 'origen' },
+        { k: 'mosquera', l: 'Mosquera', t: 'x', g: 'Origen', unico: 'origen' },
         { k: 'accion', l: 'Acción correctiva', t: 'txt' },
       ]},
   ],
@@ -811,14 +983,14 @@ const FORMATOS = [
 
 // ── 4. RUTINA DE SANEAMIENTO ────────────────────────────────────────────
 {
-  id: 'RRS', hoja: 'RUTINA DE SANEAMIENTO',
+  id: 'RRS', hoja: 'RUTINA DE SANEAMIENTO', tono: '#2b7d7d',
   nombre: 'REGISTRO RUTINA DE SANEAMIENTO',
   codigo: 'M-GISI-RRS-1', version: '1', actualizado: '21/04/2026',
   icono: ICONO.gota,
   desc: 'Limpieza y desinfección de la planta de corte y empaque, con verificación por horas.',
   general: [F_FECHA, F_TURNO],
   bloques: [
-    { tipo: 'horas', k: 'horas', titulo: 'Horas de verificación', n: 5 },
+    { tipo: 'horas', k: 'horas', titulo: 'Horas de verificación', n: 5, ampm: true },
     { tipo: 'tabla', k: 'jornada', titulo: 'Durante la jornada laboral', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
       columnas: [...INFO_SANEAMIENTO, ...colsHora(5, 'horas')],
       filas: [
@@ -910,7 +1082,7 @@ const FORMATOS = [
 
 // ── 5. RUTINA DE SANEAMIENTO BODEGA ─────────────────────────────────────
 {
-  id: 'RRSADCFBEI', hoja: 'RUTINA DE SANEAMIENTO BODEGA',
+  id: 'RRSADCFBEI', hoja: 'RUTINA DE SANEAMIENTO BODEGA', tono: '#8a7327',
   nombre: 'REGISTRO RUTINA DE SANEAMIENTO ÁREA DE DESPACHO, CUARTOS FRÍOS Y BODEGA DE EMPAQUES E INSUMOS',
   corto: 'RUTINA DE SANEAMIENTO - DESPACHO, CUARTOS FRÍOS Y BODEGA',
   codigo: 'M-GISI-RRSADCFBEI-1', version: '1', actualizado: '21/04/2026',
@@ -918,7 +1090,7 @@ const FORMATOS = [
   desc: 'Limpieza de despacho, cuartos fríos y bodega de empaques, diaria a mensual.',
   general: [F_FECHA, F_TURNO],
   bloques: [
-    { tipo: 'horas', k: 'horas', titulo: 'Horas de verificación', n: 4 },
+    { tipo: 'horas', k: 'horas', titulo: 'Horas de verificación', n: 4, ampm: true },
     { tipo: 'tabla', k: 'diario', titulo: 'Diariamente', etiqueta: 'Aspecto a verificar', leyenda: LEYENDA_MARCA,
       columnas: [...INFO_BODEGA, ...colsHora(4, 'horas')],
       filas: [
@@ -986,7 +1158,7 @@ const FORMATOS = [
 
 // ── 6. ORGANOLÉPTICO ────────────────────────────────────────────────────
 {
-  id: 'EOPP', hoja: 'ORGANOLEPTICO',
+  id: 'EOPP', hoja: 'ORGANOLEPTICO', tono: '#2f7d5c',
   nombre: 'EVALUACIÓN ORGANOLÉPTICA PRODUCTO EN PROCESO',
   codigo: 'M-EOPP-1', version: '1', actualizado: '21/04/2026',
   icono: ICONO.ojo,
@@ -1002,41 +1174,42 @@ const FORMATOS = [
         { k: 'fecha_fab',    l: 'Fecha fabricación', t: 'fecha' },
         { k: 'lote_vto',     l: 'Lote / F. Vto', t: 'calc', desde: 'fecha_fab', dias: DIAS_VENCIMIENTO },
         { k: 'gramaje_bloque', l: 'Gramaje bloque', t: 'sel', ops: GRAMAJES_BLOQUE },
-        { k: 'presentacion', l: 'Presentación obtenida', t: 'chips', ops: ['TAJ', 'POR', 'CP', 'PR', 'Dd', 'Bq', 'Q.Bo'] },
+        { k: 'presentacion', l: 'Presentación obtenida', t: 'sel', ops: ['TAJ', 'POR', 'CP', 'PR', 'Dd', 'Bq', 'Q.Bo'],
+          txt: { TAJ: 'Tajado', POR: 'Porción', CP: 'Campesino', PR: 'Pera', Dd: 'Deditos', Bq: 'Bloque', 'Q.Bo': 'Queso con bocadillo' } },
         { grupo: 'Fase táctil y visual - 1. Apariencia externa de la horma' },
         { k: 'forma',   l: 'Forma', t: 'op', ...OP_RB },
         { k: 'corteza', l: 'Corteza', t: 'op', ...OP_RB },
-        { k: 'obs1',    l: 'Observaciones', t: 'txt' },
+        { k: 'obs1', unica: true, l: 'Observaciones', t: 'txt' },
         { grupo: 'Fase táctil y visual - 2. Textura' },
         { k: 'tv_elasticidad', l: 'Elasticidad', t: 'op', ...OP_RB },
         { k: 'tv_firmeza',     l: 'Firmeza', t: 'op', ...OP_RB },
-        { k: 'obs2',           l: 'Observaciones', t: 'txt' },
+        { k: 'obs2', unica: true, l: 'Observaciones', t: 'txt' },
         { grupo: 'Fase táctil y visual - 3. Rigurosidad' },
         { k: 'arenosa', l: 'Arenosa', t: 'op', ...OP_RB },
         { k: 'graso',   l: 'Graso', t: 'op', ...OP_RB },
-        { k: 'obs3',    l: 'Observaciones', t: 'txt' },
+        { k: 'obs3', unica: true, l: 'Observaciones', t: 'txt' },
         { grupo: 'Fase táctil y visual - 4. Humedad superficie (características táctiles en superficie)' },
         { k: 'contacto_seco', l: 'Contacto seco', t: 'op', ...OP_RB },
         { k: 'humedo',        l: 'Húmedo', t: 'op', ...OP_RB },
-        { k: 'obs4',          l: 'Observaciones', t: 'txt' },
+        { k: 'obs4', unica: true, l: 'Observaciones', t: 'txt' },
         { grupo: 'Fase táctil y visual - 5. Apariencia interna' },
         { k: 'color',     l: 'Color', t: 'op', ...OP_RB },
         { k: 'aberturas', l: 'Aberturas', t: 'op', ...OP_RB },
         { k: 'cristales', l: 'Cristales', t: 'op', ...OP_RB },
-        { k: 'obs5',      l: 'Observaciones', t: 'txt' },
+        { k: 'obs5', unica: true, l: 'Observaciones', t: 'txt' },
         { grupo: 'Fase olfativa y bucal - 6. Gusto' },
         { k: 'intensidad_olor', l: 'Intensidad de olor', t: 'op', ...OP_RB },
         { k: 'gusto_caract',    l: 'Gusto característico', t: 'op', ...OP_RB },
         { k: 'salado',          l: 'Salado (Alto, Medio o Bajo)', t: 'op', ops: ['A', 'M', 'Bj'], txt: { A: 'Alto', M: 'Medio', Bj: 'Bajo' } },
         { k: 'acido',           l: 'Ácido', t: 'op', ...OP_RB },
-        { k: 'obs6',            l: 'Observaciones', t: 'txt' },
+        { k: 'obs6', unica: true, l: 'Observaciones', t: 'txt' },
         { grupo: 'Fase olfativa y bucal - 7. Textura' },
         { k: 'ob_elasticidad', l: 'Elasticidad', t: 'op', ...OP_RB },
         { k: 'ob_firmeza',     l: 'Firmeza', t: 'op', ...OP_RB },
         { k: 'granuloso',      l: 'Granuloso', t: 'op', ...OP_RB },
         { k: 'adherencia',     l: 'Adherencia', t: 'op', ...OP_RB },
         { k: 'solubilidad',    l: 'Solubilidad', t: 'op', ...OP_RB },
-        { k: 'obs7',           l: 'Observaciones', t: 'txt' },
+        { k: 'obs7', unica: true, l: 'Observaciones', t: 'txt' },
       ]},
   ],
   nota: '<b>Nota:</b> diligenciar mediante evaluación sensorial del producto en proceso, registrando las características observadas en las fases táctil, visual, olfativa y bucal. Marcar los atributos según corresponda y consignar observaciones en caso de desviaciones. Completar la información del producto, lote, presentación y responsables de la evaluación.',
@@ -1044,15 +1217,19 @@ const FORMATOS = [
 
 // ── 7. PORCIÓN Y TAJADO ─────────────────────────────────────────────────
 {
-  id: 'RPCPCEQPT', hoja: 'PORCIÓN Y TAJADO',
+  id: 'RPCPCEQPT', hoja: 'PORCIÓN Y TAJADO', tono: '#8f3a52',
   nombre: 'REGISTRO PARÁMETROS DE CONTROL PROCESO DE CORTE Y EMPAQUE QUESO PORCIÓN Y TAJADO',
   corto: 'PARÁMETROS DE CONTROL - QUESO PORCIÓN Y TAJADO',
   codigo: 'M-GISI-RPCPCEQPT-1', version: '2', actualizado: '18/05/2026',
   icono: ICONO.tajado,
   desc: 'Parámetros de bloque, queso cortado, retal e insumos, evaluados por hora.',
+  // Anchos de la información general en el computador: presentación solo lo
+  // que ocupan sus tres fichas y responsable el campo más largo
+  anchosGeneral: 'minmax(140px,1fr) minmax(135px,.7fr) max-content minmax(160px,.8fr) minmax(240px,2fr)',
   general: [F_FECHA, F_TURNO,
-    { k: 'presentacion', l: 'Presentación', t: 'chips', ops: ['PORCIÓN', 'DEDITOS', 'TAJADO'] },
-    { k: 'linea', l: 'No. línea de corte', t: 'txt' },
+    // Selección única, con el aspecto de fichas separadas
+    { k: 'presentacion', l: 'Presentación', t: 'op', ops: ['PORCIÓN', 'DEDITOS', 'TAJADO'], estilo: 'fichas' },
+    { k: 'linea', l: 'No. línea de corte', t: 'sel', ops: ['1', '2', '3', '4', '5', '6'] },
     { k: 'responsable', l: 'Responsable', t: 'txt' }],
   bloques: [
     { tipo: 'matriz', k: 'parametros', titulo: 'Parámetros evaluados por hora', n: 9, enc: 'hora',
@@ -1062,7 +1239,7 @@ const FORMATOS = [
         { k: 'temp_area', l: 'Temperatura del área (°C)', t: 'num' },
         { grupo: 'Bloque' },
         { k: 'tipo_queso', l: 'Tipo de queso', t: 'sel', ...OP_QUESO_CORTO },
-        { k: 'gramaje_bloque', l: 'Gramaje del bloque', t: 'txt' },
+        { k: 'gramaje_bloque', l: 'Gramaje del bloque', t: 'sel', ops: GRAMAJES_BLOQUE },
         { k: 'fecha_prod_bloque', l: 'Codificado: fecha de producción', t: 'fecha' },
         { k: 'lote_vto_bloque', l: 'Codificado: lote / fecha vencimiento', t: 'calc', desde: 'fecha_prod_bloque', dias: DIAS_VENCIMIENTO },
         { k: 'temp_salida', l: 'Temperatura de salida del bloque del cuarto frío (°C)', t: 'num' },
@@ -1251,6 +1428,16 @@ function ctrl(def, b, r, c, modo, apagado) {
       return `<input type="text" readonly tabindex="-1" class="${cls} c-calc" data-calc="1" ${a} value="${esc(v ? fmtFecha(v) : '')}">`;
     case 'hora':
       return `<input type="text" class="${cls} c-hora" placeholder="hh:mm" maxlength="5" inputmode="numeric" data-t="hora" ${a} value="${val}">`;
+    case 'hora12': {
+      // Se escribe de 1 a 12 (solo números) y se elige AM o PM. Lo que se
+      // guarda es la hora militar: 8:30 + PM se guarda como 20:30.
+      const p = partesHora12(v);
+      return `<span class="c-hora12">
+        <input type="text" class="${cls} c-hora" placeholder="hh:mm" maxlength="5" inputmode="numeric" data-t="hora12" ${a} value="${esc(p.t)}">
+        <select class="c-ampm" data-t="ampm" ${a}>${['AM', 'PM'].map(o =>
+          `<option value="${o}"${p.ap === o ? ' selected' : ''}>${o}</option>`).join('')}</select>
+      </span>`;
+    }
     case 'area':
       return `<textarea rows="3" ${a}>${val}</textarea>`;
     case 'sel':
@@ -1261,7 +1448,7 @@ function ctrl(def, b, r, c, modo, apagado) {
     case 'marca':
       return `<button type="button" class="c-marca ${v ? 'm-' + v : ''}" data-t="marca" ${a}>${MARCA_TXT[v] || ''}</button>`;
     case 'op':
-      return `<div class="seg" role="group">${def.ops.map(o =>
+      return `<div class="${def.estilo === 'fichas' ? 'chips chips-unica' : 'seg' + (def.vertical ? ' seg-vert' : '')}" role="group">${def.ops.map(o =>
         `<button type="button" data-t="op" data-v="${esc(o)}" ${a} class="${v === o ? 'on' : ''} ${MALOS.includes(o) ? 'v-mal' : ''} ${BUENOS.includes(o) ? 'v-bien' : ''}" title="${esc(def.txt?.[o] || o)}">${esc(o)}</button>`
       ).join('')}</div>`;
     case 'chips': {
@@ -1295,12 +1482,23 @@ function tarjeta(titulo, cuerpo, sub) {
 }
 
 // req = todos obligatorios (Información general y bloques marcados)
-function rejilla(campos, columnas, req) {
-  const n = columnas || (campos.length <= 4 ? campos.length : 3);
-  const estilo = `grid-template-columns:repeat(${n},minmax(0,1fr))${n === 1 ? ';max-width:340px' : ''}`;
-  return `<div class="form-grid" style="${estilo}">${campos.map(c =>
-    `<div class="field" data-campo="${esc(c.k)}"${c.t === 'area' ? ' style="grid-column:1/-1"' : ''}><label>${esc(c.l)}${(req || c.req) ? ' *' : ''}</label>${ctrl(c, 'f', '', c.k, 'campo')}</div>`
-  ).join('')}</div>`;
+// Sin `columnas`, los campos se acomodan solos: en el computador caben todos
+// en una línea y al angostarse la pantalla van bajando.
+function rejilla(campos, columnas, req, anchos) {
+  // anchos: plantilla de columnas propia del formato (solo en pantallas anchas;
+  // cuando no cabe, la rejilla vuelve a acomodarse sola)
+  if (anchos) return `<div class="rejilla-cont"><div class="form-grid anchos-propios" style="--anchos:${anchos}">${campos.map(c =>
+    `<div class="field" data-campo="${esc(c.k)}"><label>${esc(c.l)}${(req || c.req) ? ' *' : ''}</label>${ctrl(c, 'f', '', c.k, 'campo')}</div>`
+  ).join('')}</div></div>`;
+  const estilo = columnas
+    ? `grid-template-columns:repeat(${columnas},minmax(0,1fr))${columnas === 1 ? ';max-width:340px' : ''}`
+    : `grid-template-columns:repeat(auto-fit,minmax(158px,1fr))${campos.length === 1 ? ';max-width:340px' : ''}`;
+  return `<div class="form-grid" style="${estilo}">${campos.map(c => {
+    // area = ancho completo; ancho: n = ocupa n columnas de la rejilla
+    const span = c.t === 'area' ? ' style="grid-column:1/-1"'
+               : c.ancho ? ` style="grid-column:span ${c.ancho}"` : '';
+    return `<div class="field" data-campo="${esc(c.k)}"${span}><label>${esc(c.l)}${(req || c.req) ? ' *' : ''}</label>${ctrl(c, 'f', '', c.k, 'campo')}</div>`;
+  }).join('')}</div>`;
 }
 
 // Campos del cierre del formato (observaciones, realizado por y cargo)
@@ -1395,6 +1593,10 @@ function alternarOpcional(bk, k) {
   renderFormulario(true);
 }
 
+// Columna donde se guardan las filas que llevan una sola casilla para toda la
+// matriz (las observaciones de cada fase del organoléptico)
+const COL_UNICA = '_u';
+
 // Columnas visibles de una matriz (Organoléptico empieza con 5 y crece hasta 10)
 const columnasMatriz = b => b.inicial ? Math.min(b.n, actual.ui[b.k + ':n'] || b.inicial) : b.n;
 
@@ -1424,6 +1626,8 @@ function matrizHTML(b) {
   const cuerpo = b.filas.map(fl => {
     if (fl.grupo) return `<tr class="fila-grupo"><td class="col-fila">${esc(fl.grupo)}</td><td colspan="${n}"></td></tr>`;
     if (fl.info)  return `<tr class="fila-info"><td class="col-fila">${esc(fl.l || '')}</td><td colspan="${n}">${esc(fl.info)}</td></tr>`;
+    // unica: una sola casilla para toda la fila (las observaciones de cada fase)
+    if (fl.unica) return `<tr><td class="col-fila">${esc(fl.l)}</td><td colspan="${n}" class="celda-mat celda-unica">${ctrl(fl, b.k, fl.k, COL_UNICA)}</td></tr>`;
     return `<tr><td class="col-fila">${esc(fl.l)}</td>` + Array.from({ length: n }, (_, i) =>
       `<td class="centro celda-mat">${ctrl(fl, b.k, fl.k, String(i), null, matrizApagada(b, i))}</td>`).join('') + '</tr>';
   }).join('');
@@ -1477,8 +1681,10 @@ function muestrasHTML(b) {
 }
 
 function horasHTML(b) {
-  const campos = Array.from({ length: b.n }, (_, i) => ({ k: String(i), l: 'Hora ' + (i + 1), t: 'hora' }));
-  return `<div class="form-grid" style="grid-template-columns:repeat(${b.n},minmax(0,1fr));max-width:${b.n * 150}px">${campos.map(c =>
+  const t = b.ampm ? 'hora12' : 'hora';
+  const ancho = b.ampm ? 190 : 150;
+  const campos = Array.from({ length: b.n }, (_, i) => ({ k: String(i), l: 'Hora ' + (i + 1), t }));
+  return `<div class="form-grid" style="grid-template-columns:repeat(${b.n},minmax(0,1fr));max-width:${b.n * ancho}px">${campos.map(c =>
       `<div class="field"><label>${c.l}</label>${ctrl(c, b.k, '_', c.k, 'campo')}</div>`).join('')}</div>`;
 }
 
@@ -1505,11 +1711,12 @@ function renderFormulario(conservarScroll) {
   const vista = $('view-formato'), y = vista.scrollTop;
   _listas = new Set();
   let h = fichaHTML(f);
-  h += tarjeta('Información general', rejilla(f.general, null, true));
+  h += tarjeta('Información general', rejilla(f.general, null, true, f.anchosGeneral));
   f.bloques.forEach(b => { h += bloqueHTML(b); });
   const cierre = cierreDe(f);
   h += tarjeta('Observaciones y firmas', rejilla(cierre, cierre.length - 1));
   h += `<div class="nota-formato">${f.criterios ? f.criterios + '<br><br>' : ''}${f.nota}</div>`;
+  $('form-cuerpo').style.setProperty('--tono', f.tono || 'var(--accent-mid)');
   $('form-cuerpo').innerHTML = h;
   if (conservarScroll) vista.scrollTop = y;
   espejarScrollTodos('#view-formato .table-wrap');
@@ -1564,6 +1771,35 @@ function actualizarEncabezadosHora() {
   });
 }
 
+// ── Horas de 12 con AM / PM ──────────────────────────────────────────────
+// En pantalla se escribe de 1 a 12 y se elige AM o PM; lo que se guarda (y lo
+// que se manda a la hoja) es siempre la hora militar 00:00 - 23:59.
+function partesHora12(v) {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(String(v ?? '').trim());
+  if (!m) return { t: String(v ?? ''), ap: 'AM' };
+  const h = +m[1];
+  return { t: pad2(h % 12 || 12) + ':' + m[2], ap: h >= 12 ? 'PM' : 'AM' };
+}
+
+// Deja solo números y dos puntos: así no entran letras ni símbolos
+const soloHora = s => String(s ?? '').replace(/[^\d:]/g, '').slice(0, 5);
+
+// Texto de 1 a 12 + AM/PM → hora militar. ok:false si la hora está mal escrita
+function armarHora12(txt, ap) {
+  const s = soloHora(txt).trim();
+  if (!s) return { v: '', ok: true };
+  let h, m;
+  const sep = /^(\d{1,2}):(\d{1,2})$/.exec(s);
+  if (sep) { h = +sep[1]; m = +sep[2]; }
+  else if (/^\d{1,2}$/.test(s)) { h = +s; m = 0; }
+  else if (/^\d{3}$/.test(s)) { h = +s[0]; m = +s.slice(1); }
+  else if (/^\d{4}$/.test(s)) { h = +s.slice(0, 2); m = +s.slice(2); }
+  else return { v: s, ok: false };
+  if (h < 1 || h > 12 || m > 59) return { v: s, ok: false };
+  h = (h % 12) + (ap === 'PM' ? 12 : 0);
+  return { v: pad2(h) + ':' + pad2(m), ok: true };
+}
+
 // Acepta 830, 0830, 8:30, 8.30, 8h30 → 08:30
 function normHora(s) {
   s = String(s || '').trim();
@@ -1602,6 +1838,25 @@ function recalcularFechas() {
   }));
 }
 
+// Guarda una hora de 12 (casilla + AM/PM) como hora militar. `el` puede ser
+// cualquiera de los dos: la casilla de la hora o la lista de AM/PM.
+function guardarHora12(el, normalizar) {
+  const caja = el.closest('.c-hora12');
+  if (!caja) return { ok: true };
+  const inp = caja.querySelector('input[data-t="hora12"]');
+  const sel = caja.querySelector('select.c-ampm');
+  const r = armarHora12(inp.value, sel ? sel.value : 'AM');
+  if (normalizar) {
+    inp.classList.toggle('c-malo', !r.ok);
+    if (r.ok && r.v) { const p = partesHora12(r.v); inp.value = p.t; if (sel) sel.value = p.ap; }
+  }
+  poner(inp.dataset.b, inp.dataset.r, inp.dataset.c, r.ok ? r.v : inp.value);
+  inp.closest('.field')?.classList.remove('falta');
+  actualizarEncabezadosHora();
+  aplicarHoras();
+  return r;
+}
+
 // ── Eventos del formulario (delegados, se instalan una sola vez) ─────────
 document.addEventListener('DOMContentLoaded', () => {
   const cont = $('form-cuerpo');
@@ -1611,6 +1866,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let v = el.value;
     const t = el.dataset.t;
     if (t === 'num') {
+      // Si escriben el punto del teclado numérico se vuelve coma al momento
+      if (v.includes('.')) {
+        const p = el.selectionStart;
+        v = v.replace(/\./g, ',');
+        el.value = v;
+        try { el.setSelectionRange(p, p); } catch (_) {}
+      }
       const n = leerDecimal(v);
       const malo = n === null || (el.dataset.min !== undefined && n !== '' && n < +el.dataset.min);
       el.classList.toggle('c-malo', malo);
@@ -1619,6 +1881,19 @@ document.addEventListener('DOMContentLoaded', () => {
       const malo = v !== '' && !/^\d+$/.test(v) || el.validity.badInput;
       el.classList.toggle('c-malo', !!malo);
       v = v === '' ? '' : (malo ? v : Number(v));
+    } else if (t === 'hora12' || t === 'ampm') {
+      if (t === 'hora12') {
+        // Solo números y dos puntos: no entran letras ni símbolos
+        const limpio = soloHora(v);
+        if (limpio !== v) {
+          const p = Math.max(0, el.selectionStart - (v.length - limpio.length));
+          el.value = limpio;
+          try { el.setSelectionRange(p, p); } catch (_) {}
+        }
+        el.classList.remove('c-malo');
+      }
+      guardarHora12(el);
+      return;
     } else if (el.type === 'text') v = v.toUpperCase();
     poner(el.dataset.b, el.dataset.r, el.dataset.c, v);
     el.closest('.field')?.classList.remove('falta');
@@ -1631,6 +1906,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = e.target;
     if (!actual || !el.dataset) return;
     if (el.dataset.t === 'num' && !el.classList.contains('c-malo')) el.value = mostrarDecimal(leerDecimal(el.value));
+    if (el.dataset.t === 'hora12' || el.dataset.t === 'ampm') return void guardarHora12(el, true);
     if (el.dataset.t !== 'hora') return;
     const n = normHora(el.value);
     el.value = n.v;
@@ -1657,7 +1933,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (t === 'x') {
       const nv = act ? '' : 'X';
       poner(b, r, c, nv);
-      btn.classList.toggle('on', !!nv); btn.textContent = nv; btn.setAttribute('aria-pressed', String(!!nv));
+      const pintar = (el, v) => { el.classList.toggle('on', !!v); el.textContent = v; el.setAttribute('aria-pressed', String(!!v)); };
+      pintar(btn, nv);
+      // Casillas de selección única (tipo de queso y origen): al marcar una se
+      // desmarcan las otras de esa misma fila
+      const blq = actual.fmt.bloques.find(x => x.k === b);
+      const def = blq?.columnas?.find(x => x.k === c);
+      if (nv && def?.unico) blq.columnas.filter(x => x.unico === def.unico && x.k !== c).forEach(x => {
+        poner(b, r, x.k, '');
+        const otro = document.querySelector(`#form-cuerpo button[data-b="${b}"][data-r="${r}"][data-c="${x.k}"]`);
+        if (otro) pintar(otro, '');
+      });
     } else if (t === 'marca') {
       const nv = MARCA_SIG[act || ''];
       poner(b, r, c, nv);
@@ -1740,7 +2026,9 @@ async function abrirRegistro(id) {
     fmt.bloques.filter(b => b.inicial).forEach(b => {
       let ultima = -1;
       Object.entries(datos[b.k] || {}).forEach(([r, fila]) => {
-        if (r !== '_enc') Object.keys(fila).forEach(i => { if (!esVacio(fila[i])) ultima = Math.max(ultima, +i); });
+        if (r !== '_enc') Object.keys(fila).forEach(i => {
+          if (/^\d+$/.test(i) && !esVacio(fila[i])) ultima = Math.max(ultima, +i);
+        });
       });
       actual.ui[b.k + ':n'] = Math.max(b.inicial, ultima + 1);
     });
@@ -1815,6 +2103,7 @@ function aplanar(f, d) {
       const enc = d[b.k]?._enc || {};
       b.filas.filter(fl => fl.k).forEach(fl => {
         const filaD = d[b.k]?.[fl.k] || {};
+        if (fl.unica) { push(tit, fl.l, '', filaD[COL_UNICA]); return; }
         for (let i = 0; i < b.n; i++) {
           if (b.enc === 'hora' && !enc[i]) continue;   // sin hora escrita no se envía
           const col = b.enc === 'hora' ? 'Hora ' + (i + 1) + (enc[i] ? ' (' + enc[i] + ')' : '') : b.enc + ' ' + (i + 1);
@@ -1926,8 +2215,9 @@ async function guardarFormato() {
   if (malas.length) return avisarFechasInvalidas(malas);
   const mal = document.querySelector('#form-cuerpo .c-malo');
   if (mal) {
-    const esHora = mal.dataset.t === 'hora';
-    toast(esHora ? 'Hay una hora mal escrita. Usa el formato hh:mm (por ejemplo 08:30).'
+    const esHora = mal.dataset.t === 'hora' || mal.dataset.t === 'hora12';
+    toast(mal.dataset.t === 'hora12' ? 'Hay una hora mal escrita. Escribe de 1 a 12 (por ejemplo 8:30) y elige AM o PM.'
+        : esHora ? 'Hay una hora mal escrita. Usa el formato hh:mm (por ejemplo 08:30).'
                  : 'Hay un número mal escrito (usa por ejemplo 40,4 o 40.4; los enteros sin decimales y sin negativos).', 'error');
     mal.closest('.card')?.classList.remove('collapsed');
     mal.focus();
@@ -2233,7 +2523,7 @@ function renderInicio() {
     const regs = registros.filter(r => r.formato === f.id);
     const delMes = regs.filter(r => String(r.fecha).startsWith(mes)).length;
     const ultimo = regs.reduce((m, r) => (r.fecha > m ? r.fecha : m), '');
-    return `<button class="formato-card" onclick="abrirFormato('${f.id}')">
+    return `<button class="formato-card" style="--tono:${f.tono}" onclick="abrirFormato('${f.id}')">
       <div class="fc-top">
         <span class="fc-icon">${f.icono}</span>
         <div><div class="fc-nombre">${esc(f.nombre)}</div><div class="fc-codigo">${esc(f.codigo)} - Versión ${esc(f.version)}</div></div>
@@ -2343,9 +2633,12 @@ function renderHistorial() {
     responsable: r => r.responsable, usuario: r => r.usuario,
     fecha_registro: r => r.fecha_registro,
   });
-  tbody.innerHTML = lista.map(r => `<tr>
-    <td class="mono">${esc(r._dia || r.fecha)}</td>
-    <td class="col-formato"><div class="nombre">${esc(r._fmt)}</div><div class="fc-codigo">${esc(r.codigo_formato || '')}</div></td>
+  // Estado por antigüedad de la fecha del formato: hoy, últimos 7 días, más antiguo
+  const hoy = hoyISO(), hace7 = sumarDias(hoy, -7);
+  const estado = r => r.fecha === hoy ? 'est-hoy' : (r.fecha < hace7 ? 'est-viejo' : 'est-semana');
+  tbody.innerHTML = lista.map(r => `<tr class="${estado(r)}">
+    <td class="mono">${esc(r._dia || r.fecha)}${r.fecha === hoy ? '<span class="chip-hoy">HOY</span>' : ''}</td>
+    <td class="col-formato"><div class="nombre"><i class="punto-fmt" style="--tono:${fmtPorId(r.formato)?.tono || 'var(--accent-mid)'}"></i>${esc(r._fmt)}</div><div class="fc-codigo">${esc(r.codigo_formato || '')}</div></td>
     <td>${esc(r.turno || '-')}</td>
     <td>${esc(r.codigo || '-')}</td>
     <td>${esc(r.responsable || '-')}</td>
@@ -2532,7 +2825,7 @@ async function revisarArchivosApp() {
   }));
   if (!faltan.length) { aviso.style.display = 'none'; return; }
   aviso.innerHTML = `<b>Para instalar la página como aplicación en la tablet faltan estos archivos en el repositorio:</b><br>` +
-    faltan.map(a => `<code>${esc(a)}</code>`).join(' · ') +
+    faltan.map(a => `<code>${esc(a)}</code>`).join(' - ') +
     `<br>Súbelos a la raíz del repositorio (Add file → Upload files) y vuelve a abrir esta página.`;
   aviso.style.display = '';
 }
