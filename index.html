@@ -2758,4 +2758,540 @@ function aISO(v) {
   if (v === '' || v == null) return '';
   if (typeof v === 'number' && v > 20000 && v < 80000)
     return new Date(Date.UTC(1899, 11, 30) + v * 86400000).toISOString().split('T')[0];
-  c
+  const t = String(v).trim();
+  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(t)) { const [a, m, d] = t.split('-'); return `${a}-${pad2(m)}-${pad2(d)}`; }
+  const m2 = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
+  if (m2) return `${m2[3]}-${pad2(m2[2])}-${pad2(m2[1])}`;
+  return t;
+}
+
+// Columnas por NOMBRE: el orden real se lee de la fila 1 de cada hoja
+const ordenHoja = {};
+const cols = (hoja, porDefecto) => ordenHoja[hoja] || porDefecto;
+function fijarOrden(hoja, cabecera, porDefecto) {
+  const nombres = (cabecera || []).map(h => String(h || '').trim().toLowerCase());
+  if (!nombres.length) { ordenHoja[hoja] = porDefecto; return; }
+  const faltan = porDefecto.filter(c => !nombres.includes(c));
+  if (faltan.length) {
+    ordenHoja[hoja] = porDefecto;
+    toast(`A la hoja ${hoja} le faltan columnas: ${faltan.join(', ')}. Revísala antes de guardar.`, 'error');
+    return;
+  }
+  ordenHoja[hoja] = nombres;
+}
+
+const celdaDe = v => {
+  if (v === '' || v === null || v === undefined) return {};
+  if (typeof v === 'number' && isFinite(v)) return { userEnteredValue: { numberValue: v } };
+  return { userEnteredValue: { stringValue: String(v) } };
+};
+const filaDe = (obj, columnas) => ({ values: objToRow(obj, columnas).map(celdaDe) });
+
+let guardando = false;
+async function conBloqueo(etiqueta, fn) {
+  if (guardando) { toast('Espera: hay un guardado en curso.', 'error'); return false; }
+  guardando = true;
+  const botones = [...document.querySelectorAll('#view-formato button, #view-historial button')];
+  botones.forEach(b => b.disabled = true);
+  const estado = $('sync-status');
+  const antes = estado.textContent;
+  estado.textContent = etiqueta + '...';
+  try {
+    await fn();
+    estado.textContent = 'Guardado ' + new Date().toLocaleTimeString('es-CO');
+    return true;
+  } catch (e) {
+    console.error(e);
+    estado.textContent = antes;
+    toast('No se pudo guardar en la hoja: ' + e.message, 'error');
+    return false;
+  } finally {
+    guardando = false;
+    botones.forEach(b => b.disabled = false);
+  }
+}
+
+// Crea las pestañas que falten (VALORES del año, MUESTRAS_PESO) con su
+// encabezado, y aprende el orden real de columnas de las que ya existen.
+async function asegurarHojas(hojas) {
+  await obtenerSheetId(HOJA_REG);
+  if (sheetIds[HOJA_REG] === undefined) throw new Error(`no existe la pestaña ${HOJA_REG} en el Google Sheets`);
+  const faltan = hojas.filter(h => sheetIds[h.nombre] === undefined);
+  if (faltan.length) {
+    const r = await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
+      addSheet: { properties: { title: h.nombre, gridProperties: { rowCount: 2000, columnCount: h.cols.length + 2 } } } })) }));
+    (r.replies || []).forEach(rep => {
+      const p = rep.addSheet?.properties;
+      if (p) sheetIds[p.title] = p.sheetId;
+    });
+    await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
+      updateCells: { rows: [{ values: h.cols.map(c => celdaDe(c)) }], fields: 'userEnteredValue',
+        start: { sheetId: sheetIds[h.nombre], rowIndex: 0, columnIndex: 0 } } })) }));
+    faltan.forEach(h => { ordenHoja[h.nombre] = h.cols; });
+  }
+  const porLeer = hojas.filter(h => !ordenHoja[h.nombre]);
+  if (porLeer.length) {
+    const d = await leerVarios(porLeer.map(h => `${h.nombre}!1:1`));
+    porLeer.forEach((h, i) => fijarOrden(h.nombre, d.valueRanges?.[i]?.values?.[0], h.cols));
+  }
+}
+
+// Dónde está el registro y sus filas en cada pestaña (índices 0-based)
+async function ubicar(id, hojas) {
+  const columnas = { [HOJA_REG]: COLS_REG, [HOJA_MUESTRAS]: COLS_MUESTRAS };
+  const rangos = hojas.map(h => {
+    const l = colLetra(cols(h, columnas[h] || COLS_VAL).indexOf('id_registro'));
+    return `${h}!${l}:${l}`;
+  });
+  const d = await leerVarios(rangos);
+  const salida = {};
+  hojas.forEach((h, i) => {
+    const out = [];
+    (d.valueRanges?.[i]?.values || []).forEach((f, j) => { if (j > 0 && String(f[0] ?? '').trim() === id) out.push(j); });
+    salida[h] = out;
+  });
+  return salida;
+}
+
+// Borra filas agrupando las contiguas, de abajo hacia arriba
+function pedirBorrado(req, hoja, indices) {
+  const orden = [...(indices || [])].sort((a, b) => a - b), rangos = [];
+  orden.forEach(i => { const u = rangos[rangos.length - 1]; if (u && u[1] === i) u[1] = i + 1; else rangos.push([i, i + 1]); });
+  rangos.reverse().forEach(([s, e]) => req.push({ deleteDimension: {
+    range: { sheetId: sheetIds[hoja], dimension: 'ROWS', startIndex: s, endIndex: e } } }));
+}
+function pedirAgregado(req, hoja, columnas, filas) {
+  if (!filas.length) return;
+  req.push({ appendCells: { sheetId: sheetIds[hoja], fields: 'userEnteredValue', rows: filas.map(f => filaDe(f, columnas)) } });
+}
+
+// Todo en UNA operación: Google la aplica entera o no aplica nada, así un
+// fallo a mitad de camino no deja el registro a medias.
+// `previo` es la fila de REGISTROS que se está editando (para saber en qué
+// pestaña de año estaba, por si se le cambió la fecha).
+async function escribirRegistro(idPrevio, reg, extra, previo) {
+  const hojaVal = hojaValores(reg.fecha);
+  const hojaValVieja = idPrevio ? hojaValores(previo?.fecha || reg.fecha) : null;
+  const tocaMuestras = !!extra.muestras || (idPrevio && previo?.formato === 'CPUC');
+
+  if (!hayHoja()) {
+    const D = window.DATOS_DEMO;
+    D.valores ??= []; D.muestras ??= [];
+    const i = D.registros.findIndex(r => r.id_registro === idPrevio);
+    if (i > -1) D.registros[i] = { ...reg }; else D.registros.push({ ...reg });
+    D.valores = D.valores.filter(v => v.id_registro !== reg.id_registro).concat(extra.vals);
+    D.muestras = D.muestras.filter(m => m.id_registro !== reg.id_registro);
+    if (extra.muestras) D.muestras.push(extra.muestras);
+    return;
+  }
+
+  const hojas = [{ nombre: hojaVal, cols: COLS_VAL }];
+  if (hojaValVieja && hojaValVieja !== hojaVal) hojas.push({ nombre: hojaValVieja, cols: COLS_VAL });
+  if (tocaMuestras) hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
+  await asegurarHojas(hojas);
+
+  const req = [];
+  if (idPrevio) {
+    const u = await ubicar(idPrevio, [HOJA_REG, ...hojas.map(h => h.nombre)]);
+    if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja (¿lo eliminó otra persona?). Pulsa Actualizar');
+    req.push({ updateCells: { rows: [filaDe(reg, cols(HOJA_REG, COLS_REG))], fields: 'userEnteredValue',
+      start: { sheetId: sheetIds[HOJA_REG], rowIndex: u[HOJA_REG][0], columnIndex: 0 } } });
+    hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
+  } else {
+    pedirAgregado(req, HOJA_REG, cols(HOJA_REG, COLS_REG), [reg]);
+  }
+  pedirAgregado(req, hojaVal, cols(hojaVal, COLS_VAL), extra.vals);
+  if (extra.muestras) pedirAgregado(req, HOJA_MUESTRAS, cols(HOJA_MUESTRAS, COLS_MUESTRAS), [extra.muestras]);
+  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+}
+
+async function borrarRegistro(id) {
+  const r = registros.find(x => x.id_registro === id);
+  if (!hayHoja()) {
+    const D = window.DATOS_DEMO;
+    D.registros = D.registros.filter(x => x.id_registro !== id);
+    D.valores = (D.valores || []).filter(v => v.id_registro !== id);
+    D.muestras = (D.muestras || []).filter(m => m.id_registro !== id);
+    return;
+  }
+  const hojas = [{ nombre: hojaValores(r?.fecha), cols: COLS_VAL }];
+  if (r?.formato === 'CPUC') hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
+  await asegurarHojas(hojas);
+  const u = await ubicar(id, [HOJA_REG, ...hojas.map(h => h.nombre)]);
+  if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja. Pulsa Actualizar');
+  const req = [];
+  pedirBorrado(req, HOJA_REG, u[HOJA_REG]);
+  hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
+  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+}
+
+// El JSON del formato se pide solo al abrirlo (el historial no lo necesita)
+async function obtenerDatos(reg) {
+  if (!hayHoja()) {
+    const r = (window.DATOS_DEMO?.registros || []).find(x => x.id_registro === reg.id_registro);
+    return JSON.parse(r?.datos || '{}');
+  }
+  const cr = cols(HOJA_REG, COLS_REG);
+  const lId = colLetra(cr.indexOf('id_registro')), lD = colLetra(cr.indexOf('datos'));
+  let fila = reg._fila + 1;              // número de fila en la hoja (1 = encabezado)
+  for (let intento = 0; intento < 2; intento++) {
+    const d = await leerVarios([`${HOJA_REG}!${lId}${fila}`, `${HOJA_REG}!${lD}${fila}`]);
+    const id = String(d.valueRanges?.[0]?.values?.[0]?.[0] ?? '').trim();
+    if (id === reg.id_registro) return JSON.parse(d.valueRanges?.[1]?.values?.[0]?.[0] || '{}');
+    const u = await ubicar(reg.id_registro);   // alguien movió filas: se busca de nuevo
+    if (u.reg === undefined) throw new Error('el registro ya no existe en la hoja. Pulsa Actualizar');
+    fila = u.reg + 1;
+  }
+  throw new Error('no se pudo ubicar el registro en la hoja');
+}
+
+// ── Carga ────────────────────────────────────────────────────────────────
+async function cargarDatos() {
+  const st = $('sync-status');
+  st.textContent = 'Cargando...';
+  try {
+    if (!hayHoja()) {
+      registros = (window.DATOS_DEMO?.registros || []).map((r, i) => ({ ...r, _fila: i + 1 }));
+    } else {
+      const cab = await leerVarios([`${HOJA_REG}!1:1`]);
+      fijarOrden(HOJA_REG, cab.valueRanges?.[0]?.values?.[0], COLS_REG);
+      const cr = cols(HOJA_REG, COLS_REG);
+      // Si "datos" es la última columna no se descarga (es lo más pesado)
+      const aLeer = cr[cr.length - 1] === 'datos' ? cr.slice(0, -1) : cr;
+      const d = await leerRango(`${HOJA_REG}!A2:${colLetra(aLeer.length - 1)}`);
+      registros = (d.values || []).map((f, i) => ({ ...rowToObj(f, aLeer), _fila: i + 1 }))
+        .filter(r => String(r.id_registro ?? '').trim());
+    }
+    registros.forEach(prepararRegistro);
+    renderInicio();
+    prepararFiltros();
+    renderHistorial();
+    const hora = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    st.textContent = hayHoja() ? 'Actualizado ' + hora : (window.DATOS_DEMO ? 'Demo - sin guardar en Google' : 'Sin hoja configurada');
+  } catch (e) {
+    console.error(e);
+    st.textContent = 'Error al cargar';
+    if (e.message !== '401') toast('No se pudo leer la hoja: ' + e.message, 'error');
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// INICIO
+// ════════════════════════════════════════════════════════════════════════
+function renderInicio() {
+  const mes = hoyISO().slice(0, 7);
+  $('formatos-grid').innerHTML = FORMATOS.map(f => {
+    const regs = registros.filter(r => r.formato === f.id);
+    const delMes = regs.filter(r => String(r.fecha).startsWith(mes)).length;
+    const ultimo = regs.reduce((m, r) => (r.fecha > m ? r.fecha : m), '');
+    return `<button class="formato-card" style="--tono:${f.tono}" onclick="abrirFormato('${f.id}')">
+      <div class="fc-top">
+        <span class="fc-icon">${f.icono}</span>
+        <div><div class="fc-nombre">${esc(f.nombre)}</div><div class="fc-codigo">${esc(f.codigo)} - Versión ${esc(f.version)}</div></div>
+      </div>
+      <div class="fc-desc">${esc(f.desc)}</div>
+      <div class="fc-pie">
+        <span><b>${delMes}</b> este mes - último ${ultimo ? fmtFecha(ultimo) : '-'}</span>
+        <span class="fc-llenar">Diligenciar →</span>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// HISTORIAL
+// ════════════════════════════════════════════════════════════════════════
+// Semana juliana = semana ISO (empieza el lunes; la 1 contiene el primer jueves)
+function semanaJuliana(fechaISO) {
+  const d = new Date(fechaISO + 'T12:00:00');
+  const j = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  j.setUTCDate(j.getUTCDate() + 4 - (j.getUTCDay() || 7));
+  const enero1 = new Date(Date.UTC(j.getUTCFullYear(), 0, 1));
+  return Math.ceil(((j - enero1) / 86400000 + 1) / 7);
+}
+// '2026-09-21 11:34:02' → '21/09/2026 11:34'
+function fmtRegistro(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(String(s || ''));
+  return m ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : (s || '-');
+}
+const Q1 = 'Q1 (del 1 al 15)', Q2 = 'Q2 (del 16 al fin de mes)';
+
+function prepararRegistro(r) {
+  r.id_registro = String(r.id_registro).trim();
+  r.fecha = aISO(r.fecha);
+  ['formato', 'turno', 'codigo', 'responsable', 'usuario', 'fecha_registro', 'observaciones']
+    .forEach(k => { r[k] = String(r[k] ?? '').trim(); });
+  const f = fmtPorId(r.formato);
+  r._fmt = f ? f.nombre : (r.nombre_formato || r.formato);
+  const ok = /^\d{4}-\d{2}-\d{2}$/.test(r.fecha);
+  r._anio = ok ? r.fecha.slice(0, 4) : '';
+  r._mes = ok ? MESES[+r.fecha.slice(5, 7) - 1] : '';
+  r._q = ok ? (+r.fecha.slice(8, 10) <= 15 ? Q1 : Q2) : '';
+  r._sem = ok ? 'Semana ' + semanaJuliana(r.fecha) : '';
+  r._dia = ok ? fmtFecha(r.fecha) : '';
+  r._resp = r.responsable || '(Sin responsable)';
+}
+
+const FILTROS = { formato: [], responsable: [], anio: [], mes: [], quincena: [], semana: [], dia: [] };
+const CAMPO_FILTRO = { formato: '_fmt', responsable: '_resp', anio: '_anio', mes: '_mes', quincena: '_q', semana: '_sem', dia: '_dia' };
+const ETIQUETA_FILTRO = { formato: 'Formato', responsable: 'Responsable', anio: 'Año', mes: 'Mes',
+  quincena: 'Quincena', semana: 'Semana juliana', dia: 'Día' };
+const selectores = {};
+
+function opcionesFiltro(clave) {
+  const unicos = [...new Set(registros.map(r => r[CAMPO_FILTRO[clave]]).filter(Boolean))];
+  switch (clave) {
+    case 'formato':  return FORMATOS.map(f => f.nombre);
+    case 'anio':     return unicos.sort().reverse();
+    case 'mes':      return MESES.filter(m => unicos.includes(m));
+    case 'quincena': return [Q1, Q2];
+    case 'semana':   return unicos.sort((a, b) => parseInt(b.slice(7)) - parseInt(a.slice(7)));
+    case 'dia': {
+      const aISOcorto = s => s.split('/').reverse().join('-');
+      return unicos.sort((a, b) => aISOcorto(b).localeCompare(aISOcorto(a)));
+    }
+    default:         return unicos.sort((a, b) => a.localeCompare(b, 'es'));
+  }
+}
+
+function prepararFiltros() {
+  Object.keys(FILTROS).forEach(clave => {
+    if (!selectores[clave]) {
+      selectores[clave] = buildMultiSelect(ETIQUETA_FILTRO[clave], opcionesFiltro(clave), FILTROS[clave], renderHistorial);
+      $('h-ms-' + clave).appendChild(selectores[clave]);
+    } else selectores[clave].updateOptions(opcionesFiltro(clave));
+  });
+}
+
+function limpiarFiltros() {
+  Object.keys(FILTROS).forEach(k => { FILTROS[k].length = 0; selectores[k]?.updateOptions(opcionesFiltro(k)); });
+  $('h-buscar').value = '';
+  renderHistorial();
+}
+
+function registrosFiltrados() {
+  const q = ($('h-buscar')?.value || '').trim().toLowerCase();
+  return registros.filter(r => {
+    for (const k of Object.keys(FILTROS)) {
+      if (FILTROS[k].length && !FILTROS[k].includes(r[CAMPO_FILTRO[k]])) return false;
+    }
+    if (q) {
+      const texto = [r._fmt, r.codigo_formato, r.turno, r.codigo, r.responsable,
+                     r.usuario, r.observaciones, r._dia].join(' ').toLowerCase();
+      if (!texto.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderHistorial() {
+  const tbody = $('tbody-historial');
+  if (!tbody) return;
+  let lista = registrosFiltrados()
+    .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fecha_registro.localeCompare(a.fecha_registro));
+  lista = aplicarOrden(lista, 'historial', {
+    fecha: r => r.fecha, formato: r => r._fmt, turno: r => r.turno, codigo: r => r.codigo,
+    responsable: r => r.responsable, usuario: r => r.usuario,
+    fecha_registro: r => r.fecha_registro,
+  });
+  // Estado por antigüedad de la fecha del formato: hoy, últimos 7 días, más antiguo
+  const hoy = hoyISO(), hace7 = sumarDias(hoy, -7);
+  const estado = r => r.fecha === hoy ? 'est-hoy' : (r.fecha < hace7 ? 'est-viejo' : 'est-semana');
+  tbody.innerHTML = lista.map(r => `<tr class="${estado(r)}">
+    <td class="mono">${esc(r._dia || r.fecha)}${r.fecha === hoy ? '<span class="chip-hoy">HOY</span>' : ''}</td>
+    <td class="col-formato"><div class="nombre"><i class="punto-fmt" style="--tono:${fmtPorId(r.formato)?.tono || 'var(--accent-mid)'}"></i>${esc(r._fmt)}</div><div class="fc-codigo">${esc(r.codigo_formato || '')}</div></td>
+    <td>${esc(r.turno || '-')}</td>
+    <td>${esc(r.codigo || '-')}</td>
+    <td>${esc(r.responsable || '-')}</td>
+    <td class="text-muted" style="font-size:12px" title="${esc(r.usuario)}">${esc((r.usuario || '-').split('@')[0])}</td>
+    <td class="mono text-muted nowrap" style="font-size:11.5px">${esc(fmtRegistro(r.fecha_registro))}</td>
+    <td class="nowrap"><div class="acciones-fila">
+      <button class="btn btn-xs" onclick="abrirRegistro('${esc(r.id_registro)}')">Ver / editar</button>
+      ${isAdmin() ? `<button class="btn btn-xs btn-danger" onclick="eliminarRegistro('${esc(r.id_registro)}')">Eliminar</button>` : ''}
+    </div></td>
+  </tr>`).join('');
+  $('historial-vacio').style.display = lista.length ? 'none' : '';
+  prepararOrden('#tabla-historial', 'historial', renderHistorial);
+
+  const unicos = campo => new Set(lista.map(r => r[campo]).filter(Boolean)).size;
+  $('m-registros').textContent = lista.length.toLocaleString('es-CO');
+  $('m-formatos').textContent = unicos('formato');
+  $('m-responsables').textContent = new Set(lista.map(r => r.responsable).filter(Boolean)).size;
+  $('m-dias').textContent = unicos('fecha');
+  const fechas = lista.map(r => r.fecha).filter(Boolean).sort();
+  $('m-rango').textContent = fechas.length ? `${fmtFecha(fechas[0])} - ${fmtFecha(fechas[fechas.length - 1])}` : '-';
+  $('h-conteo').textContent = `${lista.length} de ${registros.length} registros`;
+  espejarScrollTodos('#view-historial .table-wrap');
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BARRA DE DESPLAZAMIENTO SUPERIOR (portada del módulo de Mosquera/Honda)
+// Cuando una tabla es más ancha que la pantalla, arriba aparece una barra
+// que acompaña al bajar, con una copia del encabezado sincronizada.
+// ════════════════════════════════════════════════════════════════════════
+function espejarScroll(wrap) {
+  if (!wrap || !wrap.parentNode) return;
+  let esp = wrap.previousElementSibling;
+  if (!esp || !esp.classList || !esp.classList.contains('scroll-espejo')) {
+    esp = document.createElement('div');
+    esp.className = 'scroll-espejo';
+    esp.innerHTML = '<div class="espejo-barra"><div></div></div><div class="espejo-head"></div>';
+    wrap.parentNode.insertBefore(esp, wrap);
+    esp._barra = esp.querySelector('.espejo-barra');
+    esp._cab   = esp.querySelector('.espejo-head');
+    esp._wrap  = wrap;
+
+    // Sincronizar las dos barras tiene una trampa: cada escritura nuestra
+    // dispara otro evento de scroll, y ese eco llega un cuadro tarde. Si se
+    // atiende, devuelve la barra a la posición vieja - eso era el tirón.
+    // Se recuerda el último valor escrito: si el evento trae justo ese valor
+    // es nuestro propio eco y se ignora. Se aplica en el acto (sin rAF) para
+    // que barra y tabla se muevan en el mismo cuadro. (Portado de Mosquera.)
+    esp._ultimo = -1;
+    const aplicar = x => {
+      esp._ultimo = x;
+      if (Math.round(wrap.scrollLeft)       !== x) wrap.scrollLeft       = x;
+      if (Math.round(esp._barra.scrollLeft) !== x) esp._barra.scrollLeft = x;
+      if (esp.classList.contains('con-encabezado') &&
+          Math.round(esp._cab.scrollLeft) !== x) esp._cab.scrollLeft = x;
+    };
+    const alDesplazar = origen => () => {
+      const x = Math.round(origen.scrollLeft);
+      if (x === esp._ultimo) return;
+      aplicar(x);
+    };
+    esp._aplicar = aplicar;
+    esp._barra.addEventListener('scroll', alDesplazar(esp._barra), { passive: true });
+    wrap.addEventListener('scroll',       alDesplazar(wrap),       { passive: true });
+    vigilarEncabezado(esp.closest('.view'));
+  }
+
+  const ancho = wrap.scrollWidth;
+  if (!wrap.clientWidth) { esp.style.display = 'none'; return; }
+  esp._barra.firstElementChild.style.width = ancho + 'px';
+  esp.style.display = ancho > wrap.clientWidth + 1 ? '' : 'none';
+  // Si el navegador usa barras superpuestas no ocupan alto: se reserva a mano
+  esp._barra.style.blockSize = '';
+  if (esp._barra.offsetHeight - esp._barra.clientHeight === 0) esp._barra.style.blockSize = '14px';
+
+  clonarEncabezado(esp);
+  actualizarPegada(esp);
+  esp._aplicar(Math.round(wrap.scrollLeft));
+}
+
+// Copia del encabezado con los anchos ya medidos, para que las columnas
+// calcen. Los clics se reenvían al encabezado real (ordenar sigue sirviendo)
+// y las horas escritas se copian como texto: la copia no se edita.
+function clonarEncabezado(esp) {
+  const tabla = esp._wrap.querySelector('table.data-table');
+  if (!tabla || !tabla.tHead) { esp._cab.innerHTML = ''; return; }
+  const copia = document.createElement('table');
+  copia.className = tabla.className;
+  copia.style.tableLayout = 'fixed';
+  copia.style.width = tabla.getBoundingClientRect().width + 'px';
+  copia.appendChild(tabla.tHead.cloneNode(true));
+
+  // La última fila del encabezado es la de las columnas reales (la primera
+  // puede llevar colspan de grupo)
+  const ultima = t => t.rows[t.rows.length - 1];
+  const reales = ultima(tabla.tHead).cells;
+  const copias = ultima(copia.tHead).cells;
+  for (let i = 0; i < copias.length && i < reales.length; i++) {
+    const ancho = reales[i].getBoundingClientRect().width + 'px';
+    copias[i].style.width = copias[i].style.minWidth = copias[i].style.maxWidth = ancho;
+    if (reales[i].dataset.orden) {
+      const real = reales[i];
+      copias[i].style.cursor = 'pointer';
+      copias[i].addEventListener('click', () => real.click());
+    }
+  }
+  copia.querySelectorAll('input').forEach(inp => {
+    const orig = tabla.tHead.querySelector(`input[data-b="${inp.dataset.b}"][data-r="${inp.dataset.r}"][data-c="${inp.dataset.c}"]`);
+    const span = document.createElement('span');
+    span.className = 'hora-copia';
+    span.textContent = orig?.value || '--:--';
+    inp.replaceWith(span);
+  });
+  esp._cab.innerHTML = '';
+  esp._cab.appendChild(copia);
+}
+
+// Muestra la copia del encabezado solo cuando el real ya pasó por debajo
+function actualizarPegada(esp) {
+  const vista = esp.closest('.view');
+  const tabla = esp._wrap && esp._wrap.querySelector('table.data-table');
+  if (!vista || !tabla || esp.style.display === 'none') return;
+  const cs = getComputedStyle(vista);
+  const tope = vista.getBoundingClientRect().top + parseFloat(cs.paddingTop || 0);
+  const altoBarra = esp._barra.offsetHeight;
+  const rTabla = tabla.getBoundingClientRect();
+  const rCabeza = tabla.tHead ? tabla.tHead.getBoundingClientRect() : rTabla;
+  const enElTope = esp.getBoundingClientRect().top <= tope + 1;
+  const mostrar = enElTope && rCabeza.bottom < tope + altoBarra + 4
+                  && rTabla.bottom > tope + altoBarra + 50;
+  const cambio = mostrar !== esp.classList.contains('con-encabezado');
+  if (cambio && mostrar) clonarEncabezado(esp);
+  esp.classList.toggle('con-encabezado', mostrar);
+  esp.classList.toggle('pegada', enElTope);
+  if (cambio && mostrar) esp._cab.scrollLeft = Math.round(esp._wrap.scrollLeft);
+}
+
+function vigilarEncabezado(vista) {
+  if (!vista || vista._vigilada) return;
+  vista._vigilada = true;
+  let cuadro = 0;
+  vista.addEventListener('scroll', () => {
+    if (cuadro) return;
+    cuadro = requestAnimationFrame(() => {
+      cuadro = 0;
+      vista.querySelectorAll('.scroll-espejo').forEach(actualizarPegada);
+    });
+  }, { passive: true });
+}
+
+function espejarScrollTodos(selector) {
+  requestAnimationFrame(() => document.querySelectorAll(selector).forEach(espejarScroll));
+}
+window.addEventListener('resize', () => espejarScrollTodos('.view.active .table-wrap'));
+// La barra lateral cambia el ancho disponible: se recalcula al terminar su animación
+document.addEventListener('click', e => {
+  if (e.target.closest('#btn-sidebar')) setTimeout(() => espejarScrollTodos('.view.active .table-wrap'), 400);
+});
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════
+// APLICACIÓN INSTALABLE (tablet)
+// Con manifest.webmanifest + este service worker, Chrome instala la página
+// como aplicación: se abre a pantalla completa, sin la barra del navegador.
+// Sirve para que la planta la use como una app más en la tablet.
+// ════════════════════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW no registrado:', e));
+  });
+}
+
+// Si alguno de esos archivos no quedó subido al repositorio, la tablet no
+// puede instalar la aplicación y no hay forma de adivinar por qué. Se
+// comprueba al abrir el inicio y se avisa con el nombre exacto que falta.
+async function revisarArchivosApp() {
+  const aviso = document.getElementById('aviso-instalacion');
+  if (!aviso || !location.protocol.startsWith('http')) return;
+  const archivos = ['manifest.webmanifest', 'sw.js', 'icono-192.png', 'icono-512.png', 'icono-maskable-512.png'];
+  const faltan = [];
+  await Promise.all(archivos.map(async a => {
+    try { const r = await fetch(a, { method: 'HEAD', cache: 'no-store' }); if (!r.ok) faltan.push(a); }
+    catch (e) { faltan.push(a); }
+  }));
+  if (!faltan.length) { aviso.style.display = 'none'; return; }
+  aviso.innerHTML = `<b>Para instalar la página como aplicación en la tablet faltan estos archivos en el repositorio:</b><br>` +
+    faltan.map(a => `<code>${esc(a)}</code>`).join(' - ') +
+    `<br>Súbelos a la raíz del repositorio (Add file → Upload files) y vuelve a abrir esta página.`;
+  aviso.style.display = '';
+}
+window.addEventListener('load', () => setTimeout(revisarArchivosApp, 1500));
+</script>
+
+</body>
+</html>
