@@ -68,6 +68,7 @@
      más claro arriba a la izquierda, para que la tarjeta se vea abombada */
   --nm-curvo: linear-gradient(145deg, #deeef3, #cadde4);
   --tono: var(--accent-mid);      /* color propio del formato abierto */
+  --aviso: #d08f1c;               /* ámbar de los avisos que no bloquean */
 }
 
 /* La barra lateral conserva el azul verdoso #c5d9e0 con su propia luz y sombra */
@@ -335,8 +336,11 @@
 .tabla-captura td.celda-unica { text-align: left; }
 .tabla-captura td.celda-unica .c-in { width: 100%; }
 .tabla-captura td .cual { margin-top: 6px; }
-.tabla-captura tbody tr:hover td { background: rgba(255,255,255,.35); }
-.tabla-captura tbody tr:hover td.col-fila { background: #eaeef4; }
+/* Resaltado al pasar el mouse: solo con mouse (en la tablet se quedaba pegado) */
+@media (hover: hover) {
+  .tabla-captura tbody tr:hover td { background: rgba(255,255,255,.35); }
+  .tabla-captura tbody tr:hover td.col-fila { background: #eaeef4; }
+}
 
 /* Muestras de peso: cinco bloques de 40, cada uno su propia tabla */
 /* Rejilla pareja: los cinco bloques ocupan lo mismo y, al pasar a dos
@@ -378,12 +382,93 @@
 .resumen-peso .metric-value { font-size: 22px; }
 @media (max-width: 1100px) { .resumen-peso { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
-/* Referencia y notas del formato */
+/* Referencia y notas del formato (plegables: abiertas en el PC, cerradas en la tablet) */
 .nota-formato {
   font-size: 12px; color: var(--text2); line-height: 1.6;
-  padding: 16px 20px; border-radius: var(--radius); background: var(--bg); box-shadow: var(--nm-in-xs);
+  padding: 14px 20px; border-radius: var(--radius); background: var(--bg); box-shadow: var(--nm-in-xs);
   margin-top: 18px;
 }
+.nota-formato summary {
+  cursor: pointer; font-weight: 700; color: var(--accent); font-size: 12.5px;
+  list-style: none; display: flex; align-items: center; gap: 8px; min-height: 28px;
+}
+.nota-formato summary::-webkit-details-marker { display: none; }
+.nota-formato summary::before { content: '▸'; color: var(--text3); transition: transform .2s ease; }
+.nota-formato[open] summary::before { transform: rotate(90deg); }
+.nota-formato .nota-texto { margin-top: 10px; }
+
+/* Revisión antes de guardar */
+.dlg-revisar {
+  border: none; margin: auto; padding: 26px 28px 22px; width: min(560px, calc(100vw - 32px));
+  border-radius: var(--radius-lg); background: var(--nm-curvo); color: var(--text);
+  box-shadow: var(--nm-out);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.dlg-revisar::backdrop { background: rgba(27, 53, 74, .35); backdrop-filter: blur(2px); }
+.dlg-titulo { font-size: 17px; font-weight: 700; color: var(--accent); }
+.dlg-sub { font-size: 12.5px; color: var(--text2); margin: 4px 0 16px; }
+#dlg-revisar-lista { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 10px; max-height: 50vh; overflow: auto; }
+#dlg-revisar-lista li {
+  font-size: 13px; line-height: 1.5; padding: 11px 14px 11px 16px; border-radius: var(--radius-xs);
+  background: var(--bg); box-shadow: var(--nm-in-xs), inset 4px 0 0 var(--aviso);
+}
+#dlg-revisar-lista li.info { box-shadow: var(--nm-in-xs), inset 4px 0 0 var(--accent-soft); }
+#dlg-revisar-lista b { color: var(--accent); }
+.dlg-acciones { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+
+/* Aviso de borrador sin guardar */
+.aviso-borrador {
+  display: flex; align-items: center; gap: 14px 18px; flex-wrap: wrap;
+  margin: 0 0 22px; padding: 16px 20px; border-radius: var(--radius);
+  background: #f3e6c4; box-shadow: var(--nm-out-sm);
+  font-size: 13px; color: #5c4300; line-height: 1.5;
+}
+.aviso-borrador b { color: #3f2e00; }
+.aviso-borrador-acc { display: flex; gap: 10px; margin-left: auto; }
+
+/* ── Información de consulta plegable ──────────────────────────────── */
+/* Con la información escondida desaparecen sus columnas y cada fila
+   muestra una "i" que abre el detalle justo debajo */
+.oculta-info .col-info { display: none; }
+.fila-lbl { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.btn-i {
+  display: none; flex: 0 0 auto; width: 30px; height: 30px; border: none; border-radius: 50%;
+  background: var(--bg); box-shadow: var(--nm-out-xs); cursor: pointer;
+  font-family: Georgia, serif; font-style: italic; font-weight: 700; font-size: 14px; color: var(--accent-mid);
+}
+.btn-i.on { box-shadow: var(--nm-in-xs); color: var(--tono); }
+.oculta-info .btn-i { display: inline-block; }
+.lbl-corto { display: none; }
+.oculta-info .lbl-corto { display: inline; }
+.oculta-info .lbl-largo { display: none; }
+.fila-detalle { display: none; }
+.oculta-info .fila-detalle.abierta { display: table-row; }
+.tabla-captura tr.fila-detalle td { padding: 4px 10px 12px; background: transparent !important; }
+.detalle-info {
+  position: sticky; left: 10px; max-width: min(640px, calc(100vw - 150px));
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: baseline;
+  padding: 12px 16px; border-radius: var(--radius-xs); background: var(--bg); box-shadow: var(--nm-in-xs);
+  font-size: 12px; line-height: 1.45; color: var(--text);
+}
+.detalle-info span { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
+.detalle-info b { font-weight: 600; }
+.barra-opcional { flex-wrap: wrap; }
+.btn-info-tabla { margin-left: auto; }
+
+/* Botón para marcar la columna completa (bajo la hora del encabezado) */
+.btn-col {
+  display: block; margin: 7px auto 0; padding: 5px 10px; min-width: 64px;
+  border: none; border-radius: var(--pill); cursor: pointer;
+  background: var(--bg); box-shadow: var(--nm-out-xs);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; color: var(--accent-mid);
+  text-transform: none; letter-spacing: 0; white-space: nowrap;
+}
+.btn-col:active { box-shadow: var(--nm-in-xs); }
+.btn-col[disabled] { opacity: .35; cursor: not-allowed; }
+
+/* Avisos (no bloquean el guardado): fuera de rango o dudoso */
+.c-in.c-aviso { box-shadow: var(--nm-in-xs), 0 0 0 2px var(--aviso); }
+.tabla-muestras .dudoso .c-in { box-shadow: var(--nm-in-xs), 0 0 0 2px var(--aviso); color: #7a5200; }
 .nota-formato b { color: var(--accent); }
 .leyenda { font-size: 11.5px; color: var(--text2); margin: 0 0 14px 4px; }
 .leyenda b { color: var(--accent); }
@@ -536,11 +621,30 @@
 
 /* Pantallas táctiles: botones y campos más grandes para el dedo */
 @media (pointer: coarse) {
-  .c-marca, .c-x { height: 38px; min-width: 40px; }
-  .c-in { padding: 11px 12px; font-size: 13.5px; }
-  .seg button { padding: 9px 12px; font-size: 12.5px; }
-  .chips button { padding: 9px 14px; }
-  .btn-xs { padding: 9px 14px; }
+  /* Todo lo que se toca mide al menos 46-48 px, y entre dos opciones
+     vecinas hay 8 px o más: los toques errados son entre botones pegados */
+  .c-marca { width: 54px; height: 46px; font-size: 15px; }
+  .c-x { width: 48px; height: 46px; font-size: 15px; }
+  .c-in { min-height: 46px; padding: 11px 12px; font-size: 14px; }
+  .field input, .field select, .field textarea { min-height: 48px; font-size: 14px; }
+  .seg { gap: 8px; padding: 4px; }
+  .seg button { min-width: 46px; min-height: 40px; padding: 9px 14px; font-size: 13px; }
+  .chips { gap: 10px; }
+  .chips button, .chips-unica button { min-height: 44px; padding: 10px 16px; font-size: 12.5px; }
+  .c-hora12 { gap: 8px; }
+  .c-hora12 .c-ampm { min-height: 46px; width: 78px; font-size: 13px; }
+  .c-hora12 .c-hora, .c-hora12 input.c-hora { max-width: 78px; }
+  .btn-col { min-height: 36px; padding: 8px 12px; font-size: 12px; }
+  .btn-i { width: 40px; height: 40px; font-size: 16px; }
+  .tabla-captura:not(.tabla-muestras) td { padding: 8px 8px; }
+  .tabla-muestras .c-in { min-height: 42px; }
+  .tabla-captura .th-hora { min-width: 92px; }
+  /* Con la información escondida, la columna del aspecto se angosta para que
+     las cinco horas quepan con la tablet de pie */
+  .tabla-captura.oculta-info .col-fila:not(.angosta) { min-width: 160px; max-width: 220px; }
+  .btn-sm { min-height: 42px; padding: 10px 16px; }
+  .btn-xs { padding: 9px 14px; min-height: 38px; }
+  .nota-formato summary { min-height: 40px; }
   /* El arrastre horizontal de las tablas no debe "pelear" con el vertical */
   .table-wrap, .espejo-barra { -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 }
@@ -647,6 +751,13 @@
         <button class="btn btn-sm" onclick="volverDeFormato()">← Formatos</button>
         <div class="aviso-edicion" id="aviso-edicion" style="display:none"></div>
       </div>
+      <div class="aviso-borrador" id="aviso-borrador" style="display:none">
+        <span id="aviso-borrador-txt"></span>
+        <div class="aviso-borrador-acc">
+          <button class="btn btn-sm btn-primary" onclick="recuperarBorrador()">Recuperar</button>
+          <button class="btn btn-sm" onclick="descartarBorrador()">Descartar</button>
+        </div>
+      </div>
       <div id="form-cuerpo"></div>
       <div class="acciones-form">
         <div class="izq">
@@ -719,6 +830,17 @@
 </div><!-- /app -->
 
 <!-- Toast -->
+<!-- Revisión antes de guardar (solo aparece si hay algo que mirar) -->
+<dialog class="dlg-revisar" id="dlg-revisar" aria-labelledby="dlg-revisar-titulo">
+  <div class="dlg-titulo" id="dlg-revisar-titulo">Antes de guardar, revisa</div>
+  <div class="dlg-sub">Nada de esto impide guardar. Si todo está bien, pulsa "Guardar así".</div>
+  <ul id="dlg-revisar-lista"></ul>
+  <div class="dlg-acciones">
+    <button class="btn btn-sm" onclick="cerrarRevision()">Volver a revisar</button>
+    <button class="btn btn-primary" onclick="cerrarRevision(); guardarFormato(true)">Guardar así</button>
+  </div>
+</dialog>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -770,6 +892,10 @@ window.APP = {
 //   hora12 hora de 1 a 12 con AM / PM - se guarda en hora militar
 //   x      casilla que se marca con X (unico: 'grupo' = solo una por fila)
 //   marca  verificación: ✔ Cumple (C) - ✗ No cumple (NC) - NA No aplica
+//          (con hora: el encabezado trae el botón "Todo" para la columna)
+//   info   columna de solo consulta: en la tablet se esconde y se abre con la
+//          "i" de la fila (siempre: true = no se esconde nunca)
+//   corto  (filas de matriz) nombre corto para la tablet; el completo va en la "i"
 //   op     una opción de una lista corta (botones; vertical: true = en columna;
 //          estilo: 'fichas' = fichas separadas, como las de selección múltiple)
 //   chips  varias opciones de una lista (fichas)
@@ -808,7 +934,15 @@ const GRAMAJES = ['10', '20', '25', '30', '35', '40', '45', '50', '60', '80', '9
 const GRAMAJES_BLOQUE = ['10', '20', '30', '45', '300', '350', '1800', '2000', '2100', '2200', '2400', '2500'];
 const MAQUINAS = ['FLOW PACK 1', 'FLOW PACK 2', 'FLOW PACK 3', 'TERMOFORMADORA 4',
                   'SELLADORA DE PEDAL', 'EMPACADORA AL VACÍO'];
-const DIAS_VENCIMIENTO = 29;   // lote / fecha de vencimiento = fecha de fabricación + 29 días
+const DIAS_VENCIMIENTO = 29;
+// Rangos de sellado por máquina (°C), de la tabla de referencia del formato
+// T sellado. Si una temperatura queda por fuera, la celda se marca en ámbar
+// (es solo un aviso: se puede guardar igual).
+const RANGOS_SELLADO = {
+  'FLOW PACK 1': { long: [150, 170], horiz: [130, 145] },
+  'FLOW PACK 2': { long: [170, 180], horiz: [130, 150] },
+  'FLOW PACK 3': { long: [180, 190], horiz: [135, 150] },
+};   // lote / fecha de vencimiento = fecha de fabricación + 29 días
 
 // ── Piezas repetidas ─────────────────────────────────────────────────────
 // Todos los campos de "Información general" son obligatorios
@@ -860,7 +994,7 @@ const FSEM    = 'SEMANAL Y/O CADA VEZ QUE SE REQUIERA';
 const NEBU    = 'LUN - MIÉ: ANFOCUAT (2 ml/Lt de agua) 200 ppm - JUE - DOM: PERACET (2,5 ml/Lt de agua) 250 ppm';
 const LA = 'LAVADO / ASPERSIÓN', PA = 'PAÑO ABSORBENTE / ASPERSIÓN', LN = 'LAVADO / NEBULIZACIÓN';
 
-const LEYENDA_MARCA = '<b>✔</b> Cumple - <b>✗</b> No cumple - <b>NA</b> No aplica - cada clic en la casilla cambia la marca. Las columnas se habilitan al escribir su hora.';
+const LEYENDA_MARCA = '<b>✔</b> Cumple - <b>✗</b> No cumple - <b>NA</b> No aplica - cada toque en la casilla cambia la marca. El botón <b>Todo</b> bajo la hora marca la columna completa (cada toque: ✔, ✗, NA, vacía). Las columnas se habilitan al escribir su hora.';
 
 // ── Iconos de las tarjetas ───────────────────────────────────────────────
 const ICONO = {
@@ -927,10 +1061,10 @@ const FORMATOS = [
     { tipo: 'referencia', titulo: 'Rangos de sellado por máquina',
       encabezado: ['No. máquina', 'Producto', 'Sellado longitudinal', 'Sellado horizontal'],
       filas: [
-        ['1', 'Queso doble crema (Porción)', '150-170 °C', '130-145 °C'],
-        ['1', 'Queso con bocadillo', 'No aplica', 'No aplica'],
-        ['2', 'Queso doble crema (Porción) - Queso con bocadillo', '170-180 °C', '130-150 °C'],
-        ['3', 'Queso doble crema (Porción) - Queso con bocadillo', '180-190 °C', '135-150 °C'],
+        ['1 - FLOW PACK 1', 'Queso doble crema (Porción)', '150-170 °C', '130-145 °C'],
+        ['1 - FLOW PACK 1', 'Queso con bocadillo', 'No aplica', 'No aplica'],
+        ['2 - FLOW PACK 2', 'Queso doble crema (Porción) - Queso con bocadillo', '170-180 °C', '130-150 °C'],
+        ['3 - FLOW PACK 3', 'Queso doble crema (Porción) - Queso con bocadillo', '180-190 °C', '135-150 °C'],
       ]},
   ],
   nota: '<b>Nota:</b> registrar turno, código, fecha, información del producto y número de máquina. Tomar y consignar la temperatura de sellado (longitudinal y horizontal) cada 2 horas, incluyendo inicio y final. Verificar cumplimiento según rangos establecidos y marcar Cumple/No cumple. La Máquina #1 no aplica para rangos de sellado en el ensamble de queso con bocadillo, ya que en este equipo no se realiza el proceso de sellado de dicho producto. En caso de desviaciones, registrar en observaciones y notificar para acción correctiva. Completar con nombre, firma y verificación correspondiente.',
@@ -1062,8 +1196,8 @@ const FORMATOS = [
     { tipo: 'tabla', k: 'verif_proceso', titulo: 'Verificación de proceso y soluciones de limpieza y desinfección', etiqueta: 'Aspecto a verificar',
       columnas: [
         { k: 'metodo', l: 'Método de verificación', info: true, corta: true },
-        { k: 'esperado', l: 'Resultado esperado', info: true, corta: true },
-        { k: 'dias', l: 'Días de verificación', info: true, corta: true },
+        { k: 'esperado', l: 'Resultado esperado', info: true, corta: true, siempre: true },
+        { k: 'dias', l: 'Días de verificación', info: true, corta: true, siempre: true },
         { k: 'resultado', l: 'Resultado', t: 'txt' },
       ],
       filas: [
@@ -1143,8 +1277,8 @@ const FORMATOS = [
     { tipo: 'tabla', k: 'verif_proceso', titulo: 'Verificación de proceso y soluciones de limpieza y desinfección', etiqueta: 'Aspecto a verificar',
       columnas: [
         { k: 'metodo', l: 'Método de verificación', info: true, corta: true },
-        { k: 'esperado', l: 'Resultado esperado', info: true, corta: true },
-        { k: 'dias', l: 'Días de verificación', info: true, corta: true },
+        { k: 'esperado', l: 'Resultado esperado', info: true, corta: true, siempre: true },
+        { k: 'dias', l: 'Días de verificación', info: true, corta: true, siempre: true },
         { k: 'resultado', l: 'Resultado', t: 'txt' },
       ],
       filas: [
@@ -1242,27 +1376,27 @@ const FORMATOS = [
         { k: 'gramaje_bloque', l: 'Gramaje del bloque', t: 'sel', ops: GRAMAJES_BLOQUE },
         { k: 'fecha_prod_bloque', l: 'Codificado: fecha de producción', t: 'fecha' },
         { k: 'lote_vto_bloque', l: 'Codificado: lote / fecha vencimiento', t: 'calc', desde: 'fecha_prod_bloque', dias: DIAS_VENCIMIENTO },
-        { k: 'temp_salida', l: 'Temperatura de salida del bloque del cuarto frío (°C)', t: 'num' },
-        { k: 'estado_empaque', l: 'Estado del empaque, sellado y rotulado', t: 'op', ...OP_CNCNA },
+        { k: 'temp_salida', l: 'Temperatura de salida del bloque del cuarto frío (°C)', corto: 'T° salida del bloque (°C)', t: 'num' },
+        { k: 'estado_empaque', l: 'Estado del empaque, sellado y rotulado', corto: 'Empaque, sellado y rotulado', t: 'op', ...OP_CNCNA },
         { grupo: 'Queso cortado' },
         { k: 'gramaje_obtenido', l: 'Gramaje o referencia obtenida', t: 'txt' },
         { k: 'codificado_cortado', l: 'Codificado: lote / fecha vencimiento', t: 'fecha' },
         { k: 'codigo_trazabilidad', l: 'Código de trazabilidad', t: 'txt' },
         { grupo: 'Queso cortado - Inspección organoléptica' },
-        { k: 'color', l: 'Color: blanco crema (BC) / ligeramente amarillento (LA)', t: 'op', ops: ['BC', 'LA'], txt: { BC: 'Blanco crema', LA: 'Ligeramente amarillento' } },
-        { k: 'olor', l: 'Olor: láctico, poco perceptible y ligeramente ácido - conforme (C) / no conforme (NC)', t: 'op', ...OP_CNC },
-        { k: 'sabor', l: 'Sabor: bueno (B) / ácido (AC) / moderadamente ácido (MA) / amargo (AM) / otro (cuál)', t: 'lista', sugerencias: ['B', 'AC', 'MA', 'AM'] },
-        { k: 'humedad', l: 'Humedad: seco (S) / moderadamente húmedo (MH) / húmedo (H)', t: 'op', ops: ['S', 'MH', 'H'], txt: { S: 'Seco', MH: 'Moderadamente húmedo', H: 'Húmedo' } },
-        { k: 'sellado_corte', l: 'Inspección de sellado y corte - conforme (C) / no conforme (NC)', t: 'op', ...OP_CNC },
+        { k: 'color', l: 'Color: blanco crema (BC) / ligeramente amarillento (LA)', corto: 'Color', t: 'op', ops: ['BC', 'LA'], txt: { BC: 'Blanco crema', LA: 'Ligeramente amarillento' } },
+        { k: 'olor', l: 'Olor: láctico, poco perceptible y ligeramente ácido - conforme (C) / no conforme (NC)', corto: 'Olor', t: 'op', ...OP_CNC },
+        { k: 'sabor', l: 'Sabor: bueno (B) / ácido (AC) / moderadamente ácido (MA) / amargo (AM) / otro (cuál)', corto: 'Sabor', t: 'lista', sugerencias: ['B', 'AC', 'MA', 'AM'] },
+        { k: 'humedad', l: 'Humedad: seco (S) / moderadamente húmedo (MH) / húmedo (H)', corto: 'Humedad', t: 'op', ops: ['S', 'MH', 'H'], txt: { S: 'Seco', MH: 'Moderadamente húmedo', H: 'Húmedo' } },
+        { k: 'sellado_corte', l: 'Inspección de sellado y corte - conforme (C) / no conforme (NC)', corto: 'Sellado y corte', t: 'op', ...OP_CNC },
         { grupo: 'Queso cortado - Peso, sellado y temperatura' },
         { l: 'Control de peso neto', info: 'Ver formato diario CONTROL PESO UNIDADES CORTADAS.' },
-        { k: 'integridad', l: 'Sellado (prueba de integridad) - revisar 3 unidades aleatoriamente / hora', t: 'op', ...OP_CNCNA },
-        { k: 'temp_entrada', l: 'Temperatura de entrada del producto al cuarto frío (°C)', t: 'txt' },   // texto: a veces va N/A
+        { k: 'integridad', l: 'Sellado (prueba de integridad) - revisar 3 unidades aleatoriamente / hora', corto: 'Prueba de integridad', t: 'op', ...OP_CNCNA },
+        { k: 'temp_entrada', l: 'Temperatura de entrada del producto al cuarto frío (°C)', corto: 'T° entrada al cuarto frío (°C)', t: 'txt' },   // texto: a veces va N/A
         { grupo: 'Retal' },
-        { k: 'temp_retal', l: 'Temperatura de ingreso del retal al cuarto frío (°C)', t: 'txt' },   // texto: a veces va N/A
+        { k: 'temp_retal', l: 'Temperatura de ingreso del retal al cuarto frío (°C)', corto: 'T° ingreso del retal (°C)', t: 'txt' },   // texto: a veces va N/A
         { grupo: 'Insumos' },
-        { k: 'lote_insumos_1', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 1', t: 'txt' },
-        { k: 'lote_insumos_2', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 2', t: 'txt' },
+        { k: 'lote_insumos_1', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 1', corto: 'Lote insumos - 1', t: 'txt' },
+        { k: 'lote_insumos_2', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 2', corto: 'Lote insumos - 2', t: 'txt' },
       ]},
   ],
   nota: '<b>Nota:</b> registrar los parámetros de control en los horarios establecidos mediante medición y verificación visual, consignando valores reales de temperatura, gramaje y demás variables. Evaluar los criterios de calidad marcando: (C) Cumple, (NC) No Cumple o (N.A.) No Aplica. En caso de desviaciones, registrar la novedad y la acción correctiva en observaciones. Completar la información de presentación y diligenciar las abreviaturas correspondientes en la inspección organoléptica.',
@@ -1367,6 +1501,93 @@ function poner(b, r, c, v) {
     if (!Object.keys(d[b]).length) delete d[b];
   }
   sucio = true;
+  programarBorrador();
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BORRADOR AUTOMÁTICO
+// Todo lo que se escribe se guarda en este equipo (medio segundo después de
+// escribir). Si la tablet se bloquea, se recarga la página o se cierra la
+// aplicación antes de "Guardar", al volver a abrir el formato aparece un aviso
+// para recuperarlo. Se borra al guardar, al limpiar, al eliminar o al salir
+// descartando los cambios. Solo vive en este equipo: no va a la hoja.
+// ════════════════════════════════════════════════════════════════════════
+const CLAVE_BORRADOR = 'formatos_mosquera_borrador:';
+const DIAS_BORRADOR = 14;               // un borrador más viejo que esto se descarta
+let _tBorrador = 0;
+const claveBorrador = (fmtId, id) => CLAVE_BORRADOR + fmtId + ':' + (id || 'nuevo');
+const baseRegistro = reg => reg ? (reg.fecha_modificacion || reg.fecha_registro || '') : '';
+
+// ¿Hay algo escrito además de la fecha que trae el formato por defecto?
+function hayContenido(datos) {
+  const d = limpiarDatos(datos || {});
+  return Object.keys(d).some(k => k !== 'f') || Object.keys(d.f || {}).some(k => k !== 'fecha');
+}
+function programarBorrador() {
+  if (!actual) return;
+  clearTimeout(_tBorrador);
+  _tBorrador = setTimeout(guardarBorrador, 500);
+}
+function guardarBorrador() {
+  if (!actual || !sucio) return;
+  const k = claveBorrador(actual.fmt.id, actual.id);
+  try {
+    if (!hayContenido(actual.datos)) { localStorage.removeItem(k); return; }
+    localStorage.setItem(k, JSON.stringify({
+      v: 1, datos: actual.datos, ui: actual.ui, base: baseRegistro(actual.reg),
+      usuario: userInfo?.email || '', t: ahoraLocal(),
+    }));
+  } catch (_) { /* sin espacio o sin almacenamiento: se sigue sin borrador */ }
+}
+function borrarBorrador(fmtId, id) {
+  clearTimeout(_tBorrador);
+  try { localStorage.removeItem(claveBorrador(fmtId, id)); } catch (_) {}
+}
+function leerBorrador(fmtId, id, base) {
+  try {
+    const k = claveBorrador(fmtId, id);
+    const b = JSON.parse(localStorage.getItem(k) || 'null');
+    if (!b || b.v !== 1 || !b.datos) return null;
+    // Si el registro cambió después del borrador, o el borrador es muy viejo, no sirve
+    const viejo = String(b.t || '').slice(0, 10) < sumarDias(hoyISO(), -DIAS_BORRADOR);
+    if ((b.base || '') !== (base || '') || viejo || !hayContenido(b.datos)) { localStorage.removeItem(k); return null; }
+    return b;
+  } catch (_) { return null; }
+}
+
+// Aviso de borrador al abrir un formato
+function ofrecerBorrador() {
+  const aviso = $('aviso-borrador');
+  if (!aviso || !actual) return;
+  const b = leerBorrador(actual.fmt.id, actual.id, baseRegistro(actual.reg));
+  actual._borrador = b;
+  if (!b) { aviso.style.display = 'none'; return; }
+  const [dia, hora] = String(b.t).split(' ');
+  const quien = b.usuario ? ' por ' + b.usuario.split('@')[0] : '';
+  $('aviso-borrador-txt').innerHTML = `<b>Hay un borrador sin guardar</b> de este formato, del ${esc(fmtFecha(dia))} a las ${esc((hora || '').slice(0, 5))}${esc(quien)}. ¿Lo recuperas?`;
+  aviso.style.display = '';
+}
+function recuperarBorrador() {
+  const b = actual?._borrador;
+  if (!b) return;
+  // Si ya se empezó a escribir encima, se pregunta antes de reemplazar
+  if (sucio && hayContenido(actual.datos) &&
+      !confirm('Ya escribiste algo en este formato. ¿Reemplazarlo por el borrador?')) return;
+  actual.datos = JSON.parse(JSON.stringify(b.datos));
+  actual.ui = b.ui || {};
+  actual._borrador = null;
+  sucio = true;
+  $('aviso-borrador').style.display = 'none';
+  renderFormulario();
+  guardarBorrador();
+  toast('Borrador recuperado. Revísalo y guarda el formato.', 'success');
+}
+function descartarBorrador() {
+  if (!actual) return;
+  // Si mientras tanto se escribió algo nuevo, eso queda como el borrador vigente
+  if (!(sucio && hayContenido(actual.datos))) borrarBorrador(actual.fmt.id, actual.id);
+  actual._borrador = null;
+  $('aviso-borrador').style.display = 'none';
 }
 
 // Copia sin espacios sobrantes ni textos vacíos
@@ -1471,8 +1692,8 @@ function ctrl(def, b, r, c, modo, apagado) {
   }
 }
 
-function tarjeta(titulo, cuerpo, sub) {
-  return `<div class="card">
+function tarjeta(titulo, cuerpo, sub, colapsada) {
+  return `<div class="card${colapsada ? ' collapsed' : ''}">
     <div class="card-header collapsible" onclick="toggleSection(this)">
       <div><div class="card-title">${esc(titulo)}</div>${sub ? `<div class="card-sub">${sub}</div>` : ''}</div>
       <span class="card-chevron">▼</span>
@@ -1544,9 +1765,69 @@ const matrizApagada = (b, i) => b.enc === 'hora' && !horaMatriz(b, i);
 // Columnas visibles: las opcionales (producto afectado 2) solo si se agregaron
 const colsVisibles = b => b.columnas.filter(c => !c.opc || actual.ui[b.k + ':' + c.opc]);
 
+// ── Información de consulta (frecuencia, producto, método…) ─────────────
+// En la tablet no cabe: se esconde y cada fila lleva una "i" que la abre
+// debajo. En el PC se ve completa. La preferencia queda guardada en el equipo.
+const CLAVE_INFO = 'formatos_mosquera_ver_info';
+function verInfo() {
+  try { const v = localStorage.getItem(CLAVE_INFO); if (v === '1' || v === '0') return v === '1'; } catch (_) {}
+  return !(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+}
+function alternarInfo() {
+  const nuevo = !verInfo();
+  try { localStorage.setItem(CLAVE_INFO, nuevo ? '1' : '0'); } catch (_) {}
+  aplicarVerInfo();
+}
+function aplicarVerInfo() {
+  const on = verInfo();
+  document.querySelectorAll('#form-cuerpo table.con-info').forEach(t => t.classList.toggle('oculta-info', !on));
+  document.querySelectorAll('#form-cuerpo .btn-info-tabla').forEach(bt => {
+    bt.textContent = on ? 'Ocultar información' : 'Ver información';
+    bt.setAttribute('aria-pressed', String(on));
+  });
+  espejarScrollTodos('#view-formato .table-wrap');
+}
+const botonInfo = () => `<button type="button" class="btn btn-sm btn-info-tabla" onclick="alternarInfo()" aria-pressed="${verInfo()}">${verInfo() ? 'Ocultar información' : 'Ver información'}</button>`;
+const botonI = clave => `<button type="button" class="btn-i" data-fila-info="${esc(clave)}" aria-label="Ver información">i</button>`;
+// Fila escondida con la información de una fila (se abre con la "i")
+const filaDetalle = (clave, pares, cols) => `<tr class="fila-detalle" data-det="${esc(clave)}"><td colspan="${cols}"><div class="detalle-info">${
+  pares.filter(([, v]) => v).map(([l, v]) => `<span>${esc(l)}</span><b>${esc(v)}</b>`).join('')}</div></td></tr>`;
+
+// ── Marcar una columna completa ──────────────────────────────────────────
+// Cada toque del botón del encabezado lleva TODA la columna al siguiente
+// estado: ✔ → ✗ → NA → vacía. Si la columna tiene marcas distintas, el
+// primer toque la pone toda en ✔ (y pregunta antes de pisar ✗ o NA).
+const MARCA_NOMBRE = { C: '✔ Cumple', NC: '✗ No cumple', NA: 'NA No aplica', '': 'vacía' };
+function siguienteColumna(bk, ck) {
+  const blq = actual.fmt.bloques.find(x => x.k === bk);
+  const vals = blq._filas.map(fl => leer(bk, fl.key, ck) || '');
+  const uniforme = vals.every(v => v === vals[0]);
+  return { vals, nv: uniforme ? MARCA_SIG[vals[0]] : 'C' };
+}
+const textoBotonColumna = (bk, ck) => { const { nv } = siguienteColumna(bk, ck); return nv ? 'Todo ' + MARCA_TXT[nv] : 'Borrar'; };
+function actualizarBotonColumna(bk, ck) {
+  document.querySelectorAll(`#form-cuerpo button.btn-col[data-b="${bk}"][data-c="${ck}"]`)
+    .forEach(bt => { bt.textContent = textoBotonColumna(bk, ck); });
+}
+function llenarColumna(bk, ck) {
+  const blq = actual.fmt.bloques.find(x => x.k === bk);
+  const { vals, nv } = siguienteColumna(bk, ck);
+  const pisa = vals.some(v => v && v !== nv) && !vals.every(v => v === vals[0]);
+  if (pisa && !confirm(`Esta columna ya tiene marcas distintas. ¿Dejarla toda en ${MARCA_NOMBRE[nv]}?`)) return;
+  blq._filas.forEach(fl => poner(bk, fl.key, ck, nv));
+  document.querySelectorAll(`#form-cuerpo button.c-marca[data-b="${bk}"][data-c="${ck}"]`).forEach(el => {
+    el.className = 'c-marca' + (nv ? ' m-' + nv : ''); el.textContent = MARCA_TXT[nv] || '';
+  });
+  actualizarBotonColumna(bk, ck);
+}
+
 function tablaHTML(b) {
   const cols = colsVisibles(b);
   const numerada = typeof b.filas === 'number';
+  // Columnas de consulta que se esconden en la tablet (las "siempre" no)
+  const plegables = cols.filter(c => c.info && !c.siempre);
+  const conInfo = plegables.length > 0;
+  const ci = c => (c.info && !c.siempre ? ' col-info' : '');
   let grupos = '';
   if (cols.some(c => c.g)) {
     grupos = '<tr class="grupos"><th class="col-fila' + (numerada ? ' angosta' : '') + '"></th>';
@@ -1559,25 +1840,39 @@ function tablaHTML(b) {
   }
   // Ranura vertical donde empieza un grupo de columnas (producto, origen…)
   const sep = i => i > 0 && (cols[i].g || cols[i - 1].g) && cols[i].g !== cols[i - 1].g ? ' sep' : '';
+  const cabCol = (c, i) => {
+    const clase = `${c.info ? '' : 'centro'}${c.hora ? ' th-hora' : ''}${sep(i)}${ci(c)}`;
+    const datos = c.hora ? ` data-hora="${c.hora[0]}|${c.hora[1]}" data-base="${esc(c.l)}"` : '';
+    // Columnas de verificación por hora: botón para marcar la columna completa
+    const todo = c.hora && c.t === 'marca'
+      ? `<button type="button" class="btn-col" data-t="col" data-b="${b.k}" data-c="${c.k}"${columnaApagada(c) ? ' disabled' : ''}>${esc(textoBotonColumna(b.k, c.k))}</button>`
+      : '';
+    return `<th class="${clase}"${datos}><span class="th-lbl">${esc(etiquetaCol(c))}</span>${todo}</th>`;
+  };
   const cab = `<tr><th class="col-fila${numerada ? ' angosta' : ''}">${esc(b.etiqueta || (numerada ? 'N°' : ''))}</th>` +
-    cols.map((c, i) => `<th class="${c.info ? '' : 'centro'}${c.hora ? ' th-hora' : ''}${sep(i)}"${c.hora ? ` data-hora="${c.hora[0]}|${c.hora[1]}" data-base="${esc(c.l)}"` : ''}>${esc(etiquetaCol(c))}</th>`).join('') + '</tr>';
+    cols.map(cabCol).join('') + '</tr>';
   const cuerpo = b._filas.map(fl => {
     const cual = fl.cual
       ? `<input type="text" class="c-in cual" placeholder="¿Cuál?" ${attrs(b.k, fl.key, '_cual')} value="${esc(leer(b.k, fl.key, '_cual') ?? '')}">`
       : '';
-    return `<tr><td class="col-fila${numerada ? ' angosta col-num' : ''}">${esc(fl.l)}${cual}</td>` +
+    const clave = b.k + '|' + fl.key;
+    const tieneInfo = conInfo && plegables.some(c => fl[c.k]);
+    const fila = `<tr><td class="col-fila${numerada ? ' angosta col-num' : ''}"><div class="fila-lbl"><span>${esc(fl.l)}</span>${tieneInfo ? botonI(clave) : ''}</div>${cual}</td>` +
       cols.map((c, i) => c.info
-        ? `<td class="info${c.corta ? ' corta' : ''}${sep(i)}">${esc(fl[c.k] || '')}</td>`
+        ? `<td class="info${c.corta ? ' corta' : ''}${sep(i)}${ci(c)}">${esc(fl[c.k] || '')}</td>`
         : `<td class="centro${sep(i)}">${ctrl(c, b.k, fl.key, c.k, null, columnaApagada(c))}</td>`).join('') + '</tr>';
+    return fila + (tieneInfo ? filaDetalle(clave, plegables.map(c => [c.l, fl[c.k]]), cols.length + 1) : '');
   }).join('');
   // Botones para agregar / quitar los grupos opcionales
   const opcionales = Object.entries(b.opcional || {}).map(([k, nombre]) => {
     const on = actual.ui[b.k + ':' + k];
     return `<button type="button" class="btn btn-sm${on ? ' btn-danger' : ''}" onclick="alternarOpcional('${b.k}','${k}')">${on ? '− Quitar ' : '+ Agregar '}${esc(nombre)}</button>`;
   }).join('');
+  const barra = opcionales + (conInfo ? botonInfo() : '');
+  const clases = 'data-table tabla-captura' + (conInfo ? ' con-info' + (verInfo() ? '' : ' oculta-info') : '');
   return `${b.leyenda ? `<div class="leyenda">${b.leyenda}</div>` : ''}
-    ${opcionales ? `<div class="barra-opcional">${opcionales}</div>` : ''}
-    <div class="table-wrap"><table class="data-table tabla-captura"><thead>${grupos}${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
+    ${barra ? `<div class="barra-opcional">${barra}</div>` : ''}
+    <div class="table-wrap"><table class="${clases}"><thead>${grupos}${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
 }
 
 function alternarOpcional(bk, k) {
@@ -1628,15 +1923,24 @@ function matrizHTML(b) {
     if (fl.info)  return `<tr class="fila-info"><td class="col-fila">${esc(fl.l || '')}</td><td colspan="${n}">${esc(fl.info)}</td></tr>`;
     // unica: una sola casilla para toda la fila (las observaciones de cada fase)
     if (fl.unica) return `<tr><td class="col-fila">${esc(fl.l)}</td><td colspan="${n}" class="celda-mat celda-unica">${ctrl(fl, b.k, fl.k, COL_UNICA)}</td></tr>`;
-    return `<tr><td class="col-fila">${esc(fl.l)}</td>` + Array.from({ length: n }, (_, i) =>
-      `<td class="centro celda-mat">${ctrl(fl, b.k, fl.k, String(i), null, matrizApagada(b, i))}</td>`).join('') + '</tr>';
+    // corto: en la tablet se ve el nombre corto y el completo va en la "i"
+    const clave = b.k + '|' + fl.k;
+    const nombre = fl.corto
+      ? `<div class="fila-lbl"><span class="lbl-largo">${esc(fl.l)}</span><span class="lbl-corto">${esc(fl.corto)}</span>${botonI(clave)}</div>`
+      : esc(fl.l);
+    return `<tr><td class="col-fila">${nombre}</td>` + Array.from({ length: n }, (_, i) =>
+      `<td class="centro celda-mat">${ctrl(fl, b.k, fl.k, String(i), null, matrizApagada(b, i))}</td>`).join('') + '</tr>' +
+      (fl.corto ? filaDetalle(clave, [['Parámetro', fl.l]], n + 1) : '');
   }).join('');
-  const botones = b.inicial ? `<div class="barra-opcional">
-      <button type="button" class="btn btn-sm" onclick="alternarColumnas('${b.k}', 1)"${n >= b.n ? ' disabled' : ''}>+ Agregar ${esc(b.enc.toLowerCase())} (${n} de ${b.n})</button>
-      ${n > b.inicial ? `<button type="button" class="btn btn-sm btn-danger" onclick="alternarColumnas('${b.k}', -1)">− Quitar ${esc(b.enc.toLowerCase())} ${n}</button>` : ''}
+  const conInfo = b.filas.some(fl => fl.corto);
+  const botones = (b.inicial || conInfo) ? `<div class="barra-opcional">
+      ${b.inicial ? `<button type="button" class="btn btn-sm" onclick="alternarColumnas('${b.k}', 1)"${n >= b.n ? ' disabled' : ''}>+ Agregar ${esc(b.enc.toLowerCase())} (${n} de ${b.n})</button>` : ''}
+      ${b.inicial && n > b.inicial ? `<button type="button" class="btn btn-sm btn-danger" onclick="alternarColumnas('${b.k}', -1)">− Quitar ${esc(b.enc.toLowerCase())} ${n}</button>` : ''}
+      ${conInfo ? botonInfo() : ''}
     </div>` : '';
+  const clases = 'data-table tabla-captura' + (conInfo ? ' con-info' + (verInfo() ? '' : ' oculta-info') : '');
   return `${b.leyenda ? `<div class="leyenda">${b.leyenda}</div>` : ''}${botones}
-    <div class="table-wrap"><table class="data-table tabla-captura"><thead>${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
+    <div class="table-wrap"><table class="${clases}"><thead>${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
 }
 
 // Habilita o apaga las celdas según haya hora escrita en su columna
@@ -1700,7 +2004,7 @@ function bloqueHTML(b) {
     case 'tabla':      return tarjeta(b.titulo, tablaHTML(b));
     case 'matriz':     return tarjeta(b.titulo, matrizHTML(b));
     case 'horas':      return tarjeta(b.titulo, horasHTML(b));
-    case 'referencia': return tarjeta(b.titulo, referenciaHTML(b), 'Solo consulta');
+    case 'referencia': return tarjeta(b.titulo, referenciaHTML(b), 'Solo consulta', !verInfo());   // en la tablet empieza cerrada
   }
   return '';
 }
@@ -1715,7 +2019,8 @@ function renderFormulario(conservarScroll) {
   f.bloques.forEach(b => { h += bloqueHTML(b); });
   const cierre = cierreDe(f);
   h += tarjeta('Observaciones y firmas', rejilla(cierre, cierre.length - 1));
-  h += `<div class="nota-formato">${f.criterios ? f.criterios + '<br><br>' : ''}${f.nota}</div>`;
+  h += `<details class="nota-formato"${verInfo() ? ' open' : ''}><summary>${f.criterios ? 'Criterios y nota del formato' : 'Nota del formato'}</summary>
+    <div class="nota-texto">${f.criterios ? f.criterios + '<br><br>' : ''}${f.nota}</div></details>`;
   $('form-cuerpo').style.setProperty('--tono', f.tono || 'var(--accent-mid)');
   $('form-cuerpo').innerHTML = h;
   if (conservarScroll) vista.scrollTop = y;
@@ -1730,6 +2035,7 @@ function renderFormulario(conservarScroll) {
   $('btn-guardar').textContent = actual.id ? 'Guardar cambios' : 'Guardar formato';
   $('btn-eliminar-form').style.display = actual.id && isAdmin() ? '' : 'none';
   recalcular();
+  revisarSellado();
 }
 
 // ── Cálculos en vivo (por ahora solo el control de peso) ─────────────────
@@ -1739,6 +2045,26 @@ function limitePeso(g) {
   if (PESO_MINIMO[g] !== undefined) return PESO_MINIMO[g];
   if (g < 50) return Math.round(g * 0.91 * 10) / 10;
   return null;
+}
+
+// Un peso es dudoso si queda por encima de 1,5 veces o por debajo de la mitad del gramaje
+const pesoDudoso = (v, g) => isFinite(v) && v > 0 && g > 0 && (v > g * 1.5 || v < g * 0.5);
+// Muestras que pide la nota del formato según el tamaño del lote
+const muestrasEsperadas = total => !(total > 0) ? 0 : total <= 500 ? 50 : total < 1000 ? 100 : 200;
+
+// T sellado: temperatura fuera del rango de la máquina elegida (solo aviso)
+function rangoSellado(maquina, col) { return RANGOS_SELLADO[maquina]?.[col] || null; }
+function fueraDeRango(v, rango) { return rango && v !== '' && v != null && isFinite(v) && (v < rango[0] || v > rango[1]); }
+function revisarSellado() {
+  if (!actual || actual.fmt.id !== 'CTS') return;
+  const maq = actual.datos.f?.maquina;
+  document.querySelectorAll('#form-cuerpo input[data-b="sellado"][data-c="long"], #form-cuerpo input[data-b="sellado"][data-c="horiz"]').forEach(inp => {
+    const rango = rangoSellado(maq, inp.dataset.c);
+    const v = leer('sellado', inp.dataset.r, inp.dataset.c);
+    const fuera = fueraDeRango(v, rango);
+    inp.classList.toggle('c-aviso', !!fuera);
+    inp.title = fuera ? `Fuera del rango de ${maq}: ${rango[0]}-${rango[1]} °C` : '';
+  });
 }
 
 function recalcular() {
@@ -1753,11 +2079,17 @@ function recalcular() {
   $('rp-max').textContent = valores.length ? fmt1(Math.max(...valores)) : '-';
   $('rp-lim').textContent = lim !== null ? fmt1(lim) + ' g' : (actual.datos.f?.gramaje ? 'Sin criterio' : 'Falta gramaje');
   let bajo = 0;
+  const g = parseFloat(actual.datos.f?.gramaje);
   document.querySelectorAll('.tabla-muestras td[data-m]').forEach(td => {
     const v = parseFloat(m[td.dataset.m]);
     const es = lim !== null && isFinite(v) && v > 0 && v < lim;
     td.classList.toggle('bajo', es);
     if (es) bajo++;
+    // Muy lejos del gramaje (250 con gramaje 25): casi siempre falta la coma
+    const duda = pesoDudoso(v, g);
+    td.classList.toggle('dudoso', duda);
+    const inp = td.querySelector('input');
+    if (inp) inp.title = duda ? `Muy lejos del gramaje (${g} g): revisa la coma` : '';
   });
   const el = $('rp-bajo');
   el.textContent = lim !== null ? `${bajo} / ${MAX_BAJO_PESO}` : '-';
@@ -1767,7 +2099,7 @@ function recalcular() {
 function actualizarEncabezadosHora() {
   document.querySelectorAll('#form-cuerpo th[data-hora]').forEach(th => {
     const [bk, i] = th.dataset.hora.split('|');
-    th.textContent = leer(bk, '_', i) || th.dataset.base;
+    (th.querySelector('.th-lbl') || th).textContent = leer(bk, '_', i) || th.dataset.base;
   });
 }
 
@@ -1901,6 +2233,7 @@ document.addEventListener('DOMContentLoaded', () => {
     recalcularFechas();
     if (el.dataset.b === 'f' && el.dataset.c === 'gramaje') recalcular();
     if (el.dataset.b === 'muestras') recalcular();
+    if (el.dataset.b === 'sellado' || (el.dataset.b === 'f' && el.dataset.c === 'maquina')) revisarSellado();
   });
   cont.addEventListener('change', e => {
     const el = e.target;
@@ -1926,10 +2259,18 @@ document.addEventListener('DOMContentLoaded', () => {
     sig.focus(); sig.select();
   });
   cont.addEventListener('click', e => {
+    const bi = e.target.closest('.btn-i');
+    if (bi) {
+      const det = cont.querySelector(`tr.fila-detalle[data-det="${bi.dataset.filaInfo}"]`);
+      const abierta = det?.classList.toggle('abierta');
+      bi.classList.toggle('on', !!abierta);
+      return;
+    }
     const btn = e.target.closest('button[data-b]');
     if (!btn || btn.disabled || !actual) return;
     const { b, r, c, t, v } = btn.dataset;
     const act = leer(b, r, c);
+    if (t === 'col') { llenarColumna(b, c); return; }
     if (t === 'x') {
       const nv = act ? '' : 'X';
       poner(b, r, c, nv);
@@ -1948,6 +2289,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const nv = MARCA_SIG[act || ''];
       poner(b, r, c, nv);
       btn.className = 'c-marca' + (nv ? ' m-' + nv : ''); btn.textContent = MARCA_TXT[nv] || '';
+      actualizarBotonColumna(b, c);
     } else if (t === 'op') {
       const nv = act === v ? '' : v;
       poner(b, r, c, nv);
@@ -1985,6 +2327,7 @@ function hayCambiosPendientes() {
 function confirmarSalida() {
   if (!hayCambiosPendientes()) return true;
   if (!confirm('Hay datos sin guardar en este formato. ¿Salir y perderlos?')) return false;
+  if (actual) borrarBorrador(actual.fmt.id, actual.id);
   sucio = false;
   return true;
 }
@@ -2000,6 +2343,7 @@ function mostrarFormato() {
   document.getElementById('nav-inicio').classList.add('active');
   $('topbar-title').textContent = nombreCorto(actual.fmt);
   renderFormulario();
+  ofrecerBorrador();
   $('view-formato').scrollTop = 0;
 }
 
@@ -2048,6 +2392,7 @@ function limpiarFormulario() {
   if (!actual) return;
   if (!confirm('¿Borrar todo lo escrito en este formato? (se conserva la fecha)')) return;
   const fecha = actual.datos.f?.fecha || hoyISO();
+  borrarBorrador(actual.fmt.id, actual.id);
   actual.datos = { f: { fecha } };
   sucio = !!actual.id;
   renderFormulario();
@@ -2194,7 +2539,117 @@ function armarRegistro(f, datos, previo, usuario) {
   return { reg, vals, muestras: filaMuestras(reg, f, d) };
 }
 
-async function guardarFormato() {
+// ════════════════════════════════════════════════════════════════════════
+// REVISIÓN ANTES DE GUARDAR
+// No bloquea: arma una lista corta de lo que conviene mirar (casillas sin
+// marcar, No cumple sin observación, temperaturas fuera de rango, pesos
+// dudosos, muestras que faltan). Si no hay nada, se guarda sin preguntar.
+// ════════════════════════════════════════════════════════════════════════
+function revisionAntesDeGuardar(f, d) {
+  const out = [];
+  const num = n => Number(n).toLocaleString('es-CO');
+  const plural = (n, uno, varios) => `${num(n)} ${n === 1 ? uno : varios}`;
+  let noCumple = 0;
+
+  // Casillas de verificación sin marcar en las horas escritas (rutinas)
+  const porHora = {};
+  f.bloques.filter(b => b.tipo === 'tabla').forEach(b => {
+    b.columnas.filter(c => !c.info).forEach(c => b._filas.forEach(fl => {
+      const v = d[b.k]?.[fl.key]?.[c.k];
+      if (v === 'NC') noCumple++;
+    }));
+    b.columnas.filter(c => c.hora && c.t === 'marca').forEach(c => {
+      const h = d[c.hora[0]]?._?.[c.hora[1]];
+      if (!h) return;
+      const vacias = b._filas.filter(fl => esVacio(d[b.k]?.[fl.key]?.[c.k])).length;
+      if (!vacias) return;
+      const k = c.hora[1];
+      porHora[k] ??= { h, n: 0, secciones: [] };
+      porHora[k].n += vacias;
+      porHora[k].secciones.push(b.titulo.toLowerCase());
+    });
+  });
+  Object.keys(porHora).sort().forEach(k => {
+    const x = porHora[k];
+    out.push({ tipo: 'aviso', txt: `<b>Hora ${+k + 1} (${esc(x.h)})</b>: ${plural(x.n, 'casilla sin marcar', 'casillas sin marcar')} en ${esc(x.secciones.join(', '))}.` });
+  });
+
+  // Matrices (organoléptico y porción y tajado)
+  f.bloques.filter(b => b.tipo === 'matriz').forEach(b => {
+    const filas = b.filas.filter(fl => fl.k && fl.t !== 'calc' && !fl.unica);
+    filas.forEach(fl => Object.values(d[b.k]?.[fl.k] || {}).forEach(v => { if (v === 'NC') noCumple++; }));
+    if (b.enc !== 'hora') return;
+    for (let i = 0; i < b.n; i++) {
+      const h = d[b.k]?._enc?.[i];
+      if (!h) continue;
+      const vacias = filas.filter(fl => esVacio(d[b.k]?.[fl.k]?.[i])).length;
+      if (vacias) out.push({ tipo: 'aviso', txt: `<b>Hora ${i + 1} (${esc(h)})</b>: ${plural(vacias, 'parámetro sin llenar', 'parámetros sin llenar')}.` });
+    }
+  });
+
+  // T sellado: filas incompletas y temperaturas fuera del rango de la máquina
+  if (f.id === 'CTS') {
+    const maq = d.f?.maquina;
+    let sinTemp = 0, sinMarca = 0, fuera = 0, fueraConC = 0;
+    Object.values(d.sellado || {}).forEach(fila => {
+      const temps = ['long', 'horiz'].filter(c => !esVacio(fila[c]));
+      if (fila.hora && temps.length < 2) sinTemp++;
+      if (temps.length && !fila.cumple) sinMarca++;
+      const f2 = ['long', 'horiz'].some(c => fueraDeRango(fila[c], rangoSellado(maq, c)));
+      if (f2) { fuera++; if (fila.cumple === 'C') fueraConC++; }
+    });
+    if (sinTemp) out.push({ tipo: 'aviso', txt: `${plural(sinTemp, 'fila tiene', 'filas tienen')} hora pero le falta alguna temperatura.` });
+    if (sinMarca) out.push({ tipo: 'aviso', txt: `${plural(sinMarca, 'fila tiene', 'filas tienen')} temperaturas pero no está marcada Cumple / No cumple.` });
+    if (fuera) out.push({ tipo: 'aviso', txt: `${plural(fuera, 'fila tiene', 'filas tienen')} temperaturas por fuera del rango de ${esc(maq)}` +
+      (fueraConC ? `, y ${fueraConC === 1 ? 'está marcada' : num(fueraConC) + ' están marcadas'} como <b>Cumple</b>.` : '.') });
+  }
+
+  // Contaminación física: un total sin tipo de queso o sin origen
+  if (f.id === 'FICF') {
+    let sinQueso = 0, sinOrigen = 0;
+    Object.values(d.inspeccion || {}).forEach(fila => {
+      const tiene = n => !esVacio(fila['total' + n]) || !esVacio(fila['lote' + n]) || !esVacio(fila['gram' + n]);
+      [1, 2].forEach(n => { if (tiene(n) && !['mz', 'dc', 'cp', 'pe'].some(q => fila[q + n])) sinQueso++; });
+      if ((tiene(1) || tiene(2)) && !['honda', 'guaduas', 'mosquera'].some(o => fila[o])) sinOrigen++;
+    });
+    if (sinQueso) out.push({ tipo: 'aviso', txt: `${plural(sinQueso, 'producto afectado no tiene', 'productos afectados no tienen')} marcado el tipo de queso.` });
+    if (sinOrigen) out.push({ tipo: 'aviso', txt: `${plural(sinOrigen, 'fila no tiene', 'filas no tienen')} marcado el origen.` });
+  }
+
+  // Control de peso: muestras que pide la nota, pesos dudosos y bajo el mínimo
+  if (f.id === 'CPUC') {
+    const b = f.bloques.find(x => x.tipo === 'muestras');
+    const r = resumenMuestras(d, b);
+    const esperadas = muestrasEsperadas(+d.f?.total_unidades);
+    if (esperadas && r.n < esperadas)
+      out.push({ tipo: 'aviso', txt: `Lote de ${num(+d.f.total_unidades)} unidades: la nota pide <b>${esperadas} muestras</b> y hay ${num(r.n)}.` });
+    const g = parseFloat(d.f?.gramaje);
+    const dudosos = Object.values(d[b.k]?.m || {}).filter(v => pesoDudoso(+v, g)).length;
+    if (dudosos) out.push({ tipo: 'aviso', txt: `${plural(dudosos, 'peso está', 'pesos están')} muy lejos del gramaje de ${esc(d.f.gramaje)} g (casilla en ámbar): revisa si falta la coma.` });
+    if (r.bajo !== '' && r.bajo > MAX_BAJO_PESO)
+      out.push({ tipo: 'aviso', txt: `${num(r.bajo)} unidades quedaron por debajo del peso mínimo; el criterio permite máximo ${MAX_BAJO_PESO}.` });
+  }
+
+  if (noCumple) out.push({
+    tipo: d.f?.observaciones ? 'info' : 'aviso',
+    txt: `Hay ${plural(noCumple, 'marca', 'marcas')} de <b>No cumple</b>` +
+      (d.f?.observaciones ? '.' : ' y las observaciones están vacías: conviene anotar la novedad y la acción tomada.'),
+  });
+  return out;
+}
+
+function abrirRevision(lista) {
+  $('dlg-revisar-lista').innerHTML = lista.map(x => `<li class="${x.tipo}">${x.txt}</li>`).join('');
+  const dlg = $('dlg-revisar');
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+}
+function cerrarRevision() {
+  const dlg = $('dlg-revisar');
+  if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+}
+
+// sinRevisar: viene del botón "Guardar así" de la revisión
+async function guardarFormato(sinRevisar) {
   if (!actual) return;
   const f = actual.fmt;
   const d = limpiarDatos(actual.datos);
@@ -2223,6 +2678,10 @@ async function guardarFormato() {
     mal.focus();
     return;
   }
+  if (sinRevisar !== true) {
+    const revision = revisionAntesDeGuardar(f, d);
+    if (revision.length) return abrirRevision(revision);
+  }
   if (!hayHoja() && !window.DATOS_DEMO) {
     toast('La página aún no tiene hoja de cálculo configurada (SHEET_ID). No se guardó.', 'error');
     return;
@@ -2236,6 +2695,7 @@ async function guardarFormato() {
   const ok = await conBloqueo(editando ? 'Guardando cambios' : 'Guardando',
     () => escribirRegistro(actual.id, reg, { vals, muestras }, actual.reg));
   if (!ok) return;
+  borrarBorrador(f.id, actual.id);
   sucio = false;
   toast(editando ? 'Cambios guardados.' : `${nombreCorto(f)} guardado.`, 'success');
   await cargarDatos();
@@ -2251,6 +2711,7 @@ async function eliminarRegistro(id) {
   if (!confirm(`¿Eliminar ${r._fmt} del ${fmtFecha(r.fecha)}? Esta acción no se puede deshacer.`)) return;
   const ok = await conBloqueo('Eliminando', () => borrarRegistro(id));
   if (!ok) return;
+  borrarBorrador(r.formato, id);
   sucio = false;
   toast('Registro eliminado.', 'success');
   await cargarDatos();
@@ -2297,540 +2758,4 @@ function aISO(v) {
   if (v === '' || v == null) return '';
   if (typeof v === 'number' && v > 20000 && v < 80000)
     return new Date(Date.UTC(1899, 11, 30) + v * 86400000).toISOString().split('T')[0];
-  const t = String(v).trim();
-  if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(t)) { const [a, m, d] = t.split('-'); return `${a}-${pad2(m)}-${pad2(d)}`; }
-  const m2 = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/.exec(t);
-  if (m2) return `${m2[3]}-${pad2(m2[2])}-${pad2(m2[1])}`;
-  return t;
-}
-
-// Columnas por NOMBRE: el orden real se lee de la fila 1 de cada hoja
-const ordenHoja = {};
-const cols = (hoja, porDefecto) => ordenHoja[hoja] || porDefecto;
-function fijarOrden(hoja, cabecera, porDefecto) {
-  const nombres = (cabecera || []).map(h => String(h || '').trim().toLowerCase());
-  if (!nombres.length) { ordenHoja[hoja] = porDefecto; return; }
-  const faltan = porDefecto.filter(c => !nombres.includes(c));
-  if (faltan.length) {
-    ordenHoja[hoja] = porDefecto;
-    toast(`A la hoja ${hoja} le faltan columnas: ${faltan.join(', ')}. Revísala antes de guardar.`, 'error');
-    return;
-  }
-  ordenHoja[hoja] = nombres;
-}
-
-const celdaDe = v => {
-  if (v === '' || v === null || v === undefined) return {};
-  if (typeof v === 'number' && isFinite(v)) return { userEnteredValue: { numberValue: v } };
-  return { userEnteredValue: { stringValue: String(v) } };
-};
-const filaDe = (obj, columnas) => ({ values: objToRow(obj, columnas).map(celdaDe) });
-
-let guardando = false;
-async function conBloqueo(etiqueta, fn) {
-  if (guardando) { toast('Espera: hay un guardado en curso.', 'error'); return false; }
-  guardando = true;
-  const botones = [...document.querySelectorAll('#view-formato button, #view-historial button')];
-  botones.forEach(b => b.disabled = true);
-  const estado = $('sync-status');
-  const antes = estado.textContent;
-  estado.textContent = etiqueta + '...';
-  try {
-    await fn();
-    estado.textContent = 'Guardado ' + new Date().toLocaleTimeString('es-CO');
-    return true;
-  } catch (e) {
-    console.error(e);
-    estado.textContent = antes;
-    toast('No se pudo guardar en la hoja: ' + e.message, 'error');
-    return false;
-  } finally {
-    guardando = false;
-    botones.forEach(b => b.disabled = false);
-  }
-}
-
-// Crea las pestañas que falten (VALORES del año, MUESTRAS_PESO) con su
-// encabezado, y aprende el orden real de columnas de las que ya existen.
-async function asegurarHojas(hojas) {
-  await obtenerSheetId(HOJA_REG);
-  if (sheetIds[HOJA_REG] === undefined) throw new Error(`no existe la pestaña ${HOJA_REG} en el Google Sheets`);
-  const faltan = hojas.filter(h => sheetIds[h.nombre] === undefined);
-  if (faltan.length) {
-    const r = await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
-      addSheet: { properties: { title: h.nombre, gridProperties: { rowCount: 2000, columnCount: h.cols.length + 2 } } } })) }));
-    (r.replies || []).forEach(rep => {
-      const p = rep.addSheet?.properties;
-      if (p) sheetIds[p.title] = p.sheetId;
-    });
-    await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
-      updateCells: { rows: [{ values: h.cols.map(c => celdaDe(c)) }], fields: 'userEnteredValue',
-        start: { sheetId: sheetIds[h.nombre], rowIndex: 0, columnIndex: 0 } } })) }));
-    faltan.forEach(h => { ordenHoja[h.nombre] = h.cols; });
-  }
-  const porLeer = hojas.filter(h => !ordenHoja[h.nombre]);
-  if (porLeer.length) {
-    const d = await leerVarios(porLeer.map(h => `${h.nombre}!1:1`));
-    porLeer.forEach((h, i) => fijarOrden(h.nombre, d.valueRanges?.[i]?.values?.[0], h.cols));
-  }
-}
-
-// Dónde está el registro y sus filas en cada pestaña (índices 0-based)
-async function ubicar(id, hojas) {
-  const columnas = { [HOJA_REG]: COLS_REG, [HOJA_MUESTRAS]: COLS_MUESTRAS };
-  const rangos = hojas.map(h => {
-    const l = colLetra(cols(h, columnas[h] || COLS_VAL).indexOf('id_registro'));
-    return `${h}!${l}:${l}`;
-  });
-  const d = await leerVarios(rangos);
-  const salida = {};
-  hojas.forEach((h, i) => {
-    const out = [];
-    (d.valueRanges?.[i]?.values || []).forEach((f, j) => { if (j > 0 && String(f[0] ?? '').trim() === id) out.push(j); });
-    salida[h] = out;
-  });
-  return salida;
-}
-
-// Borra filas agrupando las contiguas, de abajo hacia arriba
-function pedirBorrado(req, hoja, indices) {
-  const orden = [...(indices || [])].sort((a, b) => a - b), rangos = [];
-  orden.forEach(i => { const u = rangos[rangos.length - 1]; if (u && u[1] === i) u[1] = i + 1; else rangos.push([i, i + 1]); });
-  rangos.reverse().forEach(([s, e]) => req.push({ deleteDimension: {
-    range: { sheetId: sheetIds[hoja], dimension: 'ROWS', startIndex: s, endIndex: e } } }));
-}
-function pedirAgregado(req, hoja, columnas, filas) {
-  if (!filas.length) return;
-  req.push({ appendCells: { sheetId: sheetIds[hoja], fields: 'userEnteredValue', rows: filas.map(f => filaDe(f, columnas)) } });
-}
-
-// Todo en UNA operación: Google la aplica entera o no aplica nada, así un
-// fallo a mitad de camino no deja el registro a medias.
-// `previo` es la fila de REGISTROS que se está editando (para saber en qué
-// pestaña de año estaba, por si se le cambió la fecha).
-async function escribirRegistro(idPrevio, reg, extra, previo) {
-  const hojaVal = hojaValores(reg.fecha);
-  const hojaValVieja = idPrevio ? hojaValores(previo?.fecha || reg.fecha) : null;
-  const tocaMuestras = !!extra.muestras || (idPrevio && previo?.formato === 'CPUC');
-
-  if (!hayHoja()) {
-    const D = window.DATOS_DEMO;
-    D.valores ??= []; D.muestras ??= [];
-    const i = D.registros.findIndex(r => r.id_registro === idPrevio);
-    if (i > -1) D.registros[i] = { ...reg }; else D.registros.push({ ...reg });
-    D.valores = D.valores.filter(v => v.id_registro !== reg.id_registro).concat(extra.vals);
-    D.muestras = D.muestras.filter(m => m.id_registro !== reg.id_registro);
-    if (extra.muestras) D.muestras.push(extra.muestras);
-    return;
-  }
-
-  const hojas = [{ nombre: hojaVal, cols: COLS_VAL }];
-  if (hojaValVieja && hojaValVieja !== hojaVal) hojas.push({ nombre: hojaValVieja, cols: COLS_VAL });
-  if (tocaMuestras) hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
-  await asegurarHojas(hojas);
-
-  const req = [];
-  if (idPrevio) {
-    const u = await ubicar(idPrevio, [HOJA_REG, ...hojas.map(h => h.nombre)]);
-    if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja (¿lo eliminó otra persona?). Pulsa Actualizar');
-    req.push({ updateCells: { rows: [filaDe(reg, cols(HOJA_REG, COLS_REG))], fields: 'userEnteredValue',
-      start: { sheetId: sheetIds[HOJA_REG], rowIndex: u[HOJA_REG][0], columnIndex: 0 } } });
-    hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
-  } else {
-    pedirAgregado(req, HOJA_REG, cols(HOJA_REG, COLS_REG), [reg]);
-  }
-  pedirAgregado(req, hojaVal, cols(hojaVal, COLS_VAL), extra.vals);
-  if (extra.muestras) pedirAgregado(req, HOJA_MUESTRAS, cols(HOJA_MUESTRAS, COLS_MUESTRAS), [extra.muestras]);
-  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
-}
-
-async function borrarRegistro(id) {
-  const r = registros.find(x => x.id_registro === id);
-  if (!hayHoja()) {
-    const D = window.DATOS_DEMO;
-    D.registros = D.registros.filter(x => x.id_registro !== id);
-    D.valores = (D.valores || []).filter(v => v.id_registro !== id);
-    D.muestras = (D.muestras || []).filter(m => m.id_registro !== id);
-    return;
-  }
-  const hojas = [{ nombre: hojaValores(r?.fecha), cols: COLS_VAL }];
-  if (r?.formato === 'CPUC') hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
-  await asegurarHojas(hojas);
-  const u = await ubicar(id, [HOJA_REG, ...hojas.map(h => h.nombre)]);
-  if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja. Pulsa Actualizar');
-  const req = [];
-  pedirBorrado(req, HOJA_REG, u[HOJA_REG]);
-  hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
-  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
-}
-
-// El JSON del formato se pide solo al abrirlo (el historial no lo necesita)
-async function obtenerDatos(reg) {
-  if (!hayHoja()) {
-    const r = (window.DATOS_DEMO?.registros || []).find(x => x.id_registro === reg.id_registro);
-    return JSON.parse(r?.datos || '{}');
-  }
-  const cr = cols(HOJA_REG, COLS_REG);
-  const lId = colLetra(cr.indexOf('id_registro')), lD = colLetra(cr.indexOf('datos'));
-  let fila = reg._fila + 1;              // número de fila en la hoja (1 = encabezado)
-  for (let intento = 0; intento < 2; intento++) {
-    const d = await leerVarios([`${HOJA_REG}!${lId}${fila}`, `${HOJA_REG}!${lD}${fila}`]);
-    const id = String(d.valueRanges?.[0]?.values?.[0]?.[0] ?? '').trim();
-    if (id === reg.id_registro) return JSON.parse(d.valueRanges?.[1]?.values?.[0]?.[0] || '{}');
-    const u = await ubicar(reg.id_registro);   // alguien movió filas: se busca de nuevo
-    if (u.reg === undefined) throw new Error('el registro ya no existe en la hoja. Pulsa Actualizar');
-    fila = u.reg + 1;
-  }
-  throw new Error('no se pudo ubicar el registro en la hoja');
-}
-
-// ── Carga ────────────────────────────────────────────────────────────────
-async function cargarDatos() {
-  const st = $('sync-status');
-  st.textContent = 'Cargando...';
-  try {
-    if (!hayHoja()) {
-      registros = (window.DATOS_DEMO?.registros || []).map((r, i) => ({ ...r, _fila: i + 1 }));
-    } else {
-      const cab = await leerVarios([`${HOJA_REG}!1:1`]);
-      fijarOrden(HOJA_REG, cab.valueRanges?.[0]?.values?.[0], COLS_REG);
-      const cr = cols(HOJA_REG, COLS_REG);
-      // Si "datos" es la última columna no se descarga (es lo más pesado)
-      const aLeer = cr[cr.length - 1] === 'datos' ? cr.slice(0, -1) : cr;
-      const d = await leerRango(`${HOJA_REG}!A2:${colLetra(aLeer.length - 1)}`);
-      registros = (d.values || []).map((f, i) => ({ ...rowToObj(f, aLeer), _fila: i + 1 }))
-        .filter(r => String(r.id_registro ?? '').trim());
-    }
-    registros.forEach(prepararRegistro);
-    renderInicio();
-    prepararFiltros();
-    renderHistorial();
-    const hora = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    st.textContent = hayHoja() ? 'Actualizado ' + hora : (window.DATOS_DEMO ? 'Demo - sin guardar en Google' : 'Sin hoja configurada');
-  } catch (e) {
-    console.error(e);
-    st.textContent = 'Error al cargar';
-    if (e.message !== '401') toast('No se pudo leer la hoja: ' + e.message, 'error');
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// INICIO
-// ════════════════════════════════════════════════════════════════════════
-function renderInicio() {
-  const mes = hoyISO().slice(0, 7);
-  $('formatos-grid').innerHTML = FORMATOS.map(f => {
-    const regs = registros.filter(r => r.formato === f.id);
-    const delMes = regs.filter(r => String(r.fecha).startsWith(mes)).length;
-    const ultimo = regs.reduce((m, r) => (r.fecha > m ? r.fecha : m), '');
-    return `<button class="formato-card" style="--tono:${f.tono}" onclick="abrirFormato('${f.id}')">
-      <div class="fc-top">
-        <span class="fc-icon">${f.icono}</span>
-        <div><div class="fc-nombre">${esc(f.nombre)}</div><div class="fc-codigo">${esc(f.codigo)} - Versión ${esc(f.version)}</div></div>
-      </div>
-      <div class="fc-desc">${esc(f.desc)}</div>
-      <div class="fc-pie">
-        <span><b>${delMes}</b> este mes - último ${ultimo ? fmtFecha(ultimo) : '-'}</span>
-        <span class="fc-llenar">Diligenciar →</span>
-      </div>
-    </button>`;
-  }).join('');
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// HISTORIAL
-// ════════════════════════════════════════════════════════════════════════
-// Semana juliana = semana ISO (empieza el lunes; la 1 contiene el primer jueves)
-function semanaJuliana(fechaISO) {
-  const d = new Date(fechaISO + 'T12:00:00');
-  const j = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  j.setUTCDate(j.getUTCDate() + 4 - (j.getUTCDay() || 7));
-  const enero1 = new Date(Date.UTC(j.getUTCFullYear(), 0, 1));
-  return Math.ceil(((j - enero1) / 86400000 + 1) / 7);
-}
-// '2026-09-21 11:34:02' → '21/09/2026 11:34'
-function fmtRegistro(s) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(String(s || ''));
-  return m ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : (s || '-');
-}
-const Q1 = 'Q1 (del 1 al 15)', Q2 = 'Q2 (del 16 al fin de mes)';
-
-function prepararRegistro(r) {
-  r.id_registro = String(r.id_registro).trim();
-  r.fecha = aISO(r.fecha);
-  ['formato', 'turno', 'codigo', 'responsable', 'usuario', 'fecha_registro', 'observaciones']
-    .forEach(k => { r[k] = String(r[k] ?? '').trim(); });
-  const f = fmtPorId(r.formato);
-  r._fmt = f ? f.nombre : (r.nombre_formato || r.formato);
-  const ok = /^\d{4}-\d{2}-\d{2}$/.test(r.fecha);
-  r._anio = ok ? r.fecha.slice(0, 4) : '';
-  r._mes = ok ? MESES[+r.fecha.slice(5, 7) - 1] : '';
-  r._q = ok ? (+r.fecha.slice(8, 10) <= 15 ? Q1 : Q2) : '';
-  r._sem = ok ? 'Semana ' + semanaJuliana(r.fecha) : '';
-  r._dia = ok ? fmtFecha(r.fecha) : '';
-  r._resp = r.responsable || '(Sin responsable)';
-}
-
-const FILTROS = { formato: [], responsable: [], anio: [], mes: [], quincena: [], semana: [], dia: [] };
-const CAMPO_FILTRO = { formato: '_fmt', responsable: '_resp', anio: '_anio', mes: '_mes', quincena: '_q', semana: '_sem', dia: '_dia' };
-const ETIQUETA_FILTRO = { formato: 'Formato', responsable: 'Responsable', anio: 'Año', mes: 'Mes',
-  quincena: 'Quincena', semana: 'Semana juliana', dia: 'Día' };
-const selectores = {};
-
-function opcionesFiltro(clave) {
-  const unicos = [...new Set(registros.map(r => r[CAMPO_FILTRO[clave]]).filter(Boolean))];
-  switch (clave) {
-    case 'formato':  return FORMATOS.map(f => f.nombre);
-    case 'anio':     return unicos.sort().reverse();
-    case 'mes':      return MESES.filter(m => unicos.includes(m));
-    case 'quincena': return [Q1, Q2];
-    case 'semana':   return unicos.sort((a, b) => parseInt(b.slice(7)) - parseInt(a.slice(7)));
-    case 'dia': {
-      const aISOcorto = s => s.split('/').reverse().join('-');
-      return unicos.sort((a, b) => aISOcorto(b).localeCompare(aISOcorto(a)));
-    }
-    default:         return unicos.sort((a, b) => a.localeCompare(b, 'es'));
-  }
-}
-
-function prepararFiltros() {
-  Object.keys(FILTROS).forEach(clave => {
-    if (!selectores[clave]) {
-      selectores[clave] = buildMultiSelect(ETIQUETA_FILTRO[clave], opcionesFiltro(clave), FILTROS[clave], renderHistorial);
-      $('h-ms-' + clave).appendChild(selectores[clave]);
-    } else selectores[clave].updateOptions(opcionesFiltro(clave));
-  });
-}
-
-function limpiarFiltros() {
-  Object.keys(FILTROS).forEach(k => { FILTROS[k].length = 0; selectores[k]?.updateOptions(opcionesFiltro(k)); });
-  $('h-buscar').value = '';
-  renderHistorial();
-}
-
-function registrosFiltrados() {
-  const q = ($('h-buscar')?.value || '').trim().toLowerCase();
-  return registros.filter(r => {
-    for (const k of Object.keys(FILTROS)) {
-      if (FILTROS[k].length && !FILTROS[k].includes(r[CAMPO_FILTRO[k]])) return false;
-    }
-    if (q) {
-      const texto = [r._fmt, r.codigo_formato, r.turno, r.codigo, r.responsable,
-                     r.usuario, r.observaciones, r._dia].join(' ').toLowerCase();
-      if (!texto.includes(q)) return false;
-    }
-    return true;
-  });
-}
-
-function renderHistorial() {
-  const tbody = $('tbody-historial');
-  if (!tbody) return;
-  let lista = registrosFiltrados()
-    .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.fecha_registro.localeCompare(a.fecha_registro));
-  lista = aplicarOrden(lista, 'historial', {
-    fecha: r => r.fecha, formato: r => r._fmt, turno: r => r.turno, codigo: r => r.codigo,
-    responsable: r => r.responsable, usuario: r => r.usuario,
-    fecha_registro: r => r.fecha_registro,
-  });
-  // Estado por antigüedad de la fecha del formato: hoy, últimos 7 días, más antiguo
-  const hoy = hoyISO(), hace7 = sumarDias(hoy, -7);
-  const estado = r => r.fecha === hoy ? 'est-hoy' : (r.fecha < hace7 ? 'est-viejo' : 'est-semana');
-  tbody.innerHTML = lista.map(r => `<tr class="${estado(r)}">
-    <td class="mono">${esc(r._dia || r.fecha)}${r.fecha === hoy ? '<span class="chip-hoy">HOY</span>' : ''}</td>
-    <td class="col-formato"><div class="nombre"><i class="punto-fmt" style="--tono:${fmtPorId(r.formato)?.tono || 'var(--accent-mid)'}"></i>${esc(r._fmt)}</div><div class="fc-codigo">${esc(r.codigo_formato || '')}</div></td>
-    <td>${esc(r.turno || '-')}</td>
-    <td>${esc(r.codigo || '-')}</td>
-    <td>${esc(r.responsable || '-')}</td>
-    <td class="text-muted" style="font-size:12px" title="${esc(r.usuario)}">${esc((r.usuario || '-').split('@')[0])}</td>
-    <td class="mono text-muted nowrap" style="font-size:11.5px">${esc(fmtRegistro(r.fecha_registro))}</td>
-    <td class="nowrap"><div class="acciones-fila">
-      <button class="btn btn-xs" onclick="abrirRegistro('${esc(r.id_registro)}')">Ver / editar</button>
-      ${isAdmin() ? `<button class="btn btn-xs btn-danger" onclick="eliminarRegistro('${esc(r.id_registro)}')">Eliminar</button>` : ''}
-    </div></td>
-  </tr>`).join('');
-  $('historial-vacio').style.display = lista.length ? 'none' : '';
-  prepararOrden('#tabla-historial', 'historial', renderHistorial);
-
-  const unicos = campo => new Set(lista.map(r => r[campo]).filter(Boolean)).size;
-  $('m-registros').textContent = lista.length.toLocaleString('es-CO');
-  $('m-formatos').textContent = unicos('formato');
-  $('m-responsables').textContent = new Set(lista.map(r => r.responsable).filter(Boolean)).size;
-  $('m-dias').textContent = unicos('fecha');
-  const fechas = lista.map(r => r.fecha).filter(Boolean).sort();
-  $('m-rango').textContent = fechas.length ? `${fmtFecha(fechas[0])} - ${fmtFecha(fechas[fechas.length - 1])}` : '-';
-  $('h-conteo').textContent = `${lista.length} de ${registros.length} registros`;
-  espejarScrollTodos('#view-historial .table-wrap');
-}
-
-// ════════════════════════════════════════════════════════════════════════
-// BARRA DE DESPLAZAMIENTO SUPERIOR (portada del módulo de Mosquera/Honda)
-// Cuando una tabla es más ancha que la pantalla, arriba aparece una barra
-// que acompaña al bajar, con una copia del encabezado sincronizada.
-// ════════════════════════════════════════════════════════════════════════
-function espejarScroll(wrap) {
-  if (!wrap || !wrap.parentNode) return;
-  let esp = wrap.previousElementSibling;
-  if (!esp || !esp.classList || !esp.classList.contains('scroll-espejo')) {
-    esp = document.createElement('div');
-    esp.className = 'scroll-espejo';
-    esp.innerHTML = '<div class="espejo-barra"><div></div></div><div class="espejo-head"></div>';
-    wrap.parentNode.insertBefore(esp, wrap);
-    esp._barra = esp.querySelector('.espejo-barra');
-    esp._cab   = esp.querySelector('.espejo-head');
-    esp._wrap  = wrap;
-
-    // Sincronizar las dos barras tiene una trampa: cada escritura nuestra
-    // dispara otro evento de scroll, y ese eco llega un cuadro tarde. Si se
-    // atiende, devuelve la barra a la posición vieja - eso era el tirón.
-    // Se recuerda el último valor escrito: si el evento trae justo ese valor
-    // es nuestro propio eco y se ignora. Se aplica en el acto (sin rAF) para
-    // que barra y tabla se muevan en el mismo cuadro. (Portado de Mosquera.)
-    esp._ultimo = -1;
-    const aplicar = x => {
-      esp._ultimo = x;
-      if (Math.round(wrap.scrollLeft)       !== x) wrap.scrollLeft       = x;
-      if (Math.round(esp._barra.scrollLeft) !== x) esp._barra.scrollLeft = x;
-      if (esp.classList.contains('con-encabezado') &&
-          Math.round(esp._cab.scrollLeft) !== x) esp._cab.scrollLeft = x;
-    };
-    const alDesplazar = origen => () => {
-      const x = Math.round(origen.scrollLeft);
-      if (x === esp._ultimo) return;
-      aplicar(x);
-    };
-    esp._aplicar = aplicar;
-    esp._barra.addEventListener('scroll', alDesplazar(esp._barra), { passive: true });
-    wrap.addEventListener('scroll',       alDesplazar(wrap),       { passive: true });
-    vigilarEncabezado(esp.closest('.view'));
-  }
-
-  const ancho = wrap.scrollWidth;
-  if (!wrap.clientWidth) { esp.style.display = 'none'; return; }
-  esp._barra.firstElementChild.style.width = ancho + 'px';
-  esp.style.display = ancho > wrap.clientWidth + 1 ? '' : 'none';
-  // Si el navegador usa barras superpuestas no ocupan alto: se reserva a mano
-  esp._barra.style.blockSize = '';
-  if (esp._barra.offsetHeight - esp._barra.clientHeight === 0) esp._barra.style.blockSize = '14px';
-
-  clonarEncabezado(esp);
-  actualizarPegada(esp);
-  esp._aplicar(Math.round(wrap.scrollLeft));
-}
-
-// Copia del encabezado con los anchos ya medidos, para que las columnas
-// calcen. Los clics se reenvían al encabezado real (ordenar sigue sirviendo)
-// y las horas escritas se copian como texto: la copia no se edita.
-function clonarEncabezado(esp) {
-  const tabla = esp._wrap.querySelector('table.data-table');
-  if (!tabla || !tabla.tHead) { esp._cab.innerHTML = ''; return; }
-  const copia = document.createElement('table');
-  copia.className = tabla.className;
-  copia.style.tableLayout = 'fixed';
-  copia.style.width = tabla.getBoundingClientRect().width + 'px';
-  copia.appendChild(tabla.tHead.cloneNode(true));
-
-  // La última fila del encabezado es la de las columnas reales (la primera
-  // puede llevar colspan de grupo)
-  const ultima = t => t.rows[t.rows.length - 1];
-  const reales = ultima(tabla.tHead).cells;
-  const copias = ultima(copia.tHead).cells;
-  for (let i = 0; i < copias.length && i < reales.length; i++) {
-    const ancho = reales[i].getBoundingClientRect().width + 'px';
-    copias[i].style.width = copias[i].style.minWidth = copias[i].style.maxWidth = ancho;
-    if (reales[i].dataset.orden) {
-      const real = reales[i];
-      copias[i].style.cursor = 'pointer';
-      copias[i].addEventListener('click', () => real.click());
-    }
-  }
-  copia.querySelectorAll('input').forEach(inp => {
-    const orig = tabla.tHead.querySelector(`input[data-b="${inp.dataset.b}"][data-r="${inp.dataset.r}"][data-c="${inp.dataset.c}"]`);
-    const span = document.createElement('span');
-    span.className = 'hora-copia';
-    span.textContent = orig?.value || '--:--';
-    inp.replaceWith(span);
-  });
-  esp._cab.innerHTML = '';
-  esp._cab.appendChild(copia);
-}
-
-// Muestra la copia del encabezado solo cuando el real ya pasó por debajo
-function actualizarPegada(esp) {
-  const vista = esp.closest('.view');
-  const tabla = esp._wrap && esp._wrap.querySelector('table.data-table');
-  if (!vista || !tabla || esp.style.display === 'none') return;
-  const cs = getComputedStyle(vista);
-  const tope = vista.getBoundingClientRect().top + parseFloat(cs.paddingTop || 0);
-  const altoBarra = esp._barra.offsetHeight;
-  const rTabla = tabla.getBoundingClientRect();
-  const rCabeza = tabla.tHead ? tabla.tHead.getBoundingClientRect() : rTabla;
-  const enElTope = esp.getBoundingClientRect().top <= tope + 1;
-  const mostrar = enElTope && rCabeza.bottom < tope + altoBarra + 4
-                  && rTabla.bottom > tope + altoBarra + 50;
-  const cambio = mostrar !== esp.classList.contains('con-encabezado');
-  if (cambio && mostrar) clonarEncabezado(esp);
-  esp.classList.toggle('con-encabezado', mostrar);
-  esp.classList.toggle('pegada', enElTope);
-  if (cambio && mostrar) esp._cab.scrollLeft = Math.round(esp._wrap.scrollLeft);
-}
-
-function vigilarEncabezado(vista) {
-  if (!vista || vista._vigilada) return;
-  vista._vigilada = true;
-  let cuadro = 0;
-  vista.addEventListener('scroll', () => {
-    if (cuadro) return;
-    cuadro = requestAnimationFrame(() => {
-      cuadro = 0;
-      vista.querySelectorAll('.scroll-espejo').forEach(actualizarPegada);
-    });
-  }, { passive: true });
-}
-
-function espejarScrollTodos(selector) {
-  requestAnimationFrame(() => document.querySelectorAll(selector).forEach(espejarScroll));
-}
-window.addEventListener('resize', () => espejarScrollTodos('.view.active .table-wrap'));
-// La barra lateral cambia el ancho disponible: se recalcula al terminar su animación
-document.addEventListener('click', e => {
-  if (e.target.closest('#btn-sidebar')) setTimeout(() => espejarScrollTodos('.view.active .table-wrap'), 400);
-});
-</script>
-
-<script>
-// ════════════════════════════════════════════════════════════════════════
-// APLICACIÓN INSTALABLE (tablet)
-// Con manifest.webmanifest + este service worker, Chrome instala la página
-// como aplicación: se abre a pantalla completa, sin la barra del navegador.
-// Sirve para que la planta la use como una app más en la tablet.
-// ════════════════════════════════════════════════════════════════════════
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW no registrado:', e));
-  });
-}
-
-// Si alguno de esos archivos no quedó subido al repositorio, la tablet no
-// puede instalar la aplicación y no hay forma de adivinar por qué. Se
-// comprueba al abrir el inicio y se avisa con el nombre exacto que falta.
-async function revisarArchivosApp() {
-  const aviso = document.getElementById('aviso-instalacion');
-  if (!aviso || !location.protocol.startsWith('http')) return;
-  const archivos = ['manifest.webmanifest', 'sw.js', 'icono-192.png', 'icono-512.png', 'icono-maskable-512.png'];
-  const faltan = [];
-  await Promise.all(archivos.map(async a => {
-    try { const r = await fetch(a, { method: 'HEAD', cache: 'no-store' }); if (!r.ok) faltan.push(a); }
-    catch (e) { faltan.push(a); }
-  }));
-  if (!faltan.length) { aviso.style.display = 'none'; return; }
-  aviso.innerHTML = `<b>Para instalar la página como aplicación en la tablet faltan estos archivos en el repositorio:</b><br>` +
-    faltan.map(a => `<code>${esc(a)}</code>`).join(' - ') +
-    `<br>Súbelos a la raíz del repositorio (Add file → Upload files) y vuelve a abrir esta página.`;
-  aviso.style.display = '';
-}
-window.addEventListener('load', () => setTimeout(revisarArchivosApp, 1500));
-</script>
-
-</body>
-</html>
+  c
