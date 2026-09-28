@@ -221,6 +221,33 @@
   background-position: calc(100% - 13px) 55%, calc(100% - 8px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
 .c-in.c-num { text-align: right; font-family: 'DM Mono', monospace; }
 
+/* Concentración en ppm: número entero + unidad */
+.c-ppm { display: inline-flex; align-items: center; gap: 7px; }
+.c-ppm > input, .c-ppm > input.c-in { flex: 0 0 auto; width: 86px; min-width: 86px; }
+.ppm-suf { font-family: 'DM Mono', monospace; font-size: 11.5px; font-weight: 600; color: var(--text3); }
+/* Lista con una opción "mala" elegida (Positivo) */
+.c-in.c-sel.sel-mal, select.sel-mal { background-color: #f5d7db; color: #8f1f30; font-weight: 700; }
+
+/* Verificación que toca el día de la fecha del formato */
+.chip-toca { display: none; }
+.tabla-captura tr.toca-hoy > td { background: rgba(47, 125, 92, .11); }
+.tabla-captura tr.toca-hoy > td.col-fila { background: #cfe5da; box-shadow: inset 4px 0 0 var(--ok), inset -2px 0 0 var(--nm-dark-soft); }
+.tabla-captura tr.toca-hoy .chip-toca {
+  display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: var(--pill);
+  font-size: 9.5px; font-weight: 800; letter-spacing: .06em; color: #1e5c3d; background: #cde8d9; vertical-align: middle;
+}
+
+/* Temperatura: número + botón N/A */
+.c-temp { display: inline-flex; align-items: center; gap: 6px; }
+.c-temp > input, .c-temp > input.c-in { flex: 0 0 auto; width: 76px; min-width: 76px; }
+.btn-na {
+  flex: 0 0 auto; border: none; cursor: pointer; padding: 7px 9px; border-radius: 9px;
+  background: var(--bg); box-shadow: var(--nm-out-xs);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px; font-weight: 800; color: var(--text3);
+}
+.btn-na.on { box-shadow: var(--nm-in-xs); color: var(--accent); }
+.btn-na[disabled] { opacity: .35; cursor: not-allowed; }
+
 /* Hora con AM / PM: casilla de la hora + lista de AM o PM */
 .c-hora12 { display: inline-flex; align-items: center; gap: 5px; }
 .c-hora12 .c-hora, .c-hora12 input.c-hora { max-width: 68px; min-width: 56px; }
@@ -233,8 +260,11 @@
   background-image: linear-gradient(45deg, transparent 50%, var(--text3) 50%), linear-gradient(135deg, var(--text3) 50%, transparent 50%);
   background-position: calc(100% - 11px) 55%, calc(100% - 7px) 55%; background-size: 5px 5px; background-repeat: no-repeat;
 }
-.c-hora12 .c-ampm { flex: 0 0 auto; width: 70px; }
-.c-hora12 > input { flex: 0 0 auto; }
+.c-hora12 .c-ampm { flex: 0 0 auto; width: 70px; min-width: 70px; }
+/* Ancho fijo (no en %): un campo con ancho en % no le "pide" espacio a la
+   columna de la tabla, y en la tablet el AM/PM quedaba encima de la celda
+   siguiente */
+.c-hora12 > input, .c-hora12 > input.c-in { flex: 0 0 auto; width: 68px; min-width: 68px; }
 .c-hora12 .c-ampm:focus { outline: none; box-shadow: var(--nm-in-xs), 0 0 0 2px var(--accent-soft); }
 .c-hora12 .c-ampm[disabled] { opacity: .35; cursor: not-allowed; }
 .field .c-hora12 input.c-hora { padding: 10px 12px; font-size: 13px; }
@@ -415,6 +445,8 @@
 #dlg-revisar-lista li.info { box-shadow: var(--nm-in-xs), inset 4px 0 0 var(--accent-soft); }
 #dlg-revisar-lista b { color: var(--accent); }
 .dlg-acciones { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.btn-borrar-ok { background: linear-gradient(145deg, #a8304a, #82192d) !important; }
+.btn-borrar-ok[disabled] { opacity: .4; cursor: not-allowed; }
 
 /* Aviso de borrador sin guardar */
 .aviso-borrador {
@@ -502,7 +534,7 @@
 }
 .espejo-barra > div { block-size: 1px; }
 .espejo-head {
-  position: absolute; top: 100%; inset-inline: 4px; overflow: hidden; display: none;
+  position: absolute; top: 100%; inset-inline: 0; overflow: hidden; display: none;
   background: var(--bg); border-radius: 0 0 var(--radius) var(--radius);
 }
 .scroll-espejo.con-encabezado .espejo-head { display: block; }
@@ -540,7 +572,14 @@
 /* ── Historial ──────────────────────────────────────────────────────── */
 .metrics-grid.cuatro { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 900px) { .metrics-grid.cuatro { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-#h-buscar { flex: 1 1 260px; max-inline-size: 360px; }
+/* Filtros del historial: todos en una línea (bajan solos si no caben) */
+.filter-bar .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 9px; inline-size: 100%; }
+#h-buscar { flex: 1 1 150px; min-width: 150px !important; max-inline-size: 280px; }
+#view-historial .filter-bar .ms-btn { padding: 11px 13px; gap: 7px; }
+#view-historial .filter-bar .btn-limpiar { padding-inline: 14px; }
+.btn-limpiar { background: #f3e6c4; color: #5c4300; box-shadow: var(--nm-out-xs); }
+.btn-limpiar:hover { color: #3f2e00; box-shadow: var(--nm-out-sm); }
+.leyenda-estado .conteo-filtro { margin-left: auto; }
 .badge-formato { font-size: 10.5px; padding: 4px 11px; }
 .acciones-fila { display: flex; gap: 6px; justify-content: flex-end; }
 /* overflow: clip recorta igual que hidden pero no rompe la barra pegada arriba */
@@ -563,7 +602,7 @@
   font-family: 'Plus Jakarta Sans', sans-serif; font-size: 9.5px; font-weight: 800; letter-spacing: .06em;
   color: #1e5c3d; background: #cde8d9; vertical-align: middle;
 }
-.leyenda-estado { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; font-size: 11.5px; color: var(--text2); }
+.leyenda-estado { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 4px; font-size: 11.5px; color: var(--text2); flex: 1 1 100%; align-items: center; }
 .leyenda-estado span { display: inline-flex; align-items: center; gap: 7px; }
 .leyenda-estado i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
 .leyenda-estado .e-hoy    { background: var(--ok); }
@@ -632,9 +671,13 @@
   .chips { gap: 10px; }
   .chips button, .chips-unica button { min-height: 44px; padding: 10px 16px; font-size: 12.5px; }
   .c-hora12 { gap: 8px; }
-  .c-hora12 .c-ampm { min-height: 46px; width: 78px; font-size: 13px; }
-  .c-hora12 .c-hora, .c-hora12 input.c-hora { max-width: 78px; }
+  .c-hora12 .c-ampm { min-height: 46px; width: 78px; min-width: 78px; font-size: 13px; }
+  .c-hora12 > input, .c-hora12 > input.c-in { width: 78px; min-width: 78px; max-width: 78px; }
   .btn-col { min-height: 36px; padding: 8px 12px; font-size: 12px; }
+  .c-temp { gap: 8px; }
+  .c-ppm > input, .c-ppm > input.c-in { width: 96px; min-width: 96px; }
+  .c-temp > input, .c-temp > input.c-in { width: 80px; min-width: 80px; }
+  .btn-na { min-height: 44px; min-width: 48px; font-size: 12px; }
   .btn-i { width: 40px; height: 40px; font-size: 16px; }
   .tabla-captura:not(.tabla-muestras) td { padding: 8px 8px; }
   .tabla-muestras .c-in { min-height: 42px; }
@@ -734,6 +777,7 @@
       </div>
       <div class="topbar-right">
         <div id="sync-status" class="text-muted" style="font-size:11px"></div>
+        <button class="btn btn-sm btn-danger" id="btn-borrar-todo" onclick="pedirBorrarTodo()" style="display:none" title="Solo administradores">Eliminar todo</button>
         <button class="btn btn-sm" onclick="cargarDatos()">Actualizar</button>
       </div>
     </div>
@@ -780,23 +824,21 @@
 
       <div class="filter-bar">
         <div class="filter-row">
-          <input id="h-buscar" type="text" placeholder="Buscar código, turno, responsable, observación…" oninput="renderHistorial()">
+          <input id="h-buscar" type="text" placeholder="Buscar…" title="Busca por código, turno, responsable u observación" oninput="renderHistorial()">
           <span id="h-ms-formato"></span>
           <span id="h-ms-responsable"></span>
-        </div>
-        <div class="filter-row">
           <span id="h-ms-anio"></span>
           <span id="h-ms-mes"></span>
           <span id="h-ms-quincena"></span>
           <span id="h-ms-semana"></span>
           <span id="h-ms-dia"></span>
-          <button class="btn btn-sm" onclick="limpiarFiltros()">Limpiar filtros</button>
-          <span class="conteo-filtro" id="h-conteo"></span>
+          <button class="btn btn-sm btn-limpiar" onclick="limpiarFiltros()">✕ Limpiar filtros</button>
         </div>
         <div class="leyenda-estado">
           <span><i class="e-hoy"></i>Hoy</span>
           <span><i class="e-semana"></i>Últimos 7 días</span>
           <span><i class="e-viejo"></i>Más de 7 días</span>
+          <span class="conteo-filtro" id="h-conteo"></span>
         </div>
       </div>
 
@@ -830,6 +872,20 @@
 </div><!-- /app -->
 
 <!-- Toast -->
+<!-- Eliminar todos los registros (administrador) -->
+<dialog class="dlg-revisar" id="dlg-borrar-todo" aria-labelledby="dlg-borrar-titulo">
+  <div class="dlg-titulo" id="dlg-borrar-titulo" style="color:var(--danger)">Eliminar todos los registros</div>
+  <div class="dlg-sub" id="dlg-borrar-texto"></div>
+  <div class="field" style="margin-bottom:18px">
+    <label for="dlg-borrar-palabra">Para confirmar, escribe ELIMINAR</label>
+    <input type="text" id="dlg-borrar-palabra" autocomplete="off" oninput="this.value=this.value.toUpperCase(); $('dlg-borrar-ok').disabled = this.value.trim() !== 'ELIMINAR'">
+  </div>
+  <div class="dlg-acciones">
+    <button class="btn btn-sm" onclick="$('dlg-borrar-todo').close()">Cancelar</button>
+    <button class="btn btn-primary btn-borrar-ok" id="dlg-borrar-ok" disabled onclick="borrarTodo()">Eliminar todo</button>
+  </div>
+</dialog>
+
 <!-- Revisión antes de guardar (solo aparece si hay algo que mirar) -->
 <dialog class="dlg-revisar" id="dlg-revisar" aria-labelledby="dlg-revisar-titulo">
   <div class="dlg-titulo" id="dlg-revisar-titulo">Antes de guardar, revisa</div>
@@ -864,8 +920,12 @@ window.APP = {
   },
   CAMPOS_FECHA_HOY: [],
   alIniciar() { renderInicio(); cargarDatos(); },
-  alCambiarUsuario() { if (document.getElementById('view-historial').classList.contains('active')) renderHistorial(); },
+  alCambiarUsuario() {
+    if (document.getElementById('view-historial').classList.contains('active')) renderHistorial();
+    mostrarBorrarTodo();
+  },
   alCambiarVista(v) {
+    mostrarBorrarTodo();
     if (v === 'inicio')    renderInicio();
     if (v === 'historial') renderHistorial();
     // Las tablas ocultas no tienen ancho: la barra superior se recalcula al mostrarlas
@@ -884,6 +944,11 @@ window.APP = {
 // Tipos de campo y de columna:
 //   txt    texto libre (se guarda en mayúsculas)
 //   num    número decimal (acepta 40,4 y 40.4); min: 0 para no negativos
+//   temp   temperatura: número decimal o N/A (botón al lado); se guarda como número
+//   ppm    concentración: número entero; a la hoja llega como "180 ppm"
+//   segun  (columna) función que da el tipo de la celda según su fila
+//   diasSemana (columna) días en que toca: la fila se resalta si la fecha del
+//          formato cae en uno de ellos ("LUNES Y SÁBADO", "LUNES A SÁBADO"…)
 //   ent    número entero, mínimo 0
 //   sel    lista desplegable (ops)
 //   calc   fecha calculada: desde + dias (lote / fecha de vencimiento)
@@ -896,6 +961,7 @@ window.APP = {
 //   info   columna de solo consulta: en la tablet se esconde y se abre con la
 //          "i" de la fila (siempre: true = no se esconde nunca)
 //   corto  (filas de matriz) nombre corto para la tablet; el completo va en la "i"
+//   rango  [mín, máx]: fuera de él la celda queda en ámbar (solo aviso; acepta N/A)
 //   op     una opción de una lista corta (botones; vertical: true = en columna;
 //          estilo: 'fichas' = fichas separadas, como las de selección múltiple)
 //   chips  varias opciones de una lista (fichas)
@@ -935,6 +1001,9 @@ const GRAMAJES_BLOQUE = ['10', '20', '30', '45', '300', '350', '1800', '2000', '
 const MAQUINAS = ['FLOW PACK 1', 'FLOW PACK 2', 'FLOW PACK 3', 'TERMOFORMADORA 4',
                   'SELLADORA DE PEDAL', 'EMPACADORA AL VACÍO'];
 const DIAS_VENCIMIENTO = 29;
+// Límite de control de los PCC de temperatura (°C). Fuera de él la celda se
+// marca en ámbar y aparece en la revisión antes de guardar.
+const PCC_FRIO = [0, 4];
 // Rangos de sellado por máquina (°C), de la tabla de referencia del formato
 // T sellado. Si una temperatura queda por fuera, la celda se marca en ámbar
 // (es solo un aviso: se puede guardar igual).
@@ -958,10 +1027,12 @@ const CIERRE = [
   { k: 'cargo_realiza', l: 'Cargo', t: 'sel', ops: CARGOS, req: true },
 ];
 
+const F_MAQUINA = { k: 'maquina', l: '# Máquina', t: 'sel', ops: MAQUINAS };
+const F_RESP    = { k: 'responsable', l: 'Responsable', t: 'txt' };
 const OP_CNC   = { ops: ['C', 'NC'],        txt: { C: 'Cumple', NC: 'No cumple' } };
 const OP_CNCNA = { ops: ['C', 'NC', 'NA'],  txt: { C: 'Cumple', NC: 'No cumple', NA: 'No aplica' } };
 const OP_RB    = { ops: ['R', 'B'],         txt: { R: 'Regular', B: 'Bueno' } };
-const MALOS = ['NC', 'NO CUMPLE', 'R'];      // se pintan en rojo al elegirlos
+const MALOS = ['NC', 'NO CUMPLE', 'R', 'POSITIVO'];      // se pintan en rojo al elegirlos
 const BUENOS = ['C', 'CUMPLE', 'B'];
 
 // Verificación por horas de las rutinas de saneamiento
@@ -994,6 +1065,23 @@ const FSEM    = 'SEMANAL Y/O CADA VEZ QUE SE REQUIERA';
 const NEBU    = 'LUN - MIÉ: ANFOCUAT (2 ml/Lt de agua) 200 ppm - JUE - DOM: PERACET (2,5 ml/Lt de agua) 250 ppm';
 const LA = 'LAVADO / ASPERSIÓN', PA = 'PAÑO ABSORBENTE / ASPERSIÓN', LN = 'LAVADO / NEBULIZACIÓN';
 
+// Resultado de la verificación de proceso, según el resultado esperado de la fila:
+//  - "130-260 ppm" / "200 ppm": número entero con el rango esperado (si es un solo
+//    valor, se toma ± TOLERANCIA_PPM). A la hoja llega con " ppm" al final.
+//  - "Negativo": lista Negativo / Positivo.
+const TOLERANCIA_PPM = 0.10;   // 200 ppm → 180 a 220 ppm
+function resultadoSegun(fila) {
+  const esp = String(fila.esperado || '');
+  const r = /(\d+)\s*(?:-\s*(\d+))?\s*ppm/i.exec(esp);
+  if (r) {
+    const a = +r[1], b = r[2] ? +r[2] : null;
+    const rango = b !== null ? [a, b] : [Math.round(a * (1 - TOLERANCIA_PPM)), Math.round(a * (1 + TOLERANCIA_PPM))];
+    return { t: 'ppm', rango };
+  }
+  if (/negativo/i.test(esp)) return { t: 'sel', ops: ['NEGATIVO', 'POSITIVO'] };
+  return { t: 'txt' };
+}
+
 const LEYENDA_MARCA = '<b>✔</b> Cumple - <b>✗</b> No cumple - <b>NA</b> No aplica - cada toque en la casilla cambia la marca. El botón <b>Todo</b> bajo la hora marca la columna completa (cada toque: ✔, ✗, NA, vacía). Las columnas se habilitan al escribir su hora.';
 
 // ── Iconos de las tarjetas ───────────────────────────────────────────────
@@ -1004,6 +1092,8 @@ const ICONO = {
   gota: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 6.4 6 10.5a6 6 0 0 1-12 0C6 9.4 12 3 12 3z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5"/></svg>',
   bodega: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l9-6 9 6v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg>',
   ojo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  sellado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M4 7l2-3 2 3 2-3 2 3 2-3 2 3 2-3 2 3"/><path d="M8 12h8"/><path d="M8 15.5h5"/></svg>',
+  ensamble: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15l9-5 9 5-9 5z"/><path d="M3 15v2l9 5 9-5v-2"/><path d="M6 10.5l6-3.5 6 3.5"/><path d="M9 6.2l3-1.7 3 1.7"/></svg>',
   tajado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l9-12 9 12z"/><path d="M3 17v2h18v-2"/><circle cx="10" cy="13" r="1"/><circle cx="14" cy="11" r=".8"/></svg>',
 };
 
@@ -1197,8 +1287,8 @@ const FORMATOS = [
       columnas: [
         { k: 'metodo', l: 'Método de verificación', info: true, corta: true },
         { k: 'esperado', l: 'Resultado esperado', info: true, corta: true, siempre: true },
-        { k: 'dias', l: 'Días de verificación', info: true, corta: true, siempre: true },
-        { k: 'resultado', l: 'Resultado', t: 'txt' },
+        { k: 'dias', l: 'Días de verificación', info: true, corta: true, siempre: true, diasSemana: true },
+        { k: 'resultado', l: 'Resultado', t: 'txt', segun: resultadoSegun },
       ],
       filas: [
         { l: 'LIMPIEZA Y DESINFECCIÓN DE SUPERFICIES', dias: 'LUNES Y SÁBADO', metodo: 'Tiras Vericleen', esperado: 'Negativo' },
@@ -1278,8 +1368,8 @@ const FORMATOS = [
       columnas: [
         { k: 'metodo', l: 'Método de verificación', info: true, corta: true },
         { k: 'esperado', l: 'Resultado esperado', info: true, corta: true, siempre: true },
-        { k: 'dias', l: 'Días de verificación', info: true, corta: true, siempre: true },
-        { k: 'resultado', l: 'Resultado', t: 'txt' },
+        { k: 'dias', l: 'Días de verificación', info: true, corta: true, siempre: true, diasSemana: true },
+        { k: 'resultado', l: 'Resultado', t: 'txt', segun: resultadoSegun },
       ],
       filas: [
         { l: 'CONCENTRACIÓN DE PERACET 3 LT EMPLEADO EN NEBULIZACIÓN DE CUARTOS FRÍOS', dias: 'JUEVES', metodo: 'Test ácido peracético', esperado: '130-260 ppm' },
@@ -1359,11 +1449,11 @@ const FORMATOS = [
   desc: 'Parámetros de bloque, queso cortado, retal e insumos, evaluados por hora.',
   // Anchos de la información general en el computador: presentación solo lo
   // que ocupan sus tres fichas y responsable el campo más largo
-  anchosGeneral: 'minmax(140px,1fr) minmax(135px,.7fr) max-content minmax(160px,.8fr) minmax(240px,2fr)',
+  anchosGeneral: 'minmax(140px,1fr) minmax(120px,.7fr) max-content minmax(180px,.9fr) minmax(235px,2fr)',
   general: [F_FECHA, F_TURNO,
     // Selección única, con el aspecto de fichas separadas
     { k: 'presentacion', l: 'Presentación', t: 'op', ops: ['PORCIÓN', 'DEDITOS', 'TAJADO'], estilo: 'fichas' },
-    { k: 'linea', l: 'No. línea de corte', t: 'sel', ops: ['1', '2', '3', '4', '5', '6'] },
+    { k: 'linea', l: 'No. línea de corte', t: 'sel', ops: MAQUINAS },   // línea de corte = # máquina
     { k: 'responsable', l: 'Responsable', t: 'txt' }],
   bloques: [
     { tipo: 'matriz', k: 'parametros', titulo: 'Parámetros evaluados por hora', n: 9, enc: 'hora',
@@ -1379,7 +1469,7 @@ const FORMATOS = [
         { k: 'temp_salida', l: 'Temperatura de salida del bloque del cuarto frío (°C)', corto: 'T° salida del bloque (°C)', t: 'num' },
         { k: 'estado_empaque', l: 'Estado del empaque, sellado y rotulado', corto: 'Empaque, sellado y rotulado', t: 'op', ...OP_CNCNA },
         { grupo: 'Queso cortado' },
-        { k: 'gramaje_obtenido', l: 'Gramaje o referencia obtenida', t: 'txt' },
+        { k: 'gramaje_obtenido', l: 'Gramaje o referencia obtenida', t: 'sel', ops: GRAMAJES },
         { k: 'codificado_cortado', l: 'Codificado: lote / fecha vencimiento', t: 'fecha' },
         { k: 'codigo_trazabilidad', l: 'Código de trazabilidad', t: 'txt' },
         { grupo: 'Queso cortado - Inspección organoléptica' },
@@ -1391,15 +1481,123 @@ const FORMATOS = [
         { grupo: 'Queso cortado - Peso, sellado y temperatura' },
         { l: 'Control de peso neto', info: 'Ver formato diario CONTROL PESO UNIDADES CORTADAS.' },
         { k: 'integridad', l: 'Sellado (prueba de integridad) - revisar 3 unidades aleatoriamente / hora', corto: 'Prueba de integridad', t: 'op', ...OP_CNCNA },
-        { k: 'temp_entrada', l: 'Temperatura de entrada del producto al cuarto frío (°C)', corto: 'T° entrada al cuarto frío (°C)', t: 'txt' },   // texto: a veces va N/A
+        { k: 'temp_entrada', l: 'Temperatura de entrada del producto al cuarto frío (°C)', corto: 'T° entrada al cuarto frío (°C)', t: 'temp' },   // número o N/A
         { grupo: 'Retal' },
-        { k: 'temp_retal', l: 'Temperatura de ingreso del retal al cuarto frío (°C)', corto: 'T° ingreso del retal (°C)', t: 'txt' },   // texto: a veces va N/A
+        { k: 'temp_retal', l: 'Temperatura de ingreso del retal al cuarto frío (°C)', corto: 'T° ingreso del retal (°C)', t: 'temp' },   // número o N/A
         { grupo: 'Insumos' },
         { k: 'lote_insumos_1', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 1', corto: 'Lote insumos - 1', t: 'txt' },
         { k: 'lote_insumos_2', l: 'Lote correspondiente a rollos, bolsas y separadores según el corte realizado - 2', corto: 'Lote insumos - 2', t: 'txt' },
       ]},
   ],
   nota: '<b>Nota:</b> registrar los parámetros de control en los horarios establecidos mediante medición y verificación visual, consignando valores reales de temperatura, gramaje y demás variables. Evaluar los criterios de calidad marcando: (C) Cumple, (NC) No Cumple o (N.A.) No Aplica. En caso de desviaciones, registrar la novedad y la acción correctiva en observaciones. Completar la información de presentación y diligenciar las abreviaturas correspondientes en la inspección organoléptica.',
+},
+
+// ── 8. SELLADO (termoformado) ───────────────────────────────────────────
+{
+  id: 'RPCPS', hoja: 'SELLADO TERMO', tono: '#2f86a6',
+  nombre: 'REGISTRO PARÁMETROS DE CONTROL PROCESO DE SELLADO',
+  corto: 'PARÁMETROS DE CONTROL - PROCESO DE SELLADO',
+  codigo: 'M-GISI-RPCPS-1', version: '1', actualizado: '21/04/2026',
+  icono: ICONO.sellado,
+  desc: 'Temperaturas, codificado e inspección del sellado por hora, y resumen del producto sellado en el turno.',
+  // La nota del papel pide registrar la línea: la línea es la máquina
+  general: [F_FECHA, F_TURNO, F_CODIGO, F_MAQUINA, F_RESP],
+  bloques: [
+    { tipo: 'matriz', k: 'parametros', titulo: 'Parámetros evaluados por hora', n: 9, enc: 'hora',
+      leyenda: '<b>PR</b> Pera - <b>DC</b> Doble crema - <b>MZ</b> Mozarella - <b>CP</b> Campesino - <b>C</b> Cumple - <b>NC</b> No cumple - <b>NA</b> No aplica. Escribe la hora de cada evaluación en el encabezado de la columna: la columna se habilita al escribirla.',
+      filas: [
+        { grupo: 'Área' },
+        { k: 'temp_area', l: 'Temperatura del área (°C)', t: 'num' },
+        { grupo: 'Bloque' },
+        { k: 'tipo_queso', l: 'Tipo de queso', t: 'sel', ...OP_QUESO_CORTO },
+        { k: 'gramaje', l: 'Gramaje del producto', t: 'sel', ops: GRAMAJES },
+        { k: 'referencia', l: 'Referencia', t: 'txt' },
+        { k: 'fecha_prod_mp', l: 'Codificado materia prima: fecha de producción', corto: 'Codificado MP: fecha de producción', t: 'fecha' },
+        { k: 'lote_vto_mp', l: 'Codificado materia prima: lote / fecha vencimiento', corto: 'Codificado MP: lote / F. Vto', t: 'calc', desde: 'fecha_prod_mp', dias: DIAS_VENCIMIENTO },
+        { k: 'temp_salida', l: 'Temperatura de salida del producto del cuarto frío (°C) - PCC, límite de control 0 - 4 °C', corto: 'T° salida del cuarto frío (°C) - PCC', t: 'temp', rango: PCC_FRIO },   // número o N/A
+        { k: 'temp_entrada', l: 'Temperatura de entrada del producto al cuarto frío (°C) - PCC, límite de control 0 - 4 °C', corto: 'T° entrada al cuarto frío (°C) - PCC', t: 'temp', rango: PCC_FRIO },
+        { grupo: 'Inspección' },
+        { k: 'gramaje_obtenido', l: 'Gramaje o referencia obtenida', t: 'sel', ops: GRAMAJES },
+        { k: 'fecha_prod_pt', l: 'Codificado producto terminado: fecha de producción', corto: 'Codificado PT: fecha de producción', t: 'fecha' },
+        { k: 'lote_vto_pt', l: 'Codificado producto terminado: lote / fecha vencimiento', corto: 'Codificado PT: lote / F. Vto', t: 'calc', desde: 'fecha_prod_pt', dias: DIAS_VENCIMIENTO },
+        { grupo: 'Inspección - Cumple / No cumple' },
+        { k: 'rotulado', l: 'Rotulado: lote / fecha vencimiento (revisar 10 - 20 unidades aleatoriamente)', corto: 'Rotulado', t: 'op', ...OP_CNCNA },
+        { k: 'sellado_visual', l: 'Sellado (inspección visual) - revisar 10 unidades aleatoriamente / hora', corto: 'Sellado (inspección visual)', t: 'op', ...OP_CNCNA },
+        { k: 'integridad', l: 'Sellado (prueba de integridad) - revisar 3 unidades aleatoriamente / hora', corto: 'Prueba de integridad', t: 'op', ...OP_CNCNA },
+        { k: 'elongacion', l: '*Elongación aristas de empaque termoformado - revisar 3 unidades aleatoriamente con medidor de espesor por cada referencia', corto: 'Elongación aristas *', t: 'op', ...OP_CNCNA },
+        { grupo: 'Producción' },
+        { k: 'cantidad', l: 'Cantidad sellada por hora', t: 'ent' },
+        { grupo: 'Insumos' },
+        { k: 'lote_insumos', l: 'Lote correspondiente a rollos de empaque empleados durante el corte', corto: 'Lote rollos de empaque', t: 'txt' },
+      ]},
+    { tipo: 'tabla', k: 'resumen', titulo: 'Resumen del producto sellado durante el turno', etiqueta: 'Producto',
+      filas: ['PRODUCTO 1', 'PRODUCTO 2', 'PRODUCTO 3', 'PRODUCTO 4', 'PRODUCTO 5',
+              'PRODUCTO 6', 'PRODUCTO 7', 'PRODUCTO 8', 'PRODUCTO 9'],
+      columnas: [
+        { k: 'cantidad', l: 'Cantidad', t: 'ent' },
+        { k: 'hora_inicio', l: 'Hora inicio', t: 'hora12' },
+        { k: 'hora_final', l: 'Hora final', t: 'hora12' },
+      ]},
+  ],
+  criterios: '<b>*Elongación aristas de empaque termoformado.</b> Las medidas mínimas de las aristas son: para fondo 50 micras = 0,013 mm; fondo 62,5 micras = 0,013 mm; fondo 80 micras = 0,014 mm; fondo 90 micras = 0,022 mm; fondo 125 micras = 0,023 mm.',
+  nota: '<b>Nota:</b> registrar los parámetros del proceso de sellado en las horas establecidas, mediante medición directa y verificación visual. Consignar valores reales de temperatura, gramaje y variables de control, y evaluar los criterios marcando (C: cumple, NC: no cumple, N.A: no aplica). Realizar inspecciones según el muestreo indicado (visual, integridad y elongación). En caso de desviaciones, registrar en observaciones y definir la acción correctiva. Completar información de turno, código, línea y responsables.',
+},
+
+// ── 9. ENSAMBLE QUESO CON BOCADILLO ─────────────────────────────────────
+{
+  id: 'RPCPEQB', hoja: 'ENSAMBLE QUESO CON BOCADILLO', tono: '#c2456b',
+  nombre: 'REGISTRO PARÁMETROS DE CONTROL PROCESO DE ENSAMBLE QUESO CON BOCADILLO',
+  corto: 'PARÁMETROS DE CONTROL - ENSAMBLE QUESO CON BOCADILLO',
+  codigo: 'M-GISI-RPCPEQB-1', version: '1', actualizado: '21/04/2026',
+  icono: ICONO.ensamble,
+  desc: 'Materias primas (queso y bocadillo), evaluación organoléptica y producto terminado, evaluados por hora.',
+  general: [F_FECHA, F_TURNO,
+    { k: 'linea', l: 'No. línea de ensamble', t: 'sel', ops: MAQUINAS },   // línea = # máquina
+    F_RESP],
+  bloques: [
+    { tipo: 'matriz', k: 'parametros', titulo: 'Parámetros evaluados por hora', n: 10, enc: 'hora',
+      leyenda: '<b>C</b> Cumple - <b>NC</b> No cumple - <b>NA</b> No aplica - <b>BC</b> Blanco crema - <b>LA</b> Ligeramente amarillento - <b>S</b> Seco - <b>MH</b> Moderadamente húmedo - <b>H</b> Húmedo - <b>LU</b> Liso y uniforme - <b>CD</b> Corteza dura - <b>FS</b> Firme y semiblanda - <b>DB</b> Débil y blanda - <b>FD</b> Firme y dura. Escribe la hora de cada evaluación en el encabezado de la columna: la columna se habilita al escribirla.',
+      filas: [
+        { grupo: 'Área' },
+        { k: 'temp_area', l: 'Temperatura del área (°C)', t: 'num' },
+        { grupo: 'Materias primas - Queso doble crema' },
+        { k: 'gramaje_queso', l: 'Gramaje de la porción de queso', t: 'sel', ops: GRAMAJES },
+        { k: 'fecha_prod_queso', l: 'Codificado: fecha de producción', t: 'fecha' },
+        { k: 'lote_vto_queso', l: 'Codificado: lote / fecha vencimiento', t: 'calc', desde: 'fecha_prod_queso', dias: DIAS_VENCIMIENTO },
+        { k: 'trazabilidad_queso', l: 'Código de trazabilidad', t: 'txt' },
+        { k: 'temp_queso', l: 'Temperatura de entrada de la porción a la línea (°C) - PCC, límite de control 0 - 4 °C', corto: 'T° entrada a la línea (°C) - PCC', t: 'temp', rango: PCC_FRIO },
+        { k: 'empaque_queso', l: 'Estado del empaque, sellado y rotulado', corto: 'Empaque, sellado y rotulado', t: 'op', ...OP_CNCNA },
+        { grupo: 'Materias primas - Bocadillo de guayaba' },
+        { k: 'gramaje_bocadillo', l: 'Gramaje de la porción de bocadillo', t: 'sel', ops: GRAMAJES },
+        { k: 'lote_bocadillo', l: 'Lote', t: 'txt' },
+        { k: 'fecha_fab_bocadillo', l: 'Codificado: fecha de fabricación', t: 'fecha' },
+        { k: 'fecha_vto_bocadillo', l: 'Codificado: fecha de vencimiento', t: 'fecha' },
+        { k: 'temp_bocadillo', l: 'Temperatura de entrada de la porción a la línea (°C)', corto: 'T° entrada a la línea (°C)', t: 'temp' },
+        { k: 'empaque_bocadillo', l: 'Estado del empaque, sellado y rotulado', corto: 'Empaque, sellado y rotulado', t: 'op', ...OP_CNCNA },
+        { grupo: 'Evaluación organoléptica - Queso doble crema' },
+        { k: 'color_queso', l: 'Color: blanco crema (BC) / ligeramente amarillento (LA)', corto: 'Color', t: 'op', ops: ['BC', 'LA'], txt: { BC: 'Blanco crema', LA: 'Ligeramente amarillento' } },
+        { k: 'olor_queso', l: 'Olor: láctico, poco perceptible y ligeramente ácido - conforme (C) / no conforme (NC)', corto: 'Olor', t: 'op', ...OP_CNC },
+        { k: 'sabor_queso', l: 'Sabor: bueno (B) / ácido (AC) / moderadamente ácido (MA) / amargo (AM) / otro (cuál)', corto: 'Sabor', t: 'lista', sugerencias: ['B', 'AC', 'MA', 'AM'] },
+        { k: 'humedad_queso', l: 'Humedad: seco (S) / moderadamente húmedo (MH) / húmedo (H)', corto: 'Humedad', t: 'op', ops: ['S', 'MH', 'H'], txt: { S: 'Seco', MH: 'Moderadamente húmedo', H: 'Húmedo' } },
+        { grupo: 'Evaluación organoléptica - Bocadillo de guayaba' },
+        { k: 'color_bocadillo', l: 'Color: rojo brillante, uniforme - conforme (C) / no conforme (NC)', corto: 'Color', t: 'op', ...OP_CNC },
+        { k: 'olor_bocadillo', l: 'Olor: dulce, propio de la fruta procesada - conforme (C) / no conforme (NC)', corto: 'Olor', t: 'op', ...OP_CNC },
+        { k: 'sabor_bocadillo', l: 'Sabor: dulce (D) / ácido (AC) / caramelo (C) / otro (cuál)', corto: 'Sabor', t: 'lista', sugerencias: ['D', 'AC', 'C'] },
+        { k: 'apariencia_bocadillo', l: 'Apariencia: acabado liso y uniforme (LU) / corteza dura (CD)', corto: 'Apariencia', t: 'op', ops: ['LU', 'CD'], txt: { LU: 'Acabado liso y uniforme', CD: 'Corteza dura' } },
+        { k: 'textura_bocadillo', l: 'Textura: firme y semiblanda (FS) / débil y blanda (DB) / firme y dura (FD)', corto: 'Textura', t: 'op', ops: ['FS', 'DB', 'FD'], txt: { FS: 'Firme y semiblanda', DB: 'Débil y blanda', FD: 'Firme y dura' } },
+        { grupo: 'Producto terminado' },
+        { k: 'gramaje_obtenido', l: 'Gramaje o referencia obtenida', t: 'sel', ops: GRAMAJES },
+        { k: 'fecha_prod_pt', l: 'Codificado: fecha de producción', t: 'fecha' },
+        { k: 'lote_vto_pt', l: 'Codificado: lote / fecha vencimiento', t: 'calc', desde: 'fecha_prod_pt', dias: DIAS_VENCIMIENTO },
+        { k: 'trazabilidad_pt', l: 'Código de trazabilidad', t: 'txt' },
+        { k: 'sellado_corte', l: 'Inspección de sellado y corte - conforme (C) / no conforme (NC)', corto: 'Sellado y corte', t: 'op', ...OP_CNC },
+        { l: 'Control de peso neto', info: 'Ver formato diario CONTROL PESO UNIDADES CORTADAS.' },
+        { k: 'temp_combinado', l: 'Temperatura de entrada del combinado al cuarto frío (°C)', corto: 'T° entrada del combinado (°C)', t: 'temp' },
+        { grupo: 'Insumos' },
+        { k: 'lote_insumos', l: 'Lote correspondiente a rollos de empaque empleados durante el corte', corto: 'Lote rollos de empaque', t: 'txt' },
+      ]},
+  ],
+  nota: '<b>Nota:</b> diligenciar completamente en cada turno por el responsable de la línea, registrando de manera clara y veraz todos los parámetros del proceso, incluyendo temperaturas, gramajes, codificación, trazabilidad y evaluación organoléptica. Marcar según corresponda si cumple (C) o no cumple (NC) de acuerdo con los criterios establecidos. Cualquier desviación debe anotarse en observaciones. El registro debe contar con firmas de quien realiza y quien revisa.',
 },
 ];
 
@@ -1463,17 +1661,33 @@ function slug(s) {
 
 // Las filas de cada tabla reciben una clave estable (sale del texto de la
 // fila). Así, agregar una fila nueva al formato no desordena lo ya guardado.
+// Nombre con el que cada fila llega a VALORES (columna item). Si un nombre se
+// repite dentro de la misma sección (dos "Observaciones", dos "Código de
+// trazabilidad"…), se le agrega su grupo o su número para poder distinguirlos.
 (function prepararFormatos() {
   FORMATOS.forEach(f => f.bloques.forEach(b => {
+    if (b.tipo === 'matriz') {
+      const veces = {};
+      b.filas.filter(fl => fl.k).forEach(fl => { veces[fl.l] = (veces[fl.l] || 0) + 1; });
+      let grupo = '';
+      b.filas.forEach(fl => {
+        if (fl.grupo) { grupo = fl.grupo; return; }
+        if (fl.k) fl._item = veces[fl.l] > 1 && grupo ? `${fl.l} (${grupo})` : fl.l;
+      });
+      return;
+    }
     if (b.tipo !== 'tabla') return;
-    const usados = {};
+    const usados = {}, veces = {}, vistos = {};
     const lista = typeof b.filas === 'number'
       ? Array.from({ length: b.filas }, (_, i) => ({ l: String(i + 1), num: true }))
       : b.filas.map(x => typeof x === 'string' ? { l: x } : x);
+    lista.forEach(x => { if (!x.cual) veces[x.l] = (veces[x.l] || 0) + 1; });
     b._filas = lista.map((x, i) => {
       let k = x.num ? String(i + 1) : slug(x.l);
       if (usados[k]) { usados[k]++; k += '_' + usados[k]; } else usados[k] = 1;
-      return { ...x, key: k };
+      vistos[x.l] = (vistos[x.l] || 0) + 1;
+      const item = !x.cual && veces[x.l] > 1 && vistos[x.l] > 1 ? `${x.l} (${vistos[x.l]})` : x.l;
+      return { ...x, key: k, _item: item };
     });
   }));
 })();
@@ -1643,6 +1857,16 @@ function ctrl(def, b, r, c, modo, apagado) {
       return `<input type="text" inputmode="decimal" enterkeyhint="next" class="${cls} c-num" data-t="num"${def.min !== undefined ? ` data-min="${def.min}"` : ''} ${a} value="${esc(mostrarDecimal(v))}">`;
     case 'ent':
       return `<input type="number" min="0" step="1" inputmode="numeric" class="${cls}" data-t="ent" ${a} value="${val}">`;
+    case 'ppm':
+      // Concentración: solo números enteros; a la hoja llega como "180 ppm"
+      return `<span class="c-ppm"><input type="text" inputmode="numeric" enterkeyhint="next" class="${cls} c-num" data-t="ppm" ${a} value="${val}"><span class="ppm-suf">ppm</span></span>`;
+    case 'temp': {
+      // Temperatura: número decimal (se guarda como número) o N/A con el botón
+      // de al lado (el teclado numérico de la tablet no tiene letras)
+      const esNA = v === 'N/A';
+      return `<span class="c-temp"><input type="text" inputmode="decimal" enterkeyhint="next" class="${cls} c-num" data-t="temp" ${a} value="${esc(esNA ? 'N/A' : mostrarDecimal(v))}">` +
+        `<button type="button" class="btn-na${esNA ? ' on' : ''}" data-t="na" ${a} title="No aplica">N/A</button></span>`;
+    }
     case 'fecha':
       return `<input type="date" min="2025-01-01" max="2027-12-31" class="${cls}" ${a} value="${val}" title="${esc(def.l || 'Fecha')}">`;
     case 'calc':
@@ -1662,7 +1886,7 @@ function ctrl(def, b, r, c, modo, apagado) {
     case 'area':
       return `<textarea rows="3" ${a}>${val}</textarea>`;
     case 'sel':
-      return `<select class="${cls}${cls ? ' c-sel' : ''}" data-t="sel" ${a}><option value="">Seleccionar...</option>${def.ops.map(o =>
+      return `<select class="${cls}${cls ? ' c-sel' : ''}${MALOS.includes(v) ? ' sel-mal' : ''}" data-t="sel" ${a}><option value="">Seleccionar...</option>${def.ops.map(o =>
         `<option value="${esc(o)}"${v === o ? ' selected' : ''} title="${esc(def.txt?.[o] || o)}">${esc(o)}</option>`).join('')}</select>`;
     case 'x':
       return `<button type="button" class="c-x ${def.color ? 'x-' + def.color : ''} ${v ? 'on' : ''}" data-t="x" ${a} aria-pressed="${!!v}" title="${esc(def.l)}">${v ? 'X' : ''}</button>`;
@@ -1793,6 +2017,40 @@ const botonI = clave => `<button type="button" class="btn-i" data-fila-info="${e
 const filaDetalle = (clave, pares, cols) => `<tr class="fila-detalle" data-det="${esc(clave)}"><td colspan="${cols}"><div class="detalle-info">${
   pares.filter(([, v]) => v).map(([l, v]) => `<span>${esc(l)}</span><b>${esc(v)}</b>`).join('')}</div></td></tr>`;
 
+// Tipo de una celda: algunas columnas dependen de su fila (el resultado de la
+// verificación es ppm o Negativo/Positivo según el resultado esperado)
+const defCelda = (c, fl) => c.segun ? { ...c, ...c.segun(fl) } : c;
+
+// ── Días de verificación ─────────────────────────────────────────────────
+// "LUNES Y SÁBADO", "LUNES, MIÉRCOLES Y VIERNES", "LUNES A SÁBADO" → días (0 = domingo)
+const NOMBRES_DIA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+function diasDe(texto) {
+  const t = slug(texto || '');
+  const rango = /([a-z]+)_a_([a-z]+)/.exec(t);
+  if (rango && NOMBRES_DIA.includes(rango[1]) && NOMBRES_DIA.includes(rango[2])) {
+    const out = []; let i = NOMBRES_DIA.indexOf(rango[1]);
+    const fin = NOMBRES_DIA.indexOf(rango[2]);
+    for (let n = 0; n < 7; n++) { out.push(i); if (i === fin) break; i = (i + 1) % 7; }
+    return out;
+  }
+  return NOMBRES_DIA.map((d, i) => t.split('_').includes(d) ? i : -1).filter(i => i >= 0);
+}
+const diaDeFecha = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? new Date(iso + 'T12:00:00').getDay() : null;
+const tocaEnFecha = (dias, iso) => { const d = diaDeFecha(iso); return d !== null && diasDe(dias).includes(d); };
+// Resalta las filas que toca verificar el día de la fecha del formato
+function marcarDias() {
+  if (!actual) return;
+  const fecha = actual.datos.f?.fecha;
+  actual.fmt.bloques.filter(b => b.tipo === 'tabla').forEach(b => {
+    const col = b.columnas.find(c => c.diasSemana);
+    if (!col) return;
+    b._filas.forEach(fl => {
+      const tr = document.querySelector(`#form-cuerpo tr[data-fila="${b.k}|${fl.key}"]`);
+      tr?.classList.toggle('toca-hoy', tocaEnFecha(fl[col.k], fecha));
+    });
+  });
+}
+
 // ── Marcar una columna completa ──────────────────────────────────────────
 // Cada toque del botón del encabezado lleva TODA la columna al siguiente
 // estado: ✔ → ✗ → NA → vacía. Si la columna tiene marcas distintas, el
@@ -1857,10 +2115,11 @@ function tablaHTML(b) {
       : '';
     const clave = b.k + '|' + fl.key;
     const tieneInfo = conInfo && plegables.some(c => fl[c.k]);
-    const fila = `<tr><td class="col-fila${numerada ? ' angosta col-num' : ''}"><div class="fila-lbl"><span>${esc(fl.l)}</span>${tieneInfo ? botonI(clave) : ''}</div>${cual}</td>` +
+    const toca = cols.some(c => c.diasSemana && tocaEnFecha(fl[c.k], actual.datos.f?.fecha));
+    const fila = `<tr data-fila="${esc(clave)}"${toca ? ' class="toca-hoy"' : ''}><td class="col-fila${numerada ? ' angosta col-num' : ''}"><div class="fila-lbl"><span>${esc(fl.l)}</span>${tieneInfo ? botonI(clave) : ''}</div>${cual}</td>` +
       cols.map((c, i) => c.info
-        ? `<td class="info${c.corta ? ' corta' : ''}${sep(i)}${ci(c)}">${esc(fl[c.k] || '')}</td>`
-        : `<td class="centro${sep(i)}">${ctrl(c, b.k, fl.key, c.k, null, columnaApagada(c))}</td>`).join('') + '</tr>';
+        ? `<td class="info${c.corta ? ' corta' : ''}${sep(i)}${ci(c)}">${esc(fl[c.k] || '')}${c.diasSemana ? '<span class="chip-toca">TOCA</span>' : ''}</td>`
+        : `<td class="centro${sep(i)}">${ctrl(defCelda(c, fl), b.k, fl.key, c.k, null, columnaApagada(c))}</td>`).join('') + '</tr>';
     return fila + (tieneInfo ? filaDetalle(clave, plegables.map(c => [c.l, fl[c.k]]), cols.length + 1) : '');
   }).join('');
   // Botones para agregar / quitar los grupos opcionales
@@ -2036,6 +2295,8 @@ function renderFormulario(conservarScroll) {
   $('btn-eliminar-form').style.display = actual.id && isAdmin() ? '' : 'none';
   recalcular();
   revisarSellado();
+  revisarRangos();
+  marcarDias();
 }
 
 // ── Cálculos en vivo (por ahora solo el control de peso) ─────────────────
@@ -2065,6 +2326,35 @@ function revisarSellado() {
     inp.classList.toggle('c-aviso', !!fuera);
     inp.title = fuera ? `Fuera del rango de ${maq}: ${rango[0]}-${rango[1]} °C` : '';
   });
+}
+
+// Valor numérico de una celda: acepta 4,5 escrito como texto; N/A u otro texto → null
+function valorNum(v) {
+  if (typeof v === 'number') return v;
+  const n = leerDecimal(v);
+  return typeof n === 'number' ? n : null;
+}
+const fueraDeLimite = (v, rango) => { const n = valorNum(v); return n !== null && (n < rango[0] || n > rango[1]); };
+// Filas de matriz con límite (PCC de temperatura): fuera del límite, en ámbar
+function revisarRangos() {
+  if (!actual) return;
+  // Celdas de tabla con rango (concentraciones en ppm)
+  actual.fmt.bloques.filter(b => b.tipo === 'tabla').forEach(b => b.columnas.filter(c => c.segun).forEach(c => b._filas.forEach(fl => {
+    const def = defCelda(c, fl);
+    if (!def.rango) return;
+    const inp = document.querySelector(`#form-cuerpo input[data-b="${b.k}"][data-r="${fl.key}"][data-c="${c.k}"]`);
+    if (!inp) return;
+    const fuera = fueraDeLimite(leer(b.k, fl.key, c.k), def.rango);
+    inp.classList.toggle('c-aviso', fuera);
+    inp.title = fuera ? `Fuera del rango esperado: ${def.rango[0]} - ${def.rango[1]} ppm` : '';
+  })));
+  actual.fmt.bloques.filter(b => b.tipo === 'matriz').forEach(b => b.filas.filter(fl => fl.rango).forEach(fl => {
+    document.querySelectorAll(`#form-cuerpo input[data-b="${b.k}"][data-r="${fl.k}"]`).forEach(inp => {
+      const fuera = fueraDeLimite(leer(b.k, fl.k, inp.dataset.c), fl.rango);
+      inp.classList.toggle('c-aviso', fuera);
+      inp.title = fuera ? `Fuera del límite de control: ${fl.rango[0]} - ${fl.rango[1]} °C` : '';
+    });
+  }));
 }
 
 function recalcular() {
@@ -2209,6 +2499,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const malo = n === null || (el.dataset.min !== undefined && n !== '' && n < +el.dataset.min);
       el.classList.toggle('c-malo', malo);
       v = malo ? v : n;                  // si está mal se guarda el texto y no deja guardar
+    } else if (t === 'temp') {
+      if (v.includes('.')) {
+        const p = el.selectionStart;
+        v = v.replace(/\./g, ',');
+        el.value = v;
+        try { el.setSelectionRange(p, p); } catch (_) {}
+      }
+      const esNA = /^n\s*\/?\s*a$/i.test(v.trim());
+      const n = leerDecimal(v);
+      const malo = !esNA && n === null;
+      el.classList.toggle('c-malo', malo);
+      v = esNA ? 'N/A' : (malo ? v : n);
+      el.parentElement.querySelector('.btn-na')?.classList.toggle('on', esNA);
+    } else if (t === 'ppm') {
+      const limpio = v.replace(/\D/g, '');
+      if (limpio !== v) { el.value = limpio; v = limpio; }
+      el.classList.remove('c-malo');
+      v = v === '' ? '' : Number(v);
     } else if (t === 'ent') {
       const malo = v !== '' && !/^\d+$/.test(v) || el.validity.badInput;
       el.classList.toggle('c-malo', !!malo);
@@ -2230,15 +2538,23 @@ document.addEventListener('DOMContentLoaded', () => {
     poner(el.dataset.b, el.dataset.r, el.dataset.c, v);
     el.closest('.field')?.classList.remove('falta');
     if (t === 'hora') el.classList.remove('c-malo');
+    if (t === 'sel') el.classList.toggle('sel-mal', MALOS.includes(v));
+    if (t === 'ppm') revisarRangos();
+    if (el.dataset.b === 'f' && el.dataset.c === 'fecha') marcarDias();
     recalcularFechas();
     if (el.dataset.b === 'f' && el.dataset.c === 'gramaje') recalcular();
     if (el.dataset.b === 'muestras') recalcular();
     if (el.dataset.b === 'sellado' || (el.dataset.b === 'f' && el.dataset.c === 'maquina')) revisarSellado();
+    if (actual.fmt.bloques.some(x => x.k === el.dataset.b && x.tipo === 'matriz')) revisarRangos();
   });
   cont.addEventListener('change', e => {
     const el = e.target;
     if (!actual || !el.dataset) return;
     if (el.dataset.t === 'num' && !el.classList.contains('c-malo')) el.value = mostrarDecimal(leerDecimal(el.value));
+    if (el.dataset.t === 'temp' && !el.classList.contains('c-malo')) {
+      const v = leer(el.dataset.b, el.dataset.r, el.dataset.c);
+      el.value = v === 'N/A' ? 'N/A' : mostrarDecimal(v);
+    }
     if (el.dataset.t === 'hora12' || el.dataset.t === 'ampm') return void guardarHora12(el, true);
     if (el.dataset.t !== 'hora') return;
     const n = normHora(el.value);
@@ -2271,6 +2587,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const { b, r, c, t, v } = btn.dataset;
     const act = leer(b, r, c);
     if (t === 'col') { llenarColumna(b, c); return; }
+    if (t === 'na') {
+      const nv = act === 'N/A' ? '' : 'N/A';
+      poner(b, r, c, nv);
+      const inp = btn.parentElement.querySelector('input');
+      if (inp) { inp.value = nv; inp.classList.remove('c-malo'); }
+      btn.classList.toggle('on', nv === 'N/A');
+      revisarRangos();
+      return;
+    }
     if (t === 'x') {
       const nv = act ? '' : 'X';
       poner(b, r, c, nv);
@@ -2431,9 +2756,11 @@ function aplanar(f, d) {
     if (b.tipo === 'tabla') {
       b._filas.forEach(fl => {
         const filaD = d[b.k]?.[fl.key] || {};
-        const item = fl.cual ? 'OTROS' + (filaD._cual ? ': ' + filaD._cual : '') : (fl.num ? 'Fila ' + fl.l : fl.l);
+        const item = fl.cual ? 'OTROS' + (filaD._cual ? ': ' + filaD._cual : '') : (fl.num ? 'Fila ' + fl.l : fl._item);
         b.columnas.filter(c => !c.info).forEach(c => {
           let col = c.g ? c.g + ' - ' + c.l : c.l;
+          const v = filaD[c.k];
+          if (defCelda(c, fl).t === 'ppm' && !esVacio(v)) { push(tit, item, col, v + ' ppm'); return; }
           if (c.hora) {                     // columna de verificación sin hora: no se envía
             const h = d[c.hora[0]]?._?.[c.hora[1]];
             if (!h) return;
@@ -2448,11 +2775,11 @@ function aplanar(f, d) {
       const enc = d[b.k]?._enc || {};
       b.filas.filter(fl => fl.k).forEach(fl => {
         const filaD = d[b.k]?.[fl.k] || {};
-        if (fl.unica) { push(tit, fl.l, '', filaD[COL_UNICA]); return; }
+        if (fl.unica) { push(tit, fl._item, '', filaD[COL_UNICA]); return; }
         for (let i = 0; i < b.n; i++) {
           if (b.enc === 'hora' && !enc[i]) continue;   // sin hora escrita no se envía
           const col = b.enc === 'hora' ? 'Hora ' + (i + 1) + (enc[i] ? ' (' + enc[i] + ')' : '') : b.enc + ' ' + (i + 1);
-          push(tit, fl.l, col, filaD[i]);
+          push(tit, fl._item, col, filaD[i]);
         }
       });
     }
@@ -2574,10 +2901,34 @@ function revisionAntesDeGuardar(f, d) {
     out.push({ tipo: 'aviso', txt: `<b>Hora ${+k + 1} (${esc(x.h)})</b>: ${plural(x.n, 'casilla sin marcar', 'casillas sin marcar')} en ${esc(x.secciones.join(', '))}.` });
   });
 
+  // Verificación de proceso: lo que toca hoy, concentraciones fuera de rango y positivos
+  f.bloques.filter(b => b.tipo === 'tabla').forEach(b => {
+    const colDias = b.columnas.find(c => c.diasSemana);
+    const colRes = b.columnas.find(c => c.segun);
+    if (!colRes) return;
+    let fuera = 0, positivos = 0; const pendientes = [];
+    b._filas.forEach(fl => {
+      const v = d[b.k]?.[fl.key]?.[colRes.k];
+      const def = defCelda(colRes, fl);
+      if (def.rango && fueraDeLimite(v, def.rango)) fuera++;
+      if (v === 'POSITIVO') positivos++;
+      if (colDias && esVacio(v) && tocaEnFecha(fl[colDias.k], d.f?.fecha)) pendientes.push(fl.l);
+    });
+    const dia = NOMBRES_DIA[diaDeFecha(d.f?.fecha)]?.replace('miercoles', 'miércoles').replace('sabado', 'sábado');
+    if (pendientes.length) out.push({ tipo: 'aviso', txt: `El ${esc(dia)} toca verificar ${plural(pendientes.length, 'punto', 'puntos')} sin resultado: ${pendientes.slice(0, 3).map(x => '<b>' + esc(x.toLowerCase()) + '</b>').join('; ')}${pendientes.length > 3 ? ' y más' : ''}.` });
+    if (fuera) out.push({ tipo: 'aviso', txt: `${plural(fuera, 'concentración está', 'concentraciones están')} por fuera del rango esperado (casilla en ámbar).` });
+    if (positivos) out.push({ tipo: 'aviso', txt: `${plural(positivos, 'verificación dio', 'verificaciones dieron')} <b>POSITIVO</b>.` });
+  });
+
   // Matrices (organoléptico y porción y tajado)
   f.bloques.filter(b => b.tipo === 'matriz').forEach(b => {
     const filas = b.filas.filter(fl => fl.k && fl.t !== 'calc' && !fl.unica);
     filas.forEach(fl => Object.values(d[b.k]?.[fl.k] || {}).forEach(v => { if (v === 'NC') noCumple++; }));
+    // Temperaturas de PCC por fuera del límite de control
+    filas.filter(fl => fl.rango).forEach(fl => {
+      const fuera = Object.values(d[b.k]?.[fl.k] || {}).filter(v => fueraDeLimite(v, fl.rango)).length;
+      if (fuera) out.push({ tipo: 'aviso', txt: `<b>${esc(fl.corto || fl.l)}</b>: ${plural(fuera, 'valor', 'valores')} por fuera del límite de control (${fl.rango[0]} - ${fl.rango[1]} °C).` });
+    });
     if (b.enc !== 'hora') return;
     for (let i = 0; i < b.n; i++) {
       const h = d[b.k]?._enc?.[i];
@@ -2671,7 +3022,8 @@ async function guardarFormato(sinRevisar) {
   const mal = document.querySelector('#form-cuerpo .c-malo');
   if (mal) {
     const esHora = mal.dataset.t === 'hora' || mal.dataset.t === 'hora12';
-    toast(mal.dataset.t === 'hora12' ? 'Hay una hora mal escrita. Escribe de 1 a 12 (por ejemplo 8:30) y elige AM o PM.'
+    toast(mal.dataset.t === 'temp' ? 'Hay una temperatura mal escrita. Escribe solo el número (por ejemplo 3,5) o usa el botón N/A.'
+        : mal.dataset.t === 'hora12' ? 'Hay una hora mal escrita. Escribe de 1 a 12 (por ejemplo 8:30) y elige AM o PM.'
         : esHora ? 'Hay una hora mal escrita. Usa el formato hh:mm (por ejemplo 08:30).'
                  : 'Hay un número mal escrito (usa por ejemplo 40,4 o 40.4; los enteros sin decimales y sin negativos).', 'error');
     mal.closest('.card')?.classList.remove('collapsed');
@@ -2923,6 +3275,65 @@ async function borrarRegistro(id) {
   pedirBorrado(req, HOJA_REG, u[HOJA_REG]);
   hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
   await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+}
+
+// ── Eliminar TODOS los registros (solo administradores) ─────────────────
+// Deja las pestañas con su encabezado y nada más: REGISTROS, MUESTRAS_PESO y
+// todas las VALORES_AAAA. Todo va en una sola operación de Google.
+function mostrarBorrarTodo() {
+  const b = $('btn-borrar-todo');
+  if (!b) return;
+  const enHistorial = $('view-historial')?.classList.contains('active');
+  b.style.display = enHistorial && typeof isAdmin === 'function' && isAdmin() ? '' : 'none';
+}
+function pedirBorrarTodo() {
+  if (!isAdmin()) return toast('Solo un administrador puede eliminar registros.', 'error');
+  const n = registros.length;
+  if (!n) return toast('No hay registros para eliminar.', 'info');
+  $('dlg-borrar-texto').innerHTML = `Se eliminarán <b>los ${n.toLocaleString('es-CO')} registros</b> de la hoja (todos, no solo los que se ven con el filtro), con sus valores y muestras de peso. <b>No se puede deshacer.</b>`;
+  $('dlg-borrar-palabra').value = '';
+  $('dlg-borrar-ok').disabled = true;
+  $('dlg-borrar-todo').showModal();
+  setTimeout(() => $('dlg-borrar-palabra').focus(), 50);
+}
+async function borrarTodo() {
+  if ($('dlg-borrar-palabra').value.trim() !== 'ELIMINAR' || !isAdmin()) return;
+  $('dlg-borrar-todo').close();
+  const ok = await conBloqueo('Eliminando todo', async () => {
+    if (!hayHoja()) {
+      const D = window.DATOS_DEMO;
+      D.registros = []; D.valores = []; D.muestras = [];
+      return;
+    }
+    const meta = await pedir(`${URL_HOJA}?fields=sheets.properties`, {});
+    const req = [];
+    (meta.sheets || []).forEach(sh => {
+      const p = sh.properties || {};
+      if (!(p.title === HOJA_REG || p.title === HOJA_MUESTRAS || /^VALORES_\d{4}$/.test(p.title))) return;
+      sheetIds[p.title] = p.sheetId;
+      const filas = p.gridProperties?.rowCount;
+      if (filas) {
+        // Se agrega una fila vacía al final y se borran todas las demás menos el
+        // encabezado: Google no deja una pestaña sin ninguna fila bajo el encabezado
+        req.push({ appendDimension: { sheetId: p.sheetId, dimension: 'ROWS', length: 1 } });
+        if (filas > 1) req.push({ deleteDimension: { range: { sheetId: p.sheetId, dimension: 'ROWS', startIndex: 1, endIndex: filas } } });
+      }
+    });
+    if (!meta.sheets?.[0]?.properties?.gridProperties) {
+      // Sin tamaño de la pestaña: se borra lo que tenga datos en la columna A
+      const hojas = (meta.sheets || []).map(sh => sh.properties?.title)
+        .filter(t => t === HOJA_REG || t === HOJA_MUESTRAS || /^VALORES_\d{4}$/.test(t || ''));
+      const d = await leerVarios(hojas.map(h => `${h}!A:A`));
+      hojas.forEach((h, i) => {
+        const n = (d.valueRanges?.[i]?.values || []).length;
+        if (n > 1) req.push({ deleteDimension: { range: { sheetId: sheetIds[h], dimension: 'ROWS', startIndex: 1, endIndex: n } } });
+      });
+    }
+    if (req.length) await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+  });
+  if (!ok) return;
+  toast('Se eliminaron todos los registros.', 'success');
+  await cargarDatos();
 }
 
 // El JSON del formato se pide solo al abrirlo (el historial no lo necesita)
@@ -3196,6 +3607,19 @@ function clonarEncabezado(esp) {
   const ultima = t => t.rows[t.rows.length - 1];
   const reales = ultima(tabla.tHead).cells;
   const copias = ultima(copia.tHead).cells;
+  // Con table-layout: fixed el navegador toma los anchos de la PRIMERA fila.
+  // En tablas con fila de grupos (Contaminación física: "Producto afectado",
+  // "Origen") esa fila tiene celdas unidas y las columnas se repartían parejo:
+  // el encabezado quedaba corrido. Un <colgroup> con los anchos reales lo evita.
+  const cg = document.createElement('colgroup');
+  [...reales].forEach(th => {
+    const w = th.getBoundingClientRect().width;
+    if (!w) return;                       // columnas escondidas (información plegada)
+    const col = document.createElement('col');
+    col.style.width = w + 'px';
+    cg.appendChild(col);
+  });
+  copia.insertBefore(cg, copia.firstChild);
   for (let i = 0; i < copias.length && i < reales.length; i++) {
     const ancho = reales[i].getBoundingClientRect().width + 'px';
     copias[i].style.width = copias[i].style.minWidth = copias[i].style.maxWidth = ancho;
