@@ -950,7 +950,7 @@ window.APP = {
 //   diasSemana (columna) días en que toca: la fila se resalta si la fecha del
 //          formato cae en uno de ellos ("LUNES Y SÁBADO", "LUNES A SÁBADO"…)
 //   ent    número entero, mínimo 0
-//   sel    lista desplegable (ops)
+//   sel    lista desplegable (ops; mostrar: función para el texto que se ve)
 //   calc   fecha calculada: desde + dias (lote / fecha de vencimiento)
 //   fecha  fecha AAAA-MM-DD
 //   hora   hh:mm en hora militar (se acepta 830, 8:30, 0830…)
@@ -994,6 +994,16 @@ const TIPOS_QUESO = [
 const OP_QUESO_LARGO = { ops: TIPOS_QUESO.map(q => q.nombre) };
 const OP_QUESO_CORTO = { ops: TIPOS_QUESO.map(q => q.ab), txt: Object.fromEntries(TIPOS_QUESO.map(q => [q.ab, q.nombre])) };
 const PRESENTACIONES = ['TAJADO', 'PORCION', 'BLOQUE'];
+// Productos terminados (la misma lista de la página de producción de Mosquera)
+const PRODUCTOS_TERMINADOS = [
+  'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIBLANDO DOBLE CREMA',
+  'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIBLANDO CAMPESINO',
+  'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIDURO MOZARELLA',
+  'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIDURO PERA',
+  'QUESO FRESCO VARIEDADES: SEMIGRASO SEMIBLANDO DOBLE CREMA CON BOCADILLO',
+];
+// En las listas se muestra sin el prefijo común; a la hoja va el nombre completo
+const sinPrefijo = o => String(o).replace(/^QUESO FRESCO VARIEDADES: SEMIGRASO /, '');
 // Gramaje: la misma lista en todos los formatos (no confundir con gramaje bloque)
 const GRAMAJES = ['10', '20', '25', '30', '35', '40', '45', '50', '60', '80', '90', '125', '250', '300', '350', '500', '2500'];
 // Gramaje bloque: la misma lista en todos los formatos que lo piden
@@ -1511,7 +1521,7 @@ const FORMATOS = [
         { grupo: 'Bloque' },
         { k: 'tipo_queso', l: 'Tipo de queso', t: 'sel', ...OP_QUESO_CORTO },
         { k: 'gramaje', l: 'Gramaje del producto', t: 'sel', ops: GRAMAJES },
-        { k: 'referencia', l: 'Referencia', t: 'txt' },
+        { k: 'referencia', l: 'Referencia', t: 'sel', ops: PRESENTACIONES },
         { k: 'fecha_prod_mp', l: 'Codificado materia prima: fecha de producción', corto: 'Codificado MP: fecha de producción', t: 'fecha' },
         { k: 'lote_vto_mp', l: 'Codificado materia prima: lote / fecha vencimiento', corto: 'Codificado MP: lote / F. Vto', t: 'calc', desde: 'fecha_prod_mp', dias: DIAS_VENCIMIENTO },
         { k: 'temp_salida', l: 'Temperatura de salida del producto del cuarto frío (°C) - PCC, límite de control 0 - 4 °C', corto: 'T° salida del cuarto frío (°C) - PCC', t: 'temp', rango: PCC_FRIO },   // número o N/A
@@ -1534,6 +1544,7 @@ const FORMATOS = [
       filas: ['PRODUCTO 1', 'PRODUCTO 2', 'PRODUCTO 3', 'PRODUCTO 4', 'PRODUCTO 5',
               'PRODUCTO 6', 'PRODUCTO 7', 'PRODUCTO 8', 'PRODUCTO 9'],
       columnas: [
+        { k: 'producto', l: 'Producto terminado', t: 'sel', ops: PRODUCTOS_TERMINADOS, mostrar: sinPrefijo },
         { k: 'cantidad', l: 'Cantidad', t: 'ent' },
         { k: 'hora_inicio', l: 'Hora inicio', t: 'hora12' },
         { k: 'hora_final', l: 'Hora final', t: 'hora12' },
@@ -1887,7 +1898,7 @@ function ctrl(def, b, r, c, modo, apagado) {
       return `<textarea rows="3" ${a}>${val}</textarea>`;
     case 'sel':
       return `<select class="${cls}${cls ? ' c-sel' : ''}${MALOS.includes(v) ? ' sel-mal' : ''}" data-t="sel" ${a}><option value="">Seleccionar...</option>${def.ops.map(o =>
-        `<option value="${esc(o)}"${v === o ? ' selected' : ''} title="${esc(def.txt?.[o] || o)}">${esc(o)}</option>`).join('')}</select>`;
+        `<option value="${esc(o)}"${v === o ? ' selected' : ''} title="${esc(def.txt?.[o] || o)}">${esc(def.mostrar ? def.mostrar(o) : o)}</option>`).join('')}</select>`;
     case 'x':
       return `<button type="button" class="c-x ${def.color ? 'x-' + def.color : ''} ${v ? 'on' : ''}" data-t="x" ${a} aria-pressed="${!!v}" title="${esc(def.l)}">${v ? 'X' : ''}</button>`;
     case 'marca':
@@ -3000,7 +3011,7 @@ function cerrarRevision() {
 }
 
 // sinRevisar: viene del botón "Guardar así" de la revisión
-async function guardarFormato(sinRevisar) {
+async function guardarFormato(sinRevisar, forzar) {
   if (!actual) return;
   const f = actual.fmt;
   const d = limpiarDatos(actual.datos);
@@ -3044,8 +3055,19 @@ async function guardarFormato(sinRevisar) {
     return;
   }
   const editando = !!actual.id;
-  const ok = await conBloqueo(editando ? 'Guardando cambios' : 'Guardando',
-    () => escribirRegistro(actual.id, reg, { vals, muestras }, actual.reg));
+  let conflicto = null;
+  const ok = await conBloqueo(editando ? 'Guardando cambios' : 'Guardando', async () => {
+    try { await escribirRegistro(actual.id, reg, { vals, muestras }, actual.reg, forzar); }
+    catch (e) { if (e.conflicto === undefined) throw e; conflicto = e.conflicto; }
+  });
+  if (conflicto !== null) {
+    $('sync-status').textContent = '';
+    const cuando = conflicto ? ' (' + fmtRegistro(conflicto) + ')' : '';
+    if (confirm(`Otra persona guardó cambios en este registro${cuando} mientras tú lo tenías abierto.\n\n` +
+                'Si guardas, sus cambios se reemplazan por los tuyos. Si cancelas, puedes pulsar Actualizar y volver a abrirlo para ver lo que guardó.\n\n¿Guardar de todos modos?'))
+      return guardarFormato(true, true);
+    return;
+  }
   if (!ok) return;
   borrarBorrador(f.id, actual.id);
   sucio = false;
@@ -3079,13 +3101,19 @@ const REINTENTOS = 4;
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 const TEMPORAL = [408, 429, 500, 502, 503, 504];
 
+// sinReintentos: para las escrituras. Si Google aplicó el cambio pero la
+// respuesta se perdió (wifi inestable), repetir la misma petición duplicaría
+// el registro o borraría filas que ya no son las mismas: esas escrituras se
+// reintentan desde arriba (volviendo a ubicar las filas), no aquí.
 async function pedir(url, opts = {}) {
+  const { sinReintentos, ...peticion } = opts;
+  const intentos = sinReintentos ? 0 : REINTENTOS;
   let ultimo = null;
-  for (let i = 0; i <= REINTENTOS; i++) {
+  for (let i = 0; i <= intentos; i++) {
     if (i) await esperar(800 * Math.pow(2, i - 1));
     let r;
-    try { r = await apiFetch(url, { ...opts }); }
-    catch (e) { ultimo = new Error('Sin conexión con Google. Revisa el internet.'); continue; }
+    try { r = await apiFetch(url, { ...peticion }); }
+    catch (e) { ultimo = new Error('Sin conexión con Google. Revisa el internet.'); ultimo.temporal = true; continue; }
     if (r.status === 401) { forzarLogout('Tu sesión expiró. Inicia sesión nuevamente.'); throw new Error('401'); }
     if (r.ok) return r.json();
     if (!TEMPORAL.includes(r.status)) {
@@ -3095,9 +3123,23 @@ async function pedir(url, opts = {}) {
       throw new Error('Google rechazó la operación (' + detalle + ').');
     }
     ultimo = new Error('Google no respondió (código ' + r.status + '). Vuelve a intentar en un momento.');
+    ultimo.temporal = true;
   }
   throw ultimo;
 }
+
+// Reintenta una escritura completa (fn vuelve a ubicar filas y a armar la
+// petición cada vez) cuando el fallo fue temporal
+async function conReintentos(fn) {
+  for (let intento = 0; ; intento++) {
+    try { return await fn(intento); }
+    catch (e) {
+      if (!e.temporal || intento >= REINTENTOS) throw e;
+      await esperar(800 * Math.pow(2, intento));
+    }
+  }
+}
+const ESCRIBIR = cuerpo => ({ ...JSON_POST(cuerpo), sinReintentos: true });
 
 const URL_HOJA = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}`;
 const JSON_POST = cuerpo => ({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) });
@@ -3170,22 +3212,41 @@ async function asegurarHojas(hojas) {
   if (sheetIds[HOJA_REG] === undefined) throw new Error(`no existe la pestaña ${HOJA_REG} en el Google Sheets`);
   const faltan = hojas.filter(h => sheetIds[h.nombre] === undefined);
   if (faltan.length) {
-    const r = await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
-      addSheet: { properties: { title: h.nombre, gridProperties: { rowCount: 2000, columnCount: h.cols.length + 2 } } } })) }));
-    (r.replies || []).forEach(rep => {
-      const p = rep.addSheet?.properties;
-      if (p) sheetIds[p.title] = p.sheetId;
+    // La pestaña y su encabezado van juntos (con un id fijo por nombre): si dos
+    // personas guardan el primer registro del año al mismo tiempo, a la segunda
+    // Google le rechaza la operación completa y simplemente usa la que ya existe.
+    const req = [];
+    faltan.forEach(h => {
+      const id = idPestana(h.nombre);
+      req.push({ addSheet: { properties: { sheetId: id, title: h.nombre, gridProperties: { rowCount: 2000, columnCount: h.cols.length + 2 } } } });
+      req.push({ updateCells: { rows: [{ values: h.cols.map(c => celdaDe(c)) }], fields: 'userEnteredValue',
+        start: { sheetId: id, rowIndex: 0, columnIndex: 0 } } });
     });
-    await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: faltan.map(h => ({
-      updateCells: { rows: [{ values: h.cols.map(c => celdaDe(c)) }], fields: 'userEnteredValue',
-        start: { sheetId: sheetIds[h.nombre], rowIndex: 0, columnIndex: 0 } } })) }));
-    faltan.forEach(h => { ordenHoja[h.nombre] = h.cols; });
+    try {
+      await pedir(`${URL_HOJA}:batchUpdate`, ESCRIBIR({ requests: req }));
+      faltan.forEach(h => { sheetIds[h.nombre] = idPestana(h.nombre); ordenHoja[h.nombre] = h.cols; });
+    } catch (e) {
+      if (e.message === '401') throw e;
+      faltan.forEach(h => { delete sheetIds[h.nombre]; });
+      await obtenerSheetId(faltan[0].nombre);              // no está en caché: vuelve a leer las pestañas
+      const siguen = faltan.filter(h => sheetIds[h.nombre] === undefined);
+      if (siguen.length) throw e;                         // no era eso: se muestra el error
+    }
   }
   const porLeer = hojas.filter(h => !ordenHoja[h.nombre]);
   if (porLeer.length) {
     const d = await leerVarios(porLeer.map(h => `${h.nombre}!1:1`));
     porLeer.forEach((h, i) => fijarOrden(h.nombre, d.valueRanges?.[i]?.values?.[0], h.cols));
   }
+}
+
+// Id fijo de las pestañas que crea la página (el mismo en todos los equipos)
+function idPestana(nombre) {
+  const anio = /^VALORES_(\d{4})$/.exec(nombre);
+  if (anio) return 910000 + +anio[1];                  // VALORES_2027 → 912027
+  if (nombre === HOJA_MUESTRAS) return 900001;
+  let h = 0; for (const ch of nombre) h = (h * 31 + ch.charCodeAt(0)) % 800000;
+  return 100000 + h;
 }
 
 // Dónde está el registro y sus filas en cada pestaña (índices 0-based)
@@ -3221,7 +3282,7 @@ function pedirAgregado(req, hoja, columnas, filas) {
 // fallo a mitad de camino no deja el registro a medias.
 // `previo` es la fila de REGISTROS que se está editando (para saber en qué
 // pestaña de año estaba, por si se le cambió la fecha).
-async function escribirRegistro(idPrevio, reg, extra, previo) {
+async function escribirRegistro(idPrevio, reg, extra, previo, forzar) {
   const hojaVal = hojaValores(reg.fecha);
   const hojaValVieja = idPrevio ? hojaValores(previo?.fecha || reg.fecha) : null;
   const tocaMuestras = !!extra.muestras || (idPrevio && previo?.formato === 'CPUC');
@@ -3242,19 +3303,42 @@ async function escribirRegistro(idPrevio, reg, extra, previo) {
   if (tocaMuestras) hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
   await asegurarHojas(hojas);
 
-  const req = [];
-  if (idPrevio) {
-    const u = await ubicar(idPrevio, [HOJA_REG, ...hojas.map(h => h.nombre)]);
-    if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja (¿lo eliminó otra persona?). Pulsa Actualizar');
-    req.push({ updateCells: { rows: [filaDe(reg, cols(HOJA_REG, COLS_REG))], fields: 'userEnteredValue',
-      start: { sheetId: sheetIds[HOJA_REG], rowIndex: u[HOJA_REG][0], columnIndex: 0 } } });
-    hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
-  } else {
-    pedirAgregado(req, HOJA_REG, cols(HOJA_REG, COLS_REG), [reg]);
+  // Las filas se ubican justo antes de cada intento: si otra persona borró o
+  // editó algo entre tanto, las posiciones ya son las nuevas.
+  await conReintentos(async intento => {
+    const req = [];
+    if (idPrevio) {
+      const u = await ubicar(idPrevio, [HOJA_REG, ...hojas.map(h => h.nombre)]);
+      if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja (¿lo eliminó otra persona?). Pulsa Actualizar');
+      if (!forzar && intento === 0) await revisarConflicto(u[HOJA_REG][0], previo);
+      req.push({ updateCells: { rows: [filaDe(reg, cols(HOJA_REG, COLS_REG))], fields: 'userEnteredValue',
+        start: { sheetId: sheetIds[HOJA_REG], rowIndex: u[HOJA_REG][0], columnIndex: 0 } } });
+      hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
+    } else {
+      // Si el intento anterior sí llegó a Google (se perdió solo la respuesta),
+      // el registro ya está: no se agrega otra vez
+      if (intento > 0 && (await ubicar(reg.id_registro, [HOJA_REG]))[HOJA_REG].length) return;
+      pedirAgregado(req, HOJA_REG, cols(HOJA_REG, COLS_REG), [reg]);
+    }
+    pedirAgregado(req, hojaVal, cols(hojaVal, COLS_VAL), extra.vals);
+    if (extra.muestras) pedirAgregado(req, HOJA_MUESTRAS, cols(HOJA_MUESTRAS, COLS_MUESTRAS), [extra.muestras]);
+    await pedir(`${URL_HOJA}:batchUpdate`, ESCRIBIR({ requests: req }));
+  });
+}
+
+// Dos personas con el mismo registro abierto: si la otra ya guardó cambios, se
+// avisa en vez de reemplazarlos sin que nadie se entere
+async function revisarConflicto(fila, previo) {
+  if (!previo) return;
+  const cr = cols(HOJA_REG, COLS_REG);
+  const l = colLetra(cr.indexOf('fecha_modificacion'));
+  const d = await leerVarios([`${HOJA_REG}!${l}${fila + 1}`]);
+  const enHoja = String(d.valueRanges?.[0]?.values?.[0]?.[0] ?? '').trim();
+  if (enHoja !== String(previo.fecha_modificacion ?? '').trim()) {
+    const e = new Error('conflicto');
+    e.conflicto = enHoja;
+    throw e;
   }
-  pedirAgregado(req, hojaVal, cols(hojaVal, COLS_VAL), extra.vals);
-  if (extra.muestras) pedirAgregado(req, HOJA_MUESTRAS, cols(HOJA_MUESTRAS, COLS_MUESTRAS), [extra.muestras]);
-  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
 }
 
 async function borrarRegistro(id) {
@@ -3269,12 +3353,17 @@ async function borrarRegistro(id) {
   const hojas = [{ nombre: hojaValores(r?.fecha), cols: COLS_VAL }];
   if (r?.formato === 'CPUC') hojas.push({ nombre: HOJA_MUESTRAS, cols: COLS_MUESTRAS });
   await asegurarHojas(hojas);
-  const u = await ubicar(id, [HOJA_REG, ...hojas.map(h => h.nombre)]);
-  if (u[HOJA_REG][0] === undefined) throw new Error('el registro ya no está en la hoja. Pulsa Actualizar');
-  const req = [];
-  pedirBorrado(req, HOJA_REG, u[HOJA_REG]);
-  hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
-  await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+  await conReintentos(async intento => {
+    const u = await ubicar(id, [HOJA_REG, ...hojas.map(h => h.nombre)]);
+    if (u[HOJA_REG][0] === undefined) {
+      if (intento > 0) return;          // el intento anterior sí alcanzó a borrarlo
+      throw new Error('el registro ya no está en la hoja. Pulsa Actualizar');
+    }
+    const req = [];
+    pedirBorrado(req, HOJA_REG, u[HOJA_REG]);
+    hojas.forEach(h => pedirBorrado(req, h.nombre, u[h.nombre]));
+    await pedir(`${URL_HOJA}:batchUpdate`, ESCRIBIR({ requests: req }));
+  });
 }
 
 // ── Eliminar TODOS los registros (solo administradores) ─────────────────
@@ -3305,6 +3394,7 @@ async function borrarTodo() {
       D.registros = []; D.valores = []; D.muestras = [];
       return;
     }
+    await conReintentos(async () => {
     const meta = await pedir(`${URL_HOJA}?fields=sheets.properties`, {});
     const req = [];
     (meta.sheets || []).forEach(sh => {
@@ -3329,7 +3419,8 @@ async function borrarTodo() {
         if (n > 1) req.push({ deleteDimension: { range: { sheetId: sheetIds[h], dimension: 'ROWS', startIndex: 1, endIndex: n } } });
       });
     }
-    if (req.length) await pedir(`${URL_HOJA}:batchUpdate`, JSON_POST({ requests: req }));
+    if (req.length) await pedir(`${URL_HOJA}:batchUpdate`, ESCRIBIR({ requests: req }));
+    });
   });
   if (!ok) return;
   toast('Se eliminaron todos los registros.', 'success');
