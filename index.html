@@ -237,6 +237,14 @@
   font-size: 9.5px; font-weight: 800; letter-spacing: .06em; color: #1e5c3d; background: #cde8d9; vertical-align: middle;
 }
 
+/* Tabla sin columna de nombre de fila (resumen de sellado) */
+.tabla-captura.sin-nombre-fila .col-fila { display: none; }
+/* Lista sin elegir: el texto de ayuda ("Seleccionar...", "Producto 1") en gris */
+select.c-in.c-sel:has(option[value=""]:checked), .field select:has(option[value=""]:checked) { color: var(--text3); }
+/* Hora de la matriz en el encabezado: casilla + AM/PM */
+.tabla-captura .th-hora12 { min-width: 160px; }
+.tabla-captura .th-hora12 .c-hora12 { margin-top: 6px; }
+
 /* Temperatura: número + botón N/A */
 .c-temp { display: inline-flex; align-items: center; gap: 6px; }
 .c-temp > input, .c-temp > input.c-in { flex: 0 0 auto; width: 76px; min-width: 76px; }
@@ -944,7 +952,9 @@ window.APP = {
 // Tipos de campo y de columna:
 //   txt    texto libre (se guarda en mayúsculas)
 //   num    número decimal (acepta 40,4 y 40.4); min: 0 para no negativos
-//   temp   temperatura: número decimal o N/A (botón al lado); se guarda como número
+//   temp   número decimal o N/A (botón al lado); se guarda como número
+//          (entero: true = solo números enteros, como la cantidad sellada)
+//   fecha  anioMax: año máximo aceptado (por defecto 2027)
 //   ppm    concentración: número entero; a la hoja llega como "180 ppm"
 //   segun  (columna) función que da el tipo de la celda según su fila
 //   diasSemana (columna) días en que toca: la fila se resalta si la fecha del
@@ -1195,7 +1205,7 @@ const FORMATOS = [
         { k: 'pe1', l: 'Pera', t: 'x', g: 'Producto afectado', color: 'amarillo', unico: 'queso1' },
         { k: 'lote1', l: 'Lote', t: 'fecha', g: 'Producto afectado' },
         { k: 'gram1', l: 'Gramaje bloque', t: 'sel', ops: GRAMAJES_BLOQUE, g: 'Producto afectado' },
-        { k: 'pres1', l: 'Presentación final', t: 'ent', g: 'Producto afectado' },
+        { k: 'pres1', l: 'Presentación final', t: 'sel', ops: GRAMAJES, g: 'Producto afectado' },
         // Segundo producto: solo aparece si se pulsa "+ Agregar producto afectado 2"
         { k: 'total2', l: 'Total', t: 'ent', g: 'Producto afectado 2', opc: 'p2' },
         { k: 'mz2', l: 'Mozarella', t: 'x', g: 'Producto afectado 2', color: 'azul', opc: 'p2', unico: 'queso2' },
@@ -1204,7 +1214,7 @@ const FORMATOS = [
         { k: 'pe2', l: 'Pera', t: 'x', g: 'Producto afectado 2', color: 'amarillo', opc: 'p2', unico: 'queso2' },
         { k: 'lote2', l: 'Lote', t: 'fecha', g: 'Producto afectado 2', opc: 'p2' },
         { k: 'gram2', l: 'Gramaje bloque', t: 'sel', ops: GRAMAJES_BLOQUE, g: 'Producto afectado 2', opc: 'p2' },
-        { k: 'pres2', l: 'Presentación final', t: 'ent', g: 'Producto afectado 2', opc: 'p2' },
+        { k: 'pres2', l: 'Presentación final', t: 'sel', ops: GRAMAJES, g: 'Producto afectado 2', opc: 'p2' },
         { k: 'correccion', l: 'Corrección', t: 'txt' },
         { k: 'honda', l: 'Honda', t: 'x', g: 'Origen', unico: 'origen' },
         { k: 'guaduas', l: 'Guaduas', t: 'x', g: 'Origen', unico: 'origen' },
@@ -1536,15 +1546,16 @@ const FORMATOS = [
         { k: 'integridad', l: 'Sellado (prueba de integridad) - revisar 3 unidades aleatoriamente / hora', corto: 'Prueba de integridad', t: 'op', ...OP_CNCNA },
         { k: 'elongacion', l: '*Elongación aristas de empaque termoformado - revisar 3 unidades aleatoriamente con medidor de espesor por cada referencia', corto: 'Elongación aristas *', t: 'op', ...OP_CNCNA },
         { grupo: 'Producción' },
-        { k: 'cantidad', l: 'Cantidad sellada por hora', t: 'ent' },
+        { k: 'cantidad', l: 'Cantidad sellada por hora', t: 'temp', entero: true },   // número entero o N/A
         { grupo: 'Insumos' },
         { k: 'lote_insumos', l: 'Lote correspondiente a rollos de empaque empleados durante el corte', corto: 'Lote rollos de empaque', t: 'txt' },
       ]},
-    { tipo: 'tabla', k: 'resumen', titulo: 'Resumen del producto sellado durante el turno', etiqueta: 'Producto',
+    // Sin columna "PRODUCTO 1, 2…": ese texto va como ayuda dentro de la lista
+    { tipo: 'tabla', k: 'resumen', titulo: 'Resumen del producto sellado durante el turno', etiqueta: 'Producto', sinNombreFila: true,
       filas: ['PRODUCTO 1', 'PRODUCTO 2', 'PRODUCTO 3', 'PRODUCTO 4', 'PRODUCTO 5',
               'PRODUCTO 6', 'PRODUCTO 7', 'PRODUCTO 8', 'PRODUCTO 9'],
       columnas: [
-        { k: 'producto', l: 'Producto terminado', t: 'sel', ops: PRODUCTOS_TERMINADOS, mostrar: sinPrefijo },
+        { k: 'producto', l: 'Producto terminado', t: 'sel', ops: PRODUCTOS_TERMINADOS, mostrar: sinPrefijo, vacio: fl => fl.l.charAt(0) + fl.l.slice(1).toLowerCase() },
         { k: 'cantidad', l: 'Cantidad', t: 'ent' },
         { k: 'hora_inicio', l: 'Hora inicio', t: 'hora12' },
         { k: 'hora_final', l: 'Hora final', t: 'hora12' },
@@ -1581,8 +1592,8 @@ const FORMATOS = [
         { grupo: 'Materias primas - Bocadillo de guayaba' },
         { k: 'gramaje_bocadillo', l: 'Gramaje de la porción de bocadillo', t: 'sel', ops: GRAMAJES },
         { k: 'lote_bocadillo', l: 'Lote', t: 'txt' },
-        { k: 'fecha_fab_bocadillo', l: 'Codificado: fecha de fabricación', t: 'fecha' },
-        { k: 'fecha_vto_bocadillo', l: 'Codificado: fecha de vencimiento', t: 'fecha' },
+        // Del bocadillo solo se registra el vencimiento que trae el empaque (a mano, hasta 2030)
+        { k: 'fecha_vto_bocadillo', l: 'Codificado: fecha de vencimiento', t: 'fecha', anioMax: 2030 },
         { k: 'temp_bocadillo', l: 'Temperatura de entrada de la porción a la línea (°C)', corto: 'T° entrada a la línea (°C)', t: 'temp' },
         { k: 'empaque_bocadillo', l: 'Estado del empaque, sellado y rotulado', corto: 'Empaque, sellado y rotulado', t: 'op', ...OP_CNCNA },
         { grupo: 'Evaluación organoléptica - Queso doble crema' },
@@ -1875,11 +1886,11 @@ function ctrl(def, b, r, c, modo, apagado) {
       // Temperatura: número decimal (se guarda como número) o N/A con el botón
       // de al lado (el teclado numérico de la tablet no tiene letras)
       const esNA = v === 'N/A';
-      return `<span class="c-temp"><input type="text" inputmode="decimal" enterkeyhint="next" class="${cls} c-num" data-t="temp" ${a} value="${esc(esNA ? 'N/A' : mostrarDecimal(v))}">` +
+      return `<span class="c-temp"><input type="text" inputmode="${def.entero ? 'numeric' : 'decimal'}" enterkeyhint="next" class="${cls} c-num" data-t="temp"${def.entero ? ' data-entero="1"' : ''} ${a} value="${esc(esNA ? 'N/A' : mostrarDecimal(v))}">` +
         `<button type="button" class="btn-na${esNA ? ' on' : ''}" data-t="na" ${a} title="No aplica">N/A</button></span>`;
     }
     case 'fecha':
-      return `<input type="date" min="2025-01-01" max="2027-12-31" class="${cls}" ${a} value="${val}" title="${esc(def.l || 'Fecha')}">`;
+      return `<input type="date" min="2025-01-01" max="${def.anioMax || 2027}-12-31"${def.anioMax ? ` data-anio-max="${def.anioMax}"` : ''} class="${cls}" ${a} value="${val}" title="${esc(def.l || 'Fecha')}">`;
     case 'calc':
       return `<input type="text" readonly tabindex="-1" class="${cls} c-calc" data-calc="1" ${a} value="${esc(v ? fmtFecha(v) : '')}">`;
     case 'hora':
@@ -1897,7 +1908,7 @@ function ctrl(def, b, r, c, modo, apagado) {
     case 'area':
       return `<textarea rows="3" ${a}>${val}</textarea>`;
     case 'sel':
-      return `<select class="${cls}${cls ? ' c-sel' : ''}${MALOS.includes(v) ? ' sel-mal' : ''}" data-t="sel" ${a}><option value="">Seleccionar...</option>${def.ops.map(o =>
+      return `<select class="${cls}${cls ? ' c-sel' : ''}${MALOS.includes(v) ? ' sel-mal' : ''}" data-t="sel" ${a}><option value="">${esc(def.vacio || 'Seleccionar...')}</option>${def.ops.map(o =>
         `<option value="${esc(o)}"${v === o ? ' selected' : ''} title="${esc(def.txt?.[o] || o)}">${esc(def.mostrar ? def.mostrar(o) : o)}</option>`).join('')}</select>`;
     case 'x':
       return `<button type="button" class="c-x ${def.color ? 'x-' + def.color : ''} ${v ? 'on' : ''}" data-t="x" ${a} aria-pressed="${!!v}" title="${esc(def.l)}">${v ? 'X' : ''}</button>`;
@@ -1987,7 +1998,7 @@ function fichaHTML(f) {
 
 // Encabezado de una columna de verificación: la hora escrita, si la hay
 function etiquetaCol(c) {
-  if (c.hora) return leer(c.hora[0], '_', String(c.hora[1])) || c.l;
+  if (c.hora) return horaTexto(leer(c.hora[0], '_', String(c.hora[1]))) || c.l;
   return c.l;
 }
 
@@ -2030,7 +2041,10 @@ const filaDetalle = (clave, pares, cols) => `<tr class="fila-detalle" data-det="
 
 // Tipo de una celda: algunas columnas dependen de su fila (el resultado de la
 // verificación es ppm o Negativo/Positivo según el resultado esperado)
-const defCelda = (c, fl) => c.segun ? { ...c, ...c.segun(fl) } : c;
+const defCelda = (c, fl) => {
+  const d = c.segun ? { ...c, ...c.segun(fl) } : c;
+  return typeof d.vacio === 'function' ? { ...d, vacio: d.vacio(fl) } : d;
+};
 
 // ── Días de verificación ─────────────────────────────────────────────────
 // "LUNES Y SÁBADO", "LUNES, MIÉRCOLES Y VIERNES", "LUNES A SÁBADO" → días (0 = domingo)
@@ -2139,7 +2153,7 @@ function tablaHTML(b) {
     return `<button type="button" class="btn btn-sm${on ? ' btn-danger' : ''}" onclick="alternarOpcional('${b.k}','${k}')">${on ? '− Quitar ' : '+ Agregar '}${esc(nombre)}</button>`;
   }).join('');
   const barra = opcionales + (conInfo ? botonInfo() : '');
-  const clases = 'data-table tabla-captura' + (conInfo ? ' con-info' + (verInfo() ? '' : ' oculta-info') : '');
+  const clases = 'data-table tabla-captura' + (conInfo ? ' con-info' + (verInfo() ? '' : ' oculta-info') : '') + (b.sinNombreFila ? ' sin-nombre-fila' : '');
   return `${b.leyenda ? `<div class="leyenda">${b.leyenda}</div>` : ''}
     ${barra ? `<div class="barra-opcional">${barra}</div>` : ''}
     <div class="table-wrap"><table class="${clases}"><thead>${grupos}${cab}</thead><tbody>${cuerpo}</tbody></table></div>`;
@@ -2186,7 +2200,7 @@ function matrizHTML(b) {
   const n = columnasMatriz(b);
   const cab = '<tr><th class="col-fila">Parámetro</th>' + Array.from({ length: n }, (_, i) =>
     b.enc === 'hora'
-      ? `<th class="centro th-hora">Hora ${i + 1}<br>${ctrl({ t: 'hora' }, b.k, '_enc', String(i))}</th>`
+      ? `<th class="centro th-hora th-hora12">Hora ${i + 1}<br>${ctrl({ t: 'hora12' }, b.k, '_enc', String(i))}</th>`
       : `<th class="centro">${esc(b.enc)} ${i + 1}</th>`).join('') + '</tr>';
   const cuerpo = b.filas.map(fl => {
     if (fl.grupo) return `<tr class="fila-grupo"><td class="col-fila">${esc(fl.grupo)}</td><td colspan="${n}"></td></tr>`;
@@ -2400,7 +2414,7 @@ function recalcular() {
 function actualizarEncabezadosHora() {
   document.querySelectorAll('#form-cuerpo th[data-hora]').forEach(th => {
     const [bk, i] = th.dataset.hora.split('|');
-    (th.querySelector('.th-lbl') || th).textContent = leer(bk, '_', i) || th.dataset.base;
+    (th.querySelector('.th-lbl') || th).textContent = horaTexto(leer(bk, '_', i)) || th.dataset.base;
   });
 }
 
@@ -2412,6 +2426,13 @@ function partesHora12(v) {
   if (!m) return { t: String(v ?? ''), ap: 'AM' };
   const h = +m[1];
   return { t: pad2(h % 12 || 12) + ':' + m[2], ap: h >= 12 ? 'PM' : 'AM' };
+}
+
+// Hora guardada (militar, 14:15) → como se muestra en pantalla (02:15 PM)
+function horaTexto(v) {
+  if (!v) return '';
+  const p = partesHora12(v);
+  return /^\d{2}:\d{2}$/.test(p.t) ? `${p.t} ${p.ap}` : String(v);
 }
 
 // Deja solo números y dos puntos: así no entran letras ni símbolos
@@ -2518,7 +2539,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try { el.setSelectionRange(p, p); } catch (_) {}
       }
       const esNA = /^n\s*\/?\s*a$/i.test(v.trim());
-      const n = leerDecimal(v);
+      const entero = el.dataset.entero === '1';
+      const n = entero ? (/^\d+$/.test(v.trim()) ? Number(v.trim()) : (v.trim() === '' ? '' : null)) : leerDecimal(v);
       const malo = !esNA && n === null;
       el.classList.toggle('c-malo', malo);
       v = esNA ? 'N/A' : (malo ? v : n);
@@ -2909,7 +2931,7 @@ function revisionAntesDeGuardar(f, d) {
   });
   Object.keys(porHora).sort().forEach(k => {
     const x = porHora[k];
-    out.push({ tipo: 'aviso', txt: `<b>Hora ${+k + 1} (${esc(x.h)})</b>: ${plural(x.n, 'casilla sin marcar', 'casillas sin marcar')} en ${esc(x.secciones.join(', '))}.` });
+    out.push({ tipo: 'aviso', txt: `<b>Hora ${+k + 1} (${esc(horaTexto(x.h))})</b>: ${plural(x.n, 'casilla sin marcar', 'casillas sin marcar')} en ${esc(x.secciones.join(', '))}.` });
   });
 
   // Verificación de proceso: lo que toca hoy, concentraciones fuera de rango y positivos
@@ -2945,7 +2967,7 @@ function revisionAntesDeGuardar(f, d) {
       const h = d[b.k]?._enc?.[i];
       if (!h) continue;
       const vacias = filas.filter(fl => esVacio(d[b.k]?.[fl.k]?.[i])).length;
-      if (vacias) out.push({ tipo: 'aviso', txt: `<b>Hora ${i + 1} (${esc(h)})</b>: ${plural(vacias, 'parámetro sin llenar', 'parámetros sin llenar')}.` });
+      if (vacias) out.push({ tipo: 'aviso', txt: `<b>Hora ${i + 1} (${esc(horaTexto(h))})</b>: ${plural(vacias, 'parámetro sin llenar', 'parámetros sin llenar')}.` });
     }
   });
 
@@ -3011,6 +3033,15 @@ function cerrarRevision() {
 }
 
 // sinRevisar: viene del botón "Guardar así" de la revisión
+// La marca roja en vivo del archivo compartido usa 2025-2027; las fechas con
+// año máximo propio (vencimiento del bocadillo) se vuelven a evaluar después
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (!el.matches?.('input[type="date"][data-anio-max]')) return;
+  const anio = +String(el.value).slice(0, 4);
+  el.classList.toggle('fecha-invalida', !!el.value && (anio < 2025 || anio > +el.dataset.anioMax));
+});
+
 async function guardarFormato(sinRevisar, forzar) {
   if (!actual) return;
   const f = actual.fmt;
@@ -3028,12 +3059,25 @@ async function guardarFormato(sinRevisar, forzar) {
     primero?.querySelector('input,select,textarea,button')?.focus({ preventScroll: true });
     return;
   }
-  const malas = validarRangoFechas($('form-cuerpo'));
+  // Las fechas con año máximo propio (vencimiento del bocadillo: hasta 2030)
+  // no usan el rango general de 2025 a 2027
+  const conMax = [...$('form-cuerpo').querySelectorAll('input[type="date"][data-anio-max]')].filter(el => {
+    const anio = +String(el.value).slice(0, 4);
+    return el.value && (anio < 2025 || anio > +el.dataset.anioMax);
+  });
+  if (conMax.length) {
+    toast(`El año debe estar entre 2025 y ${conMax[0].dataset.anioMax}. Revisa: ${conMax[0].title || 'Fecha'}`, 'error');
+    conMax[0].closest('.card')?.classList.remove('collapsed');
+    conMax[0].focus();
+    return;
+  }
+  const malas = validarRangoFechas($('form-cuerpo')).filter(m => !m.el.dataset.anioMax);
   if (malas.length) return avisarFechasInvalidas(malas);
   const mal = document.querySelector('#form-cuerpo .c-malo');
   if (mal) {
     const esHora = mal.dataset.t === 'hora' || mal.dataset.t === 'hora12';
-    toast(mal.dataset.t === 'temp' ? 'Hay una temperatura mal escrita. Escribe solo el número (por ejemplo 3,5) o usa el botón N/A.'
+    toast(mal.dataset.t === 'temp' && mal.dataset.entero ? 'Hay una cantidad mal escrita. Escribe solo números enteros o usa el botón N/A.'
+        : mal.dataset.t === 'temp' ? 'Hay una temperatura mal escrita. Escribe solo el número (por ejemplo 3,5) o usa el botón N/A.'
         : mal.dataset.t === 'hora12' ? 'Hay una hora mal escrita. Escribe de 1 a 12 (por ejemplo 8:30) y elige AM o PM.'
         : esHora ? 'Hay una hora mal escrita. Usa el formato hh:mm (por ejemplo 08:30).'
                  : 'Hay un número mal escrito (usa por ejemplo 40,4 o 40.4; los enteros sin decimales y sin negativos).', 'error');
@@ -3720,6 +3764,13 @@ function clonarEncabezado(esp) {
       copias[i].addEventListener('click', () => real.click());
     }
   }
+  copia.querySelectorAll('.c-hora12').forEach(caja => {
+    const inp = caja.querySelector('input');
+    const span = document.createElement('span');
+    span.className = 'hora-copia';
+    span.textContent = horaTexto(leer(inp.dataset.b, inp.dataset.r, inp.dataset.c)) || '--:--';
+    caja.replaceWith(span);
+  });
   copia.querySelectorAll('input').forEach(inp => {
     const orig = tabla.tHead.querySelector(`input[data-b="${inp.dataset.b}"][data-r="${inp.dataset.r}"][data-c="${inp.dataset.c}"]`);
     const span = document.createElement('span');
