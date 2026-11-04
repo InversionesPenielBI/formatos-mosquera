@@ -3,9 +3,10 @@
    1. Hace que Chrome pueda instalar la página como aplicación.
    2. Guarda una copia de la página para que abra aunque el internet esté
       lento o caído (los datos sí necesitan internet).
-   Siempre intenta primero la red: si hay versión nueva, esa se usa.
-   Al publicar cambios grandes, sube el número de VERSION. */
-const VERSION = 'formatos-v1';
+   Siempre intenta primero la red y sin usar el caché del navegador: si hay
+   versión nueva, esa se usa. Al publicar cambios grandes, sube el número de
+   VERSION. */
+const VERSION = 'formatos-v2';
 const BASICOS = ['./', 'index.html', 'compartido/estilos.css', 'compartido/entorno.js',
                  'logo.png', 'logosl.png', 'manifest.webmanifest'];
 
@@ -25,7 +26,9 @@ self.addEventListener('fetch', e => {
   // Solo la propia página: Google (cuentas, Sheets) nunca se guarda
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   e.respondWith(
-    fetch(req)
+    // no-cache: siempre se le pregunta al servidor si hay versión nueva (si no
+    // cambió responde 304 y es rápido); solo sin internet se usa la copia
+    fetch(req, req.cache === 'default' ? { cache: 'no-cache' } : {})
       .then(r => {
         const copia = r.clone();
         caches.open(VERSION).then(c => c.put(req, copia)).catch(() => {});
